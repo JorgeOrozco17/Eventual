@@ -1,0 +1,367 @@
+<?php
+require_once 'dbconexion.php';
+
+class PersonalModel {
+    private $conn;
+
+    public function __construct() {
+        $db = new DBConexion();
+        $this->conn = $db->getConnection();
+    }
+
+    public function getAll() {
+        $stmt = $this->conn->prepare("SELECT * FROM personal");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getEmpleadosByJurisdiccion($jurisdiccion) {
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE id_adscripcion = ?");
+        $stmt->execute([$jurisdiccion]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAutorizados(){
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE autorizacion = 1");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getNoAutorizados(){
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE autorizacion = 0");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getById($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function save($data) {
+        // Consulta para obtener la clave de recurso
+        $stmtCVE = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
+        $stmtCVE->execute([$data['programa']]);
+        $cve_recurso = $stmtCVE->fetchColumn();
+
+        // Consulta optimizada para obtener los nombres de adscripción, centro y clues, y el código de puesto
+        $stmt = $this->conn->prepare("
+            SELECT 
+                j.nombre AS adscripcionnombre,
+                c.nombre AS centronombre,
+                c.clues AS cluenombre,
+                p.codigo AS codigo_puesto
+            FROM 
+                jurisdicciones j
+                JOIN centros c ON c.id = :centro
+                JOIN puestos p ON p.nombre_puesto = :puesto
+            WHERE 
+                j.id = :adscripcion
+        ");
+        $stmt->execute([
+            ':adscripcion' => $data['adscripcion'],
+            ':centro' => $data['centro'],
+            ':puesto' => $data['puesto']
+        ]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            // Si no se encuentran los datos correspondientes, podemos manejar el error
+            return false; // O lanzar una excepción
+        }
+
+        // Asignar valores de la consulta a las variables
+        $adscripcionnombre = $result['adscripcionnombre'];
+        $centronombre = $result['centronombre'];
+        $cluenombre = $result['cluenombre'];
+        $codigo_puesto = $result['codigo_puesto'];
+
+        // Determinar estatus basado en el movimiento
+        $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
+
+        // Preparar la consulta de inserción
+        $stmtInsert = $this->conn->prepare("
+            INSERT INTO personal (
+                numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
+                id_centro, centro, clues, RFC, CURP, sueldo_neto, sueldo_bruto, inicio_contratacion, quincena_alta, 
+                nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
+                id_usuario_registro, estatus, autorizacion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+        ");
+
+        $ok = $stmtInsert->execute([
+            $data['numero_oficio'],
+            $data['movimiento'],
+            $data['solicita'] ?? '',
+            $data['oficio'],
+            $data['puesto'],
+            $codigo_puesto,
+            $data['programa'],
+            $cve_recurso,
+            $data['rama'],
+            $data['adscripcion'],
+            $adscripcionnombre,
+            $data['centro'],
+            $centronombre,
+            $cluenombre,
+            $data['RFC'],
+            $data['CURP'],
+            $data['sueldo_neto'] ?? null,
+            $data['sueldo_bruto'] ?? null,
+            $data['inicio_contratacion'],
+            $data['quincena_alta'] ?? null,
+            $data['nombre_alta'] ?? '',
+            $data['fecha_baja'] ?? null,
+            $data['quincena_baja'] ?? null,
+            $data['cuenta'] ?? null,
+            $data['observaciones_alta'] ?? '',
+            $data['observaciones_baja'] ?? '',
+            $_SESSION['user_id'] ?? 1,
+            $estatus
+        ]);
+
+        if($ok){
+             $lastInsertId = $this->conn->lastInsertId();
+        // Guardar el comentario si viene en $data
+        if (!empty($data['observaciones_usuario'])) {
+            $stmtComent = $this->conn->prepare("
+                INSERT INTO coments (id_personal, id_usuario, comentario)
+                VALUES (?, ?, ?)
+            ");
+            $stmtComent->execute([
+                $lastInsertId,
+                $_SESSION['user_id'] ?? 1,
+                $data['observaciones_usuario']
+            ]);
+        }
+    return $lastInsertId;
+        }else {
+            return false; // O lanzar una excepción
+        }   
+    }
+
+    public function CalculoPersonal($id_personal) {
+        // 1. Traer sueldo_bruto de la tabla personal
+        $stmtPersonal = $this->conn->prepare("SELECT sueldo_bruto FROM personal WHERE id = ?");
+        $stmtPersonal->execute([$id_personal]);
+        $bruto_mensual = $stmtPersonal->fetchColumn();
+
+        if ($bruto_mensual === false) {
+            // No se encontró el registro
+            return false;
+        }
+
+        // 2. Traer valores de fijos (D_S2, D_S4, D_S5, D_S6, P_01)
+        $stmtFijos = $this->conn->query("SELECT concepto, cantidad FROM fijos WHERE concepto IN ('D_S2', 'D_S4', 'D_S5', 'D_S6', 'P_01')");
+        $fijos = [];
+        while ($row = $stmtFijos->fetch(PDO::FETCH_ASSOC)) {
+            $fijos[$row['concepto']] = (float)$row['cantidad'];
+        }
+        // Default a 0 si no está
+        $D_S2 = $fijos['D_S2'] ?? 0;
+        $D_S4 = $fijos['D_S4'] ?? 0;
+        $D_S5 = $fijos['D_S5'] ?? 0;
+        $D_S6 = $fijos['D_S6'] ?? 0;
+        $P_01 = $fijos['P_01'] ?? 0;
+
+        // 3. dsctos_issste = suma de los descuentos
+        $dsctos_issste = $D_S2 + $D_S4 + $D_S5 + $D_S6;
+
+        // 4. bruto_qna
+        $bruto_qna = $bruto_mensual / 2;
+
+        // 5. comp_garantizada
+        $comp_garantizada = $bruto_qna - $P_01;
+
+        // 6. sueldo_diario
+        $sueldo_diario = $bruto_mensual / 15;
+
+        // 7. isr_mens e isr_qna
+        // Buscar el rango en la tabla de isr
+        $stmtISR = $this->conn->prepare("
+            SELECT lim_inferior, cuota_fija, porcentaje
+            FROM anexo8_rmf
+            WHERE ? BETWEEN lim_inferior AND lim_superior
+            LIMIT 1
+        ");
+        $stmtISR->execute([$bruto_mensual]);
+        $rowISR = $stmtISR->fetch(PDO::FETCH_ASSOC);
+
+        if ($rowISR) {
+            $lim_inferior = (float)$rowISR['lim_inferior'];
+            $cuota_fija = (float)$rowISR['cuota_fija'];
+            $porcentaje = (float)$rowISR['porcentaje'];
+            $isr_mens = (($bruto_mensual - $lim_inferior) * ($porcentaje / 100)) + $cuota_fija;
+            $isr_qna = $isr_mens / 2;
+        } else {
+            // Si no hay rango, lo dejas en 0 (puedes ajustar este comportamiento)
+            $isr_mens = 0;
+            $isr_qna = 0;
+        }
+
+        $dsctos_issste_mensual = $dsctos_issste * 2;
+
+        // 8. neto_mensual y neto_qna
+        $neto_mensual = ($bruto_mensual - $isr_mens) - $dsctos_issste_mensual;
+        $neto_qna = $neto_mensual / 2;
+
+        // 9. P_00
+        $P_00 = ($bruto_mensual <= 10171) ? 475 : null;
+
+        // 10. sueldo igual a P_01
+        $sueldo = $P_01;
+
+        // 11. Insertar en calculo_personal
+        $stmtInsert = $this->conn->prepare("
+            INSERT INTO calculo_personal (
+                id_personal, sueldo, comp_garantizada, dsctos_issste, neto_qna, neto_mensual, bruto_qna, bruto_mensual,
+                sueldo_diario, isr_qna, isr_mens, D_S2, D_S4, D_S5, D_S6, P_01, P_00
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        $ok = $stmtInsert->execute([
+            $id_personal,
+            $sueldo,
+            $comp_garantizada,
+            $dsctos_issste,
+            $neto_qna,
+            $neto_mensual,
+            $bruto_qna,
+            $bruto_mensual,
+            $sueldo_diario,
+            $isr_qna,
+            $isr_mens,
+            $D_S2,
+            $D_S4,
+            $D_S5,
+            $D_S6,
+            $P_01,
+            $P_00
+        ]);
+
+        if ($ok) {
+        $stmtUpdate = $this->conn->prepare("UPDATE personal SET sueldo_neto = ? WHERE id = ?");
+        $stmtUpdate->execute([$neto_mensual, $id_personal]);
+    }
+
+    return $ok;
+    }
+
+    public function delete($id) {
+        $stmt = $this->conn->prepare("DELETE FROM personal WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
+    public function existsRFC($rfc, $movimiento) {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM personal WHERE RFC = ? AND movimiento = ?");
+        $stmt->execute([$rfc, $movimiento]);
+        return $stmt->fetchColumn() > 0;
+    }
+    
+    public function existsCURP($curp, $movimiento) {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM personal WHERE CURP = ? AND movimiento = ?");
+        $stmt->execute([$curp, $movimiento]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    public function getComentsById($id){
+        $stmt = $this->conn->prepare("
+            SELECT comentario, fecha 
+            FROM coments 
+            WHERE id_personal = ? 
+            ORDER BY fecha DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$id]);
+        $coment = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Si no hay comentario, regresamos un array vacío
+        return $coment ? $coment : ['comentario' => '', 'fecha' => ''];
+    }
+
+
+    public function obtenerPorId($id) {
+        $stmt = $this->conn->prepare("SELECT id, adscripcion, jurisdiccion FROM personal WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllbyrfc($rfc){
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE RFC = ?");
+        $stmt->execute([$rfc]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+
+    public function getStatusById($id) {
+        $stmt = $this->conn->prepare("SELECT estatus FROM personal WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetchColumn();
+    }
+
+    public function updateBaja($data) {
+    $stmt = $this->conn->prepare("
+        UPDATE personal 
+        SET 
+            movimiento = ?,
+            fecha_baja = ?, 
+            quincena_baja = ?, 
+            observaciones_baja = ?, 
+            autorizacion = 0,
+            estatus = 'inactivo'
+        WHERE id = ?
+    ");
+
+    $ok = $stmt->execute([
+        $data['movimiento'],
+        $data['fecha_baja'],
+        $data['quincena_baja'],
+        $data['observaciones_baja'] ?? '',
+        $data['id']
+    ]);
+
+    if ($ok && !empty($data['observaciones_usuario'])) {
+        $stmtComent = $this->conn->prepare("
+            INSERT INTO coments (id_personal, id_usuario, comentario)
+            VALUES (?, ?, ?)
+        ");
+        $stmtComent->execute([
+            $data['id'],
+            $_SESSION['user_id'] ?? 1,
+            $data['observaciones_usuario']
+        ]);
+    }
+    return $ok;
+    }
+
+
+    public function completeEmployee($id, $data) {
+        $stmt = $this->conn->prepare("
+            UPDATE personal 
+            SET 
+                nacionalidad = ?,
+                estado_civil = ?,
+                profesion = ?,
+                originario = ?,
+                calle = ?,
+                colonia = ?,
+                ciudad = ?,
+                estado = ?
+            WHERE id = ?");
+       
+            $ok = $stmt->execute([
+                $data['nacionalidad'],
+                $data['estado_civil'],
+                $data['profesion'],
+                $data['originario'],
+                $data['calle'],
+                $data['colonia'],
+                $data['ciudad'],
+                $data['estado'],
+                $id
+            ]);
+        return $ok;
+    }
+
+}

@@ -1,134 +1,187 @@
 <?php
-// index.php — Dashboard interactivo con gráficas y datos reales recientes
-// Asume que header.php maneja sesión y permisos
-require_once 'app/models/dbconexion.php';
-require_once 'app/controllers/catalogocontroller.php';
+require_once 'app/controllers/dashboardcontroller.php';
+require_once 'app/helpers/util.php';
 include 'header.php';
 
-$catalogo = new CatalogoController();
-$db = new DBConexion();
-$conn = $db->getConnection();
+$dashboard = new DashboardController();
+$data = $dashboard->getData();
 
-// Catálogos
-$quincenas = $catalogo->getAllQuincenas();
-$jurisdicciones = $catalogo->getAllJurisdicciones();
-$anios = range((int)date('Y') - 1, (int)date('Y') + 1);
-$user_juris = $_SESSION['jurisdiccion'] ?? 9; // 9 = todas en tu sistema
-
-function pick(array $row, array $keys, $default=null){ foreach($keys as $k){ if(isset($row[$k]) && $row[$k] !== '') return $row[$k]; } return $default; }
-function esc($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
-
-// ---------- Utilidades de tiempo / quincena actual ----------
-$today = new DateTime('now');
-$month = (int)$today->format('n');
-$day = (int)$today->format('j');
-$qnaActual = ($day <= 15) ? ($month * 2 - 1) : ($month * 2); // 1..24
-$anioActual = (int)$today->format('Y');
-
-// ---------- Consultas para KPIs y Gráficas (tolerantes a errores) ----------
-$kpiEmpleadosActivos = '—';
-$kpiLicenciasActuales = '—';
-$serieNomina = [];
-$serieFaltasLic = [];
-$pieAdscripciones = [];
-$ultimosMovs = [];
-
-if ($conn) {
-    try {
-        // KPI: Empleados activos
-        $stmt = $conn->query("SELECT COUNT(*) FROM personal WHERE estatus = 'activo'");
-        $kpiEmpleadosActivos = (int)$stmt->fetchColumn();
-
-        // KPI: Licencias en la quincena actual (sumando días)
-        $stmt = $conn->prepare("SELECT COALESCE(SUM(dias),0) FROM faltas WHERE tipo='licencia' AND quincena = ? AND año = ?");
-        $stmt->execute([$qnaActual, $anioActual]);
-        $kpiLicenciasActuales = (int)$stmt->fetchColumn();
-
-        // Serie Nómina (últimas 8 quincenas con datos en captura)
-        $stmt = $conn->query("SELECT AÑO AS anio, QNA AS quincena, 
-                                     COALESCE(SUM(TOTAL_NETO),0) AS total_neto,
-                                     COALESCE(SUM(PERCEPCIONES),0) AS percepciones,
-                                     COALESCE(SUM(DEDUCCIONES),0) AS deducciones,
-                                     COUNT(*) AS empleados
-                              FROM captura
-                              GROUP BY AÑO, QNA
-                              ORDER BY anio DESC, quincena DESC
-                              LIMIT 8");
-        $serieNomina = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $serieNomina = array_reverse($serieNomina); // para graficar cronológicamente
-
-        // Serie Faltas vs Licencias (últimas 8 quincenas)
-        $stmt = $conn->query("SELECT año, quincena,
-                                     SUM(CASE WHEN tipo='falta' THEN COALESCE(dias,1) ELSE 0 END) AS faltas_dias,
-                                     SUM(CASE WHEN tipo='licencia' THEN COALESCE(dias,1) ELSE 0 END) AS licencias_dias
-                              FROM faltas
-                              GROUP BY año, quincena
-                              ORDER BY año DESC, quincena DESC
-                              LIMIT 8");
-        $serieFaltasLic = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $serieFaltasLic = array_reverse($serieFaltasLic);
-
-        // Pie: Empleados activos por adscripción (top 6)
-        $stmt = $conn->query("SELECT COALESCE(adscripcionnombre, CONCAT('Juris ', adscripcion)) AS etiqueta,
-                                     COUNT(*) AS total
-                              FROM personal
-                              WHERE estatus='activo'
-                              GROUP BY adscripcionnombre, adscripcion
-                              ORDER BY total DESC
-                              LIMIT 6");
-        $pieAdscripciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Últimos movimientos (mix: faltas y licencias más recientes)
-        $stmt = $conn->query("SELECT id, nombre, jurisdiccion, quincena, año, tipo, dias, fechas, NOW() AS ts
-                              FROM faltas
-                              ORDER BY id DESC
-                              LIMIT 10");
-        $ultimosMovs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Throwable $e) {
-        // si algo falla, mantenemos placeholders
-    }
-}
-
+// Variables para la vista
+$quincenas = $data['quincenas'];
+$jurisdicciones = $data['jurisdicciones'];
+$anios = $data['anios'];
+$qnaActual = $data['qnaActual'];
+$anioActual = $data['anioActual'];
+$kpiEmpleadosActivos = $data['empleadosActivos'];
+$kpiLicenciasActuales = $data['licenciasActuales'];
+$serieNomina = $data['serieNomina'];
+$serieFaltasLic = $data['serieFaltasLic'];
+$pieAdscripciones = $data['pieAdscripciones'];
+$ultimosMovs = $data['ultimosMovs'];
 ?>
+
 
 <style>
     body { background-color: #D9D9D9 !important; }
-    .search-input, select{ color: #3d3c3cff; }
-    .dashboard-wrapper { max-width: 1280px; margin: 2rem auto; padding: 0 1rem; }
-    .search-bar { display: flex; gap: .75rem; align-items: center; }
-    .search-input { flex: 1; border: 1px solid #ced4da; border-radius: .75rem; padding: .75rem 1rem; background: #fff; }
-    .kpis { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; margin: 1rem 0 2rem; }
-    .kpi-card { background: #fff; border-radius: 1rem; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); display: flex; flex-direction: column; gap: .25rem; }
-    .kpi-title { font-size: .9rem; color: #6c757d; }
-    .kpi-value { font-size: 1.4rem; font-weight: 700; color: #333; }
-    .panel { background: #fff; border-radius: 1rem; box-shadow: 0 1px 6px rgba(0,0,0,.08); }
-    .panel-header { padding: 1rem 1.25rem; border-bottom: 1px solid #efefef; display: flex; justify-content: space-between; align-items: center; }
-    .panel-title { font-size: 1.1rem; font-weight: 600; color: #333; }
-    .panel-body { padding: 1rem 1.25rem; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-    .module-card { position: relative; background: #fff; border: 1px solid #f0f0f0; border-radius: 1rem; padding: 1rem; transition: transform .08s ease, box-shadow .08s ease; }
-    .module-card:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,.08); }
-    .module-title { font-weight: 600; color: #333; margin: .25rem 0 .5rem; }
-    .module-desc { color: #6c757d; font-size: .95rem; }
-    .module-actions { display: flex; gap: .5rem; margin-top: .75rem; }
-    .btn-soft { border: 1px solid #e9ecef; background: #f8f9fa; color: #333; padding: .5rem .75rem; border-radius: .75rem; text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
-    .btn-soft:hover { background: #eef2f5; }
-    .fav-btn { position: absolute; top: .5rem; right: .5rem; border: none; background: transparent; padding: .25rem; cursor: pointer; }
-    .fav-btn[aria-pressed="true"] .star { color: #f7b500; }
-    .star { font-size: 1.1rem; color: #c8c8c8; }
-    .actions-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .75rem; }
-    .action-box { background: #fff; border-radius: .75rem; border: 1px dashed #e3e6ea; padding: .75rem; display: flex; flex-direction: column; gap: .5rem; }
-    .action-box label { font-size: .85rem; color: #6c757d; }
-    .action-box select, .action-box input[type="number"] { width: 100%; border: 1px solid #ced4da; border-radius: .5rem; padding: .5rem .6rem; background: #fff; }
-    .action-buttons { display: flex; gap: .5rem; }
-    .btn-primary-soft { background: #0d6efd; color: #fff; border: none; padding: .6rem .9rem; border-radius: .6rem; text-decoration: none; }
-    .btn-primary-soft:hover { filter: brightness(0.95); }
-    .charts { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
-    .subcharts { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-    .table-responsive { width: 100%; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: .5rem .6rem; border-bottom: 1px solid #eee; font-size: .92rem; }
-    th { text-align: left; color: #6c757d; font-weight: 600; }
+    .search-input, select{ 
+        color: #3d3c3cff; 
+    }
+    .dashboard-wrapper { max-width: 1280px; 
+        margin: 2rem auto; 
+        padding: 0 1rem; 
+    }
+    .search-bar { display: flex; 
+        gap: .75rem; 
+        align-items: center; 
+    }
+    .search-input { flex: 1; 
+        border: 1px solid #ced4da; 
+        border-radius: .75rem; 
+        padding: .75rem 1rem; 
+        background: #fff; 
+    }
+    .kpis { display: grid; 
+        grid-template-columns: repeat(3, minmax(0,1fr)); 
+        gap: 1rem; margin: 1rem 0 2rem; 
+    }
+    .kpi-card { background: #fff; 
+        border-radius: 1rem; 
+        padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); 
+        display: flex; 
+        flex-direction: column; 
+        gap: .25rem; 
+    }
+    .kpi-title { font-size: .9rem; 
+        color: #6c757d; 
+    }
+    .kpi-value { font-size: 1.4rem; 
+        font-weight: 700; 
+        color: #333; 
+    }
+    .panel { background: #fff; 
+        border-radius: 1rem; 
+        box-shadow: 0 1px 6px rgba(0,0,0,.08); 
+    }
+    .panel-header { padding: 1rem 1.25rem; 
+        border-bottom: 1px solid #efefef; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+    }
+    .panel-title { font-size: 1.1rem; 
+        font-weight: 600; 
+        color: #333; 
+    }
+    .panel-body { 
+        padding: 1rem 1.25rem; 
+    }
+    .grid { display: grid; 
+        grid-template-columns: repeat(3, minmax(0, 1fr)); 
+        gap: 1rem; 
+    }
+    .module-card { position: relative; 
+        background: #fff; 
+        border: 1px solid #f0f0f0; 
+        border-radius: 1rem; padding: 1rem; 
+        transition: transform .08s ease, box-shadow .08s ease; 
+    }
+    .module-card:hover { transform: translateY(-1px); 
+        box-shadow: 0 6px 16px rgba(0,0,0,.08); 
+    }
+    .module-title { font-weight: 600; 
+        color: #333; 
+        margin: .25rem 0 .5rem; 
+    }
+    .module-desc { color: #6c757d; 
+        font-size: .95rem; 
+    }
+    .module-actions { display: flex; 
+        gap: .5rem; 
+        margin-top: .75rem; 
+    }
+    .btn-soft { border: 1px solid #e9ecef; 
+        background: #f8f9fa; 
+        color: #333; 
+        padding: .5rem .75rem; 
+        border-radius: .75rem; 
+        text-decoration: none; 
+        display: inline-flex; 
+        align-items: center; 
+        gap: .4rem; 
+    }
+    .btn-soft:hover { 
+        background: #eef2f5; 
+    }
+    .fav-btn { position: absolute; 
+        top: .5rem; 
+        right: .5rem; 
+        border: none; 
+        background: transparent; 
+        padding: .25rem; 
+        border-radius: 50%; 
+        cursor: pointer; 
+    }
+    .fav-btn[aria-pressed="true"] .star { 
+        color: #f7b500; 
+    }
+    .star { font-size: 1.1rem; 
+        color: #c8c8c8; 
+    }
+    .actions-row { display: grid; 
+        grid-template-columns: repeat(3, minmax(0,1fr)); 
+        gap: .75rem; 
+    }
+    .action-box { background: #fff; 
+        border-radius: .75rem; 
+        border: 1px dashed #e3e6ea; 
+        padding: .75rem; 
+        display: flex; 
+        flex-direction: column; 
+        gap: .5rem; 
+    }
+    .action-box label { font-size: .85rem; 
+        color: #6c757d; 
+    }
+    .action-box select, .action-box input[type="number"] { width: 100%; 
+        border: 1px solid #ced4da; 
+        border-radius: .5rem; 
+        padding: .5rem .6rem; 
+        background: #fff; 
+    }
+    .action-buttons { display: flex; 
+        gap: .5rem; 
+    }
+    .btn-primary-soft { background: #0d6efd; 
+        color: #fff; 
+        border: none; padding: .6rem .9rem; 
+        border-radius: .6rem; 
+        text-decoration: none; 
+    }
+    .btn-primary-soft:hover { 
+        filter: brightness(0.95); 
+    }
+    .charts { display: grid; 
+        grid-template-columns: 1fr; 
+        gap: 1rem; 
+    }
+    .subcharts { display: grid; 
+        grid-template-columns: 1fr; 
+        gap: 1rem; 
+    }
+    .table-responsive { width: 100%; 
+        overflow-x: auto; 
+    }
+    table { width: 100%; 
+        border-collapse: collapse; 
+    }
+    th, td { padding: .5rem .6rem; 
+        border-bottom: 1px solid #eee; 
+        font-size: .92rem; 
+    }
+    th { text-align: left; 
+        color: #6c757d; 
+        font-weight: 600; 
+    }
     @media (max-width: 1200px) { .charts { grid-template-columns: 1fr; } }
     @media (max-width: 992px) { .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); } .grid { grid-template-columns: repeat(2, minmax(0,1fr)); } .actions-row { grid-template-columns: 1fr; } }
     @media (max-width: 620px) { .kpis { grid-template-columns: 1fr; } .grid { grid-template-columns: 1fr; } }
@@ -228,18 +281,23 @@ if ($conn) {
     <br>
 
     <!-- Gráficas -->
-    <div class="panel" role="region" aria-label="Visualizaciones">
+    <div class="panel" style="padding: 2rem;" role="region" aria-label="Visualizaciones">
         <div class="panel-header">
             <div class="panel-title"><i class="fas fa-chart-line"></i> Visualizaciones (últimas quincenas)</div>
         </div>
         <div class="panel-body charts">
             <div>
-                <canvas id="chartNomina" height="140"></canvas>
+                <canvas id="chartNomina" height="80"></canvas>
             </div>
-            <div class="subcharts">
-                <canvas id="chartFaltasLic" height="140"></canvas>
-                <canvas id="chartPieAds" height="160"></canvas>
+            <br>
+            <div>
+                <canvas id="chartFaltasLic" height="80"></canvas>
             </div>
+            <br>
+            <div style="max-width:450px; margin:auto;">
+                <canvas id="chartPieAds" width="450" height="450"></canvas>
+            </div>
+
         </div>
     </div>
 
@@ -279,7 +337,7 @@ if ($conn) {
                     <?php endforeach; else: ?>
                         <tr><td colspan="8" style="color:#6c757d">No hay registros recientes.</td></tr>
                     <?php endif; ?>
-                </tbody>
+                </tbody>9
             </table>
         </div>
     </div>
@@ -334,51 +392,100 @@ updateLinks();
   const serieFaltasLic = <?php echo json_encode($serieFaltasLic ?: [], JSON_UNESCAPED_UNICODE); ?>;
   const pieAds = <?php echo json_encode($pieAdscripciones ?: [], JSON_UNESCAPED_UNICODE); ?>;
 
-  // --- Chart Nómina (línea) ---
-  try {
-    const ctxN = document.getElementById('chartNomina').getContext('2d');
-    const labelsN = serieNomina.map(r => `${String(r.quincena).padStart(2,'0')}/${r.anio}`);
-    const dataNeto = serieNomina.map(r => Number(r.total_neto||0));
-    const dataPer = serieNomina.map(r => Number(r.percepciones||0));
-    const dataDed = serieNomina.map(r => Number(r.deducciones||0));
-    new Chart(ctxN, {
-      type: 'line',
-      data: {
-        labels: labelsN,
-        datasets: [
-          { label: 'Total neto', data: dataNeto },
-          { label: 'Percepciones', data: dataPer },
-          { label: 'Deducciones', data: dataDed },
-        ]
+  // --- Chart Nómina (bar) ---
+try {
+  const ctxN = document.getElementById('chartNomina').getContext('2d');
+  const labelsN = serieNomina.map(r => `QNA ${String(r.quincena).padStart(2,'0')} ${r.anio}`);
+  const dataNeto = serieNomina.map(r => Number(r.total_neto||0));
+  const dataPer = serieNomina.map(r => Number(r.percepciones||0));
+  const dataDed = serieNomina.map(r => Number(r.deducciones||0));
+  new Chart(ctxN, {
+    type: 'bar',
+    data: {
+       labels: labelsN,
+    datasets: [
+      { 
+        label: 'Total neto', 
+        data: dataNeto, 
+        backgroundColor: '#614cafff' // morado
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { position: 'bottom' } },
-        interaction: { mode: 'index', intersect: false },
-        scales: { y: { ticks: { callback: (v)=> new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(v) } } }
-      }
-    });
-  } catch(e){}
+      { 
+        label: 'Percepciones', 
+        data: dataPer, 
+        backgroundColor: '#2196f3' // azul
+      },
+      { 
+        label: 'Deducciones', 
+        data: dataDed, 
+        backgroundColor: '#f44336' // rojo
+      },
+    ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } },
+      interaction: { mode: 'index', intersect: false },
+      scales: { y: { ticks: { callback: (v)=> new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(v) } } }
+    }
+  });
+} catch(e){}
 
-  // --- Chart Faltas vs Licencias (barras) ---
-  try {
-    const ctxF = document.getElementById('chartFaltasLic').getContext('2d');
-    const labelsF = serieFaltasLic.map(r => `${String(r.quincena).padStart(2,'0')}/${r.año ?? r.anio}`);
-    const dataFaltas = serieFaltasLic.map(r => Number(r.faltas_dias||0));
-    const dataLic = serieFaltasLic.map(r => Number(r.licencias_dias||0));
-    new Chart(ctxF, {
-      type: 'bar',
-      data: { labels: labelsF, datasets: [ { label: 'Faltas (días)', data: dataFaltas }, { label: 'Licencias (días)', data: dataLic } ] },
-      options: { responsive: true, plugins: { legend: { position:'bottom' } }, scales: { x: { stacked:false }, y:{ beginAtZero:true } } }
-    });
-  } catch(e){}
+// --- Chart Faltas vs Licencias (barras) ---
+try {
+  const ctxF = document.getElementById('chartFaltasLic').getContext('2d');
+  const labelsF = serieFaltasLic.map(r => `QNA ${String(r.quincena).padStart(2,'0')} ${r.año ?? r.anio}`);
+  const dataFaltas = serieFaltasLic.map(r => Number(r.faltas_dias||0));
+  const dataLic = serieFaltasLic.map(r => Number(r.licencias_dias||0));
+  new Chart(ctxF, {
+    type: 'bar',
+    data: { labels: labelsF, datasets: [
+        {
+          label: 'Faltas (días)',
+          data: dataFaltas,
+          backgroundColor: '#36c8f4ff' // celeste
+        },
+        {
+          label: 'Licencias (días)',
+          data: dataLic,
+          backgroundColor: '#c921f3ff' // Rosa
+        }
+    ] 
+    },
+    options: {
+    responsive: true,
+    plugins: { 
+      legend: { position: 'bottom' },
+      title: {
+        display: true,
+        text: 'Faltas vs Licencias (últimas quincenas)',
+        font: { size: 16, weight: 'bold' }
+      }
+    },
+    scales: { x: { stacked:false }, y:{ beginAtZero:true } }
+  }
+});
+} catch(e){}
 
   // --- Chart Empleados por Adscripción (dona) ---
   try {
     const ctxP = document.getElementById('chartPieAds').getContext('2d');
     const labelsP = pieAds.map(r => r.etiqueta);
     const dataP = pieAds.map(r => Number(r.total||0));
-    new Chart(ctxP, { type:'doughnut', data:{ labels: labelsP, datasets:[{ data: dataP }] }, options:{ plugins:{ legend:{ position:'bottom' } } } });
+    new Chart(ctxP, { 
+        type: 'doughnut',
+  data: { labels: labelsP, datasets: [{ data: dataP }] },
+  options: {
+    responsive: true,
+    plugins: { 
+      legend: { position: 'bottom' },
+      title: {
+        display: true,
+        text: 'Empleados por Adscripción',
+        font: { size: 16, weight: 'bold' }
+      }
+    }
+  }
+});
   } catch(e){}
 })();
 </script>

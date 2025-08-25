@@ -1,0 +1,67 @@
+
+  .check {
+    -webkit-appearance: none; /*hides the default checkbox*/
+    height: 30px;
+    width: 30px;
+    position: static;
+    top: 20px;
+    left: 20px;
+    transition: 0.10s;
+    background-color: #FE0006;
+    text-align: center;
+    font-weight: 600;
+    font-size: x-large;
+    color: white;
+    border-radius: 3px;
+    outline: none;
+  }
+  
+  .check:checked {
+    background-color: #0E9700;
+  }
+  
+  .check:before {
+    content: "✖";
+  }
+  .check:checked:before {
+    content: "✔";
+  }
+  
+  .check:hover {
+    cursor: pointer;
+    opacity: 0.8;
+  }
+
+  h5{
+    font-weight: bolder;
+    font-size: medium;
+  }
+  h4{
+    font-weight: bold;
+    font-size: large;
+    padding: 0%;
+  }
+  /* #enc{
+    border: rgb(46, 90, 46) 4px solid;
+  }
+
+  #no_enc{
+    border: rgb(235, 37, 37) 4px solid;
+  } */
+
+  #div_enc{
+    border-radius: 5px;
+    border: rgb(46, 159, 5) 2px solid;
+    padding: 0%;
+  }
+  #div_noenc{
+    border-radius: 5px;
+    border: rgb(167, 26, 26) 2px solid;
+    padding: 0%;
+  }
+
+  #cont_sec{
+    border-radius: 5px;
+    border: rgba(21, 20, 20, 0.308) 2px solid;
+    
+  }

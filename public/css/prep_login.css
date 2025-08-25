@@ -1,0 +1,28 @@
+h1,h2,h3,h4{
+    color: #FFFFFF;
+}
+img{
+    border-radius: 20px;
+    
+}
+.form-button-group{
+    background-color: #000000;
+}
+label{
+    color: #FFFFFF;
+}
+
+#body {
+    background: #fff url(../img/imagenlogin.png);
+    background-size: cover;
+    background-attachment: fixed;
+  }
+  #usuario {
+    border-radius: 20px;
+  }
+  #password {
+    border-radius: 20px;
+  }
+  #submit {
+    border-radius: 20px;
+  }

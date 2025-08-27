@@ -45,9 +45,10 @@ class Capturamodel{
     //////////////////////////////////////////    Funciones para procesar la nomina  //////////////////////////////////////////
 
     public function insertNomina ($quincena, $anio){
-        $stmt = $this->conn->prepare("INSERT INTO nominas (qna, año, total_registros,total_percepciones, total_deducciones, total_neto)
-        VALUES (?, ?, 0, 0.00, 0.00, 0.00)");
-        return $stmt->execute([$quincena, $anio]);
+        $tipo = 'Ordinaria';
+        $stmt = $this->conn->prepare("INSERT INTO nominas (qna, año, tipo, total_registros,total_percepciones, total_deducciones, total_neto)
+        VALUES (?, ?, ?, 0, 0.00, 0.00, 0.00)");
+        return $stmt->execute([$quincena, $anio, $tipo]);
     }
 
     //Funcion para verificar si ya existe una nomina generada

@@ -47,7 +47,7 @@ $quincena = $catalogo->getAllQuincenas();
     <div class="card">
         <div class="card-header">
             <div class="menu-title">
-                <h2>Generar Recibos de Nómina</h2>
+                <h2>Generar Concentrado de Nómina</h2>
             </div>
         </div>
        
@@ -79,6 +79,45 @@ $quincena = $catalogo->getAllQuincenas();
             </form>
         </div>
     </div>
+
+    <br><br>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="menu-title">
+                <h2>Generar Nómina Extraordinaria</h2>
+            </div>
+        </div>
+       
+        <div class="card-body">
+            <form action="procesar_nomina.php" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label>Quincena</label>
+                        <select name="quincena" class="form-select" required>
+                            <?php foreach ($quincena as $q): ?>
+                                <option value="<?= htmlspecialchars($q['id']) ?>">
+                                    <?= htmlspecialchars($q['nombre']) ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>Año</label>
+                        <input type="text" name="año" class="form-control" maxlength="4" pattern="\d{4}" placeholder="Ingrese un año de 4 dígitos" required>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Generar Nómina</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <?php include 'footer.php'; ?>

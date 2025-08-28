@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
 class Sum
 {
     /**
-     * SUM, ignoring non-numeric non-error strings. This is eventually used by SUMIF.
+     * SUM, ignoring non-numeric non-error strings. This is Eventually used by SUMIF.
      *
      * SUM computes the sum of all the values and cells referenced in the argument list.
      *

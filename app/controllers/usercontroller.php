@@ -35,7 +35,7 @@ class UserController {
 
             if (empty($data['id'])) {
                 if( $this->model->existByUsuario($data['usuario'])) {
-                    header("Location: /eventual/nuevousuario.php?duplicate=1");
+                    header("Location:/nuevousuario.php?duplicate");
                     exit();
                 }
             }
@@ -43,12 +43,12 @@ class UserController {
             $ok = $this->model->save($data);
 
             if ($ok) {
-                header("Location: /eventual/nuevousuario.php?success=1");
+                header("Location:/nuevousuario.php?");
             } else {
-                header("Location: /eventual/nuevousuario.php?error=1");
+                header("Location:/nuevousuario.php");
             }
         } catch (Exception $e) {
-            header("Location: /eventual/nuevousuario.php?error=1");
+            header("Location:/nuevousuario.php?error=");
         }
 
         exit();
@@ -56,7 +56,7 @@ class UserController {
 
     public function delete($id) {
         $this->model->delete($id);
-        header("Location: /eventual/nuevousuario.php?deleted=1");
+        header("Location:/nuevousuario.php");
         exit();
     }
 

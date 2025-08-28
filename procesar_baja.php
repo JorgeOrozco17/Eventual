@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Si el método ya redirige, no necesitas nada más aquí.
         // Si quieres controlar la redirección aquí:
         if ($ok) {
-            header("Location: autorizapersonal.php?success=1");
+            header("Location: autorizapersonal.php");
         } else {
             header("Location: personal.php?error=1");
         }

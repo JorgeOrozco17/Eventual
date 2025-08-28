@@ -17,7 +17,7 @@ class StringTable extends WriterPart
     /**
      * Create worksheet stringtable.
      *
-     * @param string[] $existingTable Existing table to eventually merge with
+     * @param string[] $existingTable Existing table to Eventually merge with
      *
      * @return string[] String table for worksheet
      */

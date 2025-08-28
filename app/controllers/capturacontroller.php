@@ -49,9 +49,9 @@ class Capturacontroller{
 
                 $this->log_accion($usuario, "Calculó totales de captura.", $id_acciones);
 
-                header("Location: captura.php?success=1&qna=" . $qna . "&anio=" . $anio);
+                header("Location: captura.php?&qna=" . $qna . "&anio=" . $anio);
             } else {
-                header("Location: captura.php?error=1&qna=" . urlencode($qna) . "&anio=" . urlencode($anio));
+                header("Location: captura.php?&qna=" . urlencode($qna) . "&anio=" . urlencode($anio));
             }
             exit;
         }
@@ -182,9 +182,9 @@ class Capturacontroller{
             $this->log_accion($usuario, "Actualizó pensión.", $id_acciones);
 
             if ($ok) {
-                header("Location: pension.php?success=1");
+                header("Location: pension.php");
             } else {
-                header("Location: pension.php?error=1");
+                header("Location: pension.php");
             }
             exit;
         }

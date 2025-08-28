@@ -665,13 +665,13 @@ class Html extends BaseWriter
             if ($drawing instanceof Drawing && $drawing->getPath() !== '') {
                 $filename = $drawing->getPath();
 
-                // Strip off eventual '.'
+                // Strip off Eventual '.'
                 $filename = Preg::replace('/^[.]/', '', $filename);
 
                 // Prepend images root
                 $filename = $this->getImagesRoot() . $filename;
 
-                // Strip off eventual '.' if followed by non-/
+                // Strip off Eventual '.' if followed by non-/
                 $filename = Preg::replace('@^[.]([^/])@', '$1', $filename);
 
                 // Convert UTF8 data to PCDATA

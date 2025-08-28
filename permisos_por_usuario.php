@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
     $user_id = intval($_GET['id_usuario']); // Corregido: Tomar de $_POST
     $paginas_seleccionadas = isset($_POST['paginas']) ? $_POST['paginas'] : [];
     $userController->guardarPermisosPorUsuario($user_id, $paginas_seleccionadas);
-    header("Location: permisos_por_usuario.php?id_usuario=$user_id&success=1");
+    header("Location: permisos_por_usuario.php");
     exit;
 }
 ?>

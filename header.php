@@ -7,7 +7,8 @@ include 'seguridad.php';
     <base href="" />
     <title>Nomina Eventual</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />\
+	<base href="https://nomina.soed.mx/Eventual/">
     <meta property="og:locale" content="es_ES" />
     <meta property="og:type" content="article" />
     <link rel="shortcut icon" href="public/img/ss.jpg" />
@@ -18,7 +19,7 @@ include 'seguridad.php';
     <link href="assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
     <link href="//cdn.datatables.net/2.1.4/css/dataTables.dataTables.min.css" rel="stylesheet" type="text/css" />
 	<link href="https://cdn.jsdelivr.net/npm/mdb-ui-kit@6.4.2/css/mdb.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="stylesheet" href="/public/css/styles.css">
     <!-- Reemplaza con esta versión adaptada a Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
@@ -146,7 +147,7 @@ include 'seguridad.php';
                     <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
                         <!--begin::Menu wrapper-->
                         <div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-                            <img alt="Foto" src="/eventual/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
+                            <img alt="Foto" src="/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
                         </div>
                         <!--begin::User account menu-->
                         <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">
@@ -155,7 +156,7 @@ include 'seguridad.php';
                                 <div class="menu-content d-flex align-items-center px-3">
                                     <!--begin::Avatar-->
                                     <div class="symbol symbol-50px me-5">
-                                        <img alt="Foto" src="/eventual/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
+                                        <img alt="Foto" src="/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
                                     </div>
                                     <!--end::Avatar-->
                                     <!--begin::Username-->

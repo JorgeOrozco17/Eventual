@@ -72,7 +72,7 @@ $xCol3 = $xCol2 + 3 + $colWidth;
 foreach (array_chunk($empleados, 3) as $grupo) {
     $pdf->AddPage();
 
-    $logo_path = 'C:/xampp/htdocs/Eventual/public/img/escudo.png'; // Usa PNG/JPG para compatibilidad
+    $logo_path = '/public/img/escudo.png'; // Usa PNG/JPG para compatibilidad
     $pdf->Image($logo_path, 15, 14, 18, 18); // x=15 para margen izquierdo
 
     // Encabezado una sola vez por página
@@ -80,7 +80,7 @@ foreach (array_chunk($empleados, 3) as $grupo) {
     $pdf->SetXY(15, 15);
     $pdf->Cell(0, 6, utf8_decode("SERVICIOS DE SALUD DE COAHUILA"), 0, 1, 'C');
     $pdf->SetXY(15, 21);
-    $pdf->Cell(0, 6, utf8_decode("NÓMINAS EVENTUALES"), 0, 1, 'C');
+    $pdf->Cell(0, 6, utf8_decode("NÓMINASEventualES"), 0, 1, 'C');
     $pdf->Cell(0, 6, utf8_decode("PERIODO {$anio} - Q{$quincena}"), 0, 1, 'C');
 
     $y_inicio = 35;

@@ -3,6 +3,16 @@ session_start();
 session_unset();  // Elimina todas las variables de sesión
 session_destroy(); // Destruye la sesión
 
+if (isset($_SERVER['HTTP_COOKIE'])) {
+    $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+    foreach ($cookies as $cookie) {
+        $parts = explode('=', $cookie);
+        $name = trim($parts[0]);
+        setcookie($name, '', time() - 3600, '/');
+        setcookie($name, '', time() - 3600, '/', $_SERVER['HTTP_HOST']);
+    }
+}
+
 // Al inicio de las páginas protegidas:
 header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");

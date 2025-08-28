@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute($insert_vals);
     }
 
-    header("Location: archivodetalle.php?id=" . $id_personal . "&success=1");
+    header("Location: archivodetalle.php?id=" . $id_personal);
     exit;
 } else {
     header("Location: archivo.php");

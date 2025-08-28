@@ -9282,7 +9282,7 @@ var KTChartsWidget38_ = function() {
                             colors: ["transparent"]
                         },
                         xaxis: {
-                            categories: ["Federales","EVENTUALES","Formalizados III","Formalizados II","Regularizados","IMSS Bienestar","Formalizados I","Personal en Formacion","HOMOLOGADOS","BUROCRATAS","PROMOTORES INSABI","RAMO12","Laboratorio de Tamiz Metabolico Neonatal","Honorarios","Asimilados a Salarios","PROGRAMA DE CANCER DE LA MUJER INSABI","VACUNACION FEDERAL","INSABI ANEXO IV"],
+                            categories: ["Federales","EventualES","Formalizados III","Formalizados II","Regularizados","IMSS Bienestar","Formalizados I","Personal en Formacion","HOMOLOGADOS","BUROCRATAS","PROMOTORES INSABI","RAMO12","Laboratorio de Tamiz Metabolico Neonatal","Honorarios","Asimilados a Salarios","PROGRAMA DE CANCER DE LA MUJER INSABI","VACUNACION FEDERAL","INSABI ANEXO IV"],
                             axisBorder: {
                                 show: !1
                             },

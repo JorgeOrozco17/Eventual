@@ -51,6 +51,7 @@ class PersonalModel {
                 j.nombre AS adscripcionnombre,
                 c.nombre AS centronombre,
                 c.clues AS cluenombre,
+                c.ct_art_74 AS art74,
                 p.codigo AS codigo_puesto
             FROM 
                 jurisdicciones j
@@ -77,6 +78,7 @@ class PersonalModel {
         $centronombre = $result['centronombre'];
         $cluenombre = $result['cluenombre'];
         $codigo_puesto = $result['codigo_puesto'];
+        $ct_art74 = $result['art74'];
 
         // Determinar estatus basado en el movimiento
         $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
@@ -363,5 +365,34 @@ class PersonalModel {
             ]);
         return $ok;
     }
+
+    public function altaxbaja($data){
+        $stmt = $this->conn->prepare("
+        UPDATE personal 
+        SET movimiento = ?, quincena_baja = ?, fecha_baja = ?, observaciones_baja = ?, autorizacion = 0, estatus = 'inactivo'
+        WHERE id = ?
+    ");
+
+    $ok = $stmt->execute([
+        $data['movimiento'],
+        $data['quincena_baja'],
+        $data['fecha_baja'],
+        $data['observaciones_baja'] ?? '',
+        $data['id']
+    ]);
+
+    if ($ok && !empty($data['observaciones_usuario'])) {
+        $stmtComent = $this->conn->prepare("
+            INSERT INTO coments (id_personal, id_usuario, comentario)
+            VALUES (?, ?, ?)
+        ");
+        $stmtComent->execute([
+            $data['id'],
+            $_SESSION['user_id'] ?? 1,
+            $data['observaciones_usuario']
+        ]);
+    }
+    return $ok;
+}
 
 }

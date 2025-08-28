@@ -60,7 +60,7 @@ class PersonalController {
 
     public function save() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: /eventual/personalform.php?error=1");
+            header("Location:/personalform.php");
             exit();
         }
 
@@ -68,12 +68,12 @@ class PersonalController {
             $data = $_POST;
 
             if ($this->model->existsRFC($data['RFC'], $data['movimiento'])) {
-                header("Location: /eventual/altapersonal.php?duplicate=1");
+                header("Location:/altapersonal.php");
                 exit();
             }
 
             if ($this->model->existsCURP($data['CURP'], $data['movimiento'])) { // Corregido CRUP => CURP
-                header("Location: /eventual/altapersonal.php?duplicate=1");
+                header("Location:/altapersonal.php");
                 exit();
             }
 
@@ -81,13 +81,13 @@ class PersonalController {
 
             if ($id_personal) {
                 $this->model->CalculoPersonal($id_personal);
-                header("Location: /eventual/autorizapersonal.php?success=1");
+                header("Location:/autorizapersonal.php");
             } else {
-                header("Location: /eventual/personal.php");
+                header("Location:/personal.php");
             }
         } catch (Exception $e) {
             error_log("Error al guardar personal: " . $e->getMessage());
-            header("Location: /eventual/personal.php?error=1");
+            header("Location:/personal.php");
         }
 
         exit();
@@ -95,7 +95,7 @@ class PersonalController {
 
     public function delete($id) {
         $this->model->delete($id);
-        header("Location: /eventual/altapersonal.php?deleted=1");
+        header("Location:/altapersonal.php");
         exit();
     }
 
@@ -137,7 +137,7 @@ class PersonalController {
 
 public function BajaPersonal() {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        header("Location: /eventual/bajaform.php?error=1");
+        header("Location:/bajaform.php");
         exit();
     }
     try {
@@ -146,9 +146,9 @@ public function BajaPersonal() {
             $ok = $this->model->updateBaja($data);
 
             if ($ok) {
-                header("Location: /eventual/autorizapersonal.php?success=1");
+                header("Location:/autorizapersonal.php");
             } else {
-                header("Location: /eventual/personal.php");
+                header("Location:/personal.php");
             }
         } catch (Exception $e) {
         echo 'Error: ' . $e->getMessage();
@@ -161,7 +161,7 @@ public function BajaPersonal() {
 
     public function completeEmployee($id) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: /eventual/completar_empleado.php?error=1");
+            header("Location:/completar_empleado.php");
             exit();
         }
 
@@ -171,15 +171,39 @@ public function BajaPersonal() {
             $id_personal = $this->model->completeEmployee($id, $data);
 
             if ($id_personal) {
-                header("Location: /eventual/contratos.php");
+                header("Location:/contratos.php");
             } else {
-                header("Location: /eventual/contratos.php");
+                header("Location:/contratos.php");
             }
         } catch (Exception $e) {
             error_log("Error al completar empleado: " . $e->getMessage());
-            header("Location: /eventual/completar_empleado.php?error=1");
+            header("Location:/completar_empleado.php");
         }
 
         exit();
+    }
+
+    public function altaxbaja(){
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location:/altaxbaja.php");
+            exit();
+        }
+
+        try{
+
+            $data = $_POST;
+
+            $id_personal = $this->model->altaxbaja($data);
+
+            if ($id_personal) {
+                header("Location:/autorizapersonal.php");
+            } else {
+                header("Location:/personal.php");
+            }
+        } catch (Exception $e) {
+            error_log("Error al dar de alta o baja: " . $e->getMessage());
+            header("Location:/altaxbaja.php");
+        }
+        
     }
 }

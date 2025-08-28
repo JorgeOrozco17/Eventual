@@ -37,9 +37,9 @@ class Deduccioncontroller{
         $this->log_accion($usuario, "Eliminó pensión.", $id_acciones);
 
         if ($ok) {
-            header("Location: pension.php?deleted=1");
+            header("Location: pension.php");
         } else {
-            header("Location: pension.php?delete_error=1");
+            header("Location: pension.php");
         }
         exit;
     }

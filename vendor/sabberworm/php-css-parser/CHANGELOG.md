@@ -155,7 +155,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ## 8.3.0 (2019-02-22)
 
 * Refactor parsing logic to mostly reside in the class files whose data
-  structure is to be parsed (this should eventually allow us to unit-test
+  structure is to be parsed (this should Eventually allow us to unit-test
   specific parts of the parsing logic individually).
 * Fix error in parsing `calc` expessions when the first operand is a negative
   number, thanks to @raxbg.

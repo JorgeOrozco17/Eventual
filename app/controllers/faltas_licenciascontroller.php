@@ -106,9 +106,9 @@ class Faltas_licenciascontroller {
 
         $okAll = $okSave && $okCalc;
         if ($redir_tipo === 'falta') {
-            header("Location: /eventual/incidencias.php?tipo=falta&" . ($okAll ? "success=1" : "error=1"));
+            header("Location: /incidencias.php");
         } else {
-            header("Location: /eventual/licencias.php?tipo=licencia&" . ($okAll ? "success=1" : "error=1"));
+            header("Location: /licencias.php");
         }
         exit();
     }
@@ -121,12 +121,12 @@ class Faltas_licenciascontroller {
 
         if (!$ok) {
             $dest = ($tipo === 'falta') ? 'incidencias' : 'licencias';
-            header("Location: /eventual/{$dest}.php?tipo={$tipo}&error=1");
+            header("Location: /{$dest}.php");
             exit();
         }
 
         $dest = ($tipo === 'falta') ? 'incidencias' : 'licencias';
-        header("Location: /eventual/{$dest}.php?tipo={$tipo}&deleted=1");
+        header("Location: /{$dest}.php");
         exit();
     }
 

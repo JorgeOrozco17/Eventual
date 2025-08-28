@@ -144,7 +144,7 @@ class Capturamodel{
                     $anio ?? '',
                     'ACTIVO' ?? '',
                     $emp['inicio_contratacion'] ?? '',
-                    'EVENTUAL'  ?? '',
+                    'Eventual'  ?? '',
                     $emp['programa'] ?? '',
                     $emp['clave_recurso'] ?? '',
                     $emp['puesto'] ?? '',

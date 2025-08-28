@@ -93,7 +93,7 @@ foreach (array_chunk($empleados, 2) as $grupo) {
         $pdf->Rect($x_inicio, $y_inicio, $anchoCaja, $altoCaja);
 
         // === LOGO Y ENCABEZADO DENTRO DE LA CAJA ===
-        $logo_path = 'C:/xampp/htdocs/Eventual/public/img/escudo.png';
+        $logo_path = '/public/img/escudo.png';
         $logo_y = $y_inicio + 4;
         $pdf->Image($logo_path, $x_inicio + 3, $logo_y, 18, 18);
 
@@ -101,7 +101,7 @@ foreach (array_chunk($empleados, 2) as $grupo) {
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetXY($x_inicio + 40, $y_inicio + 5);
         $pdf->Cell($anchoCaja - 70, 3, utf8_decode("SERVICIOS DE SALUD DE COAHUILA"), 0, 2, 'C');
-        $pdf->Cell($anchoCaja - 70, 5, utf8_decode("NOMINAS EVENTUALES"), 0, 2, 'C');
+        $pdf->Cell($anchoCaja - 70, 5, utf8_decode("NOMINAS EventualES"), 0, 2, 'C');
 
         // --- DATOS GENERALES ---
         $left = $x_inicio + 3;
@@ -131,7 +131,7 @@ foreach (array_chunk($empleados, 2) as $grupo) {
         $lineaY += $salto;
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetXY($baseX_izq, $lineaY);
-        $pdf->Cell(80, 3, utf8_decode("NOMINA: EVENTUALES"), 0, 0, 'L');
+        $pdf->Cell(80, 3, utf8_decode("NOMINA: EventualES"), 0, 0, 'L');
 
         // ---------- CUADRO DE DATOS GENERALES ----------
 
@@ -189,7 +189,7 @@ foreach (array_chunk($empleados, 2) as $grupo) {
         $pdf->SetX($xCol1);
         $pdf->SetFont('Arial', '', 5);
         $pdf->MultiCell($colWidth + $xCol2 - 40, 2.2, utf8_decode(
-            "EVENTUALES\nRECIBÍ DE CONFORMIDAD LA LIQUIDACION MOSTRADA EN ESTE RECIBO POR SUELDO Y PRESTACIONES QUE ME CORRESPONDEN POR LOS TRABAJOS QUE HE DESEMPEÑADO DECLARO QUE ME CONSIDERO LEGAL Y SATISFACTORIAMENTE PAGADO HASTA LA FECHA EN VIRTUD DE HABERSEME CUMPLIDO EN TODAS SUS PARTES CON LA LEY FEDERAL DEL TRABAJO."
+            "EventualES\nRECIBÍ DE CONFORMIDAD LA LIQUIDACION MOSTRADA EN ESTE RECIBO POR SUELDO Y PRESTACIONES QUE ME CORRESPONDEN POR LOS TRABAJOS QUE HE DESEMPEÑADO DECLARO QUE ME CONSIDERO LEGAL Y SATISFACTORIAMENTE PAGADO HASTA LA FECHA EN VIRTUD DE HABERSEME CUMPLIDO EN TODAS SUS PARTES CON LA LEY FEDERAL DEL TRABAJO."
         ), 0, 'L');
 
 

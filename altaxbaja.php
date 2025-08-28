@@ -1,28 +1,17 @@
-<?php
-if (isset($_GET['adscrip_id'])) {
-    require_once 'app/controllers/catalogocontroller.php';
-    $catalogo = new CatalogoController();
-    $centros = $catalogo->getCentrosByAdscripcion($_GET['adscrip_id']);
-
-    header('Content-Type: application/json');
-    echo json_encode($centros);
-    exit;
-}
-?>
 
 <?php
 require_once 'app/controllers/personalController.php';
 require_once 'app/controllers/catalogocontroller.php';
 include 'header.php';
 $controller = new PersonalController();
-$catalogo = new CatalogoModel(); 
+$catalogo = new CatalogoController(); 
 $puestos = $catalogo->getAllPuestos();
 $recursos = $catalogo->getAllRecursos();
 $adscripciones = $catalogo->getAllJurisdicciones();
 $quincena = $catalogo->getAllQuincenas();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $controller->save();
+    $controller->altaxbaja();
     exit;
 }
 
@@ -58,20 +47,15 @@ if (isset($_GET['id'])){
     <div class="card">
         <div class="card-header">
             <div class="menu-title">
-                <h2><?= $id ? 'Editar Registro de Personal' : 'Nuevo Registro de Personal' ?></h2>
+                <h2>Registro de alta por baja</h2>
             </div>
         </div>
 
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="id" value="< ?= htmlspecialchars($id) ?>">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
 
                 <div class="row g-3">
-
-                    <div class="col-md-10">
-                        <label>Nombre Alta:</label>
-                        <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>">
-                    </div>
 
                     <div class="col-md-3">
                         <label>Número de Oficio:</label>
@@ -85,11 +69,7 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-4">
                         <label>Movimiento:</label>
-                        <select name="movimiento" class="form-select" required>
-                            <option value="">Seleccione</option>
-                            <option value="alta" <?= (isset($personal['movimiento']) && $personal['movimiento'] == 'alta') ? 'selected' : '' ?>>ALTA</option>
-                            <option value="baja" <?= (isset($personal['movimiento']) && $personal['movimiento'] == 'baja') ? 'selected' : '' ?>>BAJA</option>
-                        </select>
+                        <input type="text" name="movimiento" class="form-control" value="ALTA POR BAJA" placeholder="ALTA POR BAJA" readonly>
                     </div>
 
                     <div>
@@ -104,7 +84,6 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Puesto:</label>
                         <select name="puesto" class="form-select" required>
-                            <option value="">Seleccione un puesto</option>
                             <?php foreach ($puestos as $p): ?>
                                 <option value="<?= $p['nombre_puesto'] ?>" <?= (isset($personal['puesto']) && $personal['puesto'] == $p['nombre_puesto']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($p['nombre_puesto']) ?>
@@ -116,7 +95,6 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Programa:</label>
                         <select name="programa" class="form-select" required>
-                            <option value="">Seleccione un programa</option>
                             <?php foreach ($recursos as $r): ?>
                                 <option value="<?= $r['nombre'] ?>" <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($r['nombre']) ?>
@@ -126,18 +104,19 @@ if (isset($_GET['id'])){
                     </div>
 
                     <div class="col-md-6">
-                        <label>Rama</label>
+                        <label>Rama:</label>
                         <select name="rama" id="" class="form-select" required>
-                            <option value="">Seleccione una rama</option>
-                            <option value="RAMA ADMINISTRATIVA">RAMA ADMINISTRATIVA</option>
-                            <option value="RAMA MEDICA"> RAMA MEDICA</option>
+                            <?php foreach (['RAMA ADMINISTRATIVA', 'RAMA MEDICA'] as $rama): ?>
+                                <option value="<?= $rama ?>" <?= (isset($personal['rama']) && $personal['rama'] == $rama) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($rama) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label>Adscripción:</label>
                         <select name="adscripcion" id="adscripcion" class="form-select" required>
-                            <option value="">Seleccione adscripción</option>
                             <?php foreach ($adscripciones as $a): ?>
                                 <option value="<?= $a['id'] ?>" <?= (isset($personal['adscripcion']) && $personal['adscripcion'] == $a['id']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($a['nombre']) . '-' . htmlspecialchars($a['ubicacion'])?>
@@ -155,64 +134,38 @@ if (isset($_GET['id'])){
                         </select>
                     </div>
 
+                                        <!-- Sueldo Neto 
+                    <div class="col-md-6">
+                        <label>Sueldo Neto Mensual:</label>
+                        <input type="number" step="0.01" name="sueldo_neto" class="form-control" id="sueldo_neto">
+                    </div>
+                    --->
+
+                    <!-- Sueldo Bruto -->
+                    <div class="col-md-6">
+                        <label>Sueldo Bruto Mensual:</label>
+                        <input type="number" step="0.01" name="sueldo_bruto" class="form-control" value="<?= htmlspecialchars($personal['sueldo_bruto'] ?? '') ?>">
+                    </div>
+ <!------------------------------------------------------------ datos de empleado actual --------------------------------------------->
+                    <div class="card-header"></div>
+                    <br>
+                    <h2 for="" class="menu-title">Datos del empleado Actual</h2>
+
+                    <div class="col-md-10">
+                        <label>Nombre empleado actual:</label>
+                        <input type="text" name="nombre_actual" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>" readonly>
+                    </div>
+
                     <div class="col-md-6">
                         <label>RFC:</label>
-                        <input type="text" name="RFC" class="form-control" value="<?= htmlspecialchars($personal['RFC'] ?? '') ?>" required>
+                        <input type="text" name="RFC_actual" class="form-control" value="<?= htmlspecialchars($personal['RFC'] ?? '') ?>" required readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>CURP:</label>
-                        <input type="text" name="CURP" class="form-control" value="<?= htmlspecialchars($personal['CURP'] ?? '') ?>" required>
+                        <input type="text" name="CURP_actual" class="form-control" value="<?= htmlspecialchars($personal['CURP'] ?? '') ?>" required readonly>
                     </div>
 
-                    <div class="col-md-6">
-                        <label>Selecciona el tipo de sueldo a ingresar:</label>
-                        <select id="tipo_sueldo" class="form-select" onchange="toggleSueldoFields()">
-                            <option value="">Seleccione</option>
-                            <!---- <option value="neto">Sueldo Neto</option> --->
-                            <option value="bruto">Sueldo Bruto</option>
-                        </select>
-                    </div>
-
-                    <!-- Sueldo Neto -->
-                    <div class="col-md-6" id="sueldo_neto_field" style="display:none;">
-                        <label>Sueldo Neto Mensual:</label>
-                        <input type="number" step="0.01" name="sueldo_neto" class="form-control" id="sueldo_neto">
-                    </div>
-
-                    <!-- Sueldo Bruto -->
-                    <div class="col-md-6" id="sueldo_bruto_field" style="display:none;">
-                        <label>Sueldo Bruto Mensual:</label>
-                        <input type="number" step="0.01" name="sueldo_bruto" class="form-control" id="sueldo_bruto">
-                    </div>
-
-                    <!-- Mensaje de error si no se elige un sueldo -->
-                    <div id="error-message" style="color: red; display: none;">
-                        Debes ingresar solo uno de los dos sueldos (neto o bruto).
-                    </div>
-
-                    <?php if (!isset($_GET['id'])): ?>
-                        <!-- Mostrar campos de alta solo si no hay id -->
-                        <div class="col-md-6">
-                            <label>Quincena alta:</label>
-                            <select name="quincena_alta" class="form-select" required>
-                                <option value="">Seleccione una quincena</option>
-                                <?php foreach ($quincena as $q): ?>
-                                    <option value="<?= $q['nombre'] ?>" <?= (isset($personal['quincena_alta']) && $personal['quincena_alta'] == $q['nombre']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($q['nombre']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Inicio de Contratación:</label>
-                            <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?>">
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (isset($_GET['id'])): ?>
-                        <!-- Mostrar campos de baja solo si hay id -->
                         <div class="col-md-6">
                             <label>Quincena baja:</label>
                             <select name="quincena_baja" class="form-select" required>
@@ -229,11 +182,51 @@ if (isset($_GET['id'])){
                             <label>Fecha de Baja:</label>
                             <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>">
                         </div>
-                    <?php endif; ?>
+
+                        <div class="col-md-12">
+                        <label>Observaciones de la Baja:</label>
+                        <textarea name="observaciones_baja" class="form-control"><?= htmlspecialchars($personal['observaciones_baja'] ?? '') ?></textarea>
+                    </div>
+    
+    <!------------------------------------ empleado nuevo ------------------------------------->
+                    <div class="card-header"></div>
+                    <h2 class="menu-title">Datos del empleado Nuevo</h2>
+
+                    <div class="col-md-10">
+                            <label>Nombre empleado nuevo:</label>
+                            <input type="text" name="nombre_alta" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
+                            <label>RFC:</label>
+                            <input type="text" name="RFC" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
+                            <label>CURP:</label>
+                            <input type="text" name="CURP" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
+                            <label>Quincena alta:</label>
+                            <select name="quincena_alta" class="form-select" required>
+                                <option value="">Seleccione una quincena</option>
+                                <?php foreach ($quincena as $q): ?>
+                                    <option value="<?= $q['nombre'] ?>" <?= (isset($personal['quincena_alta']) && $personal['quincena_alta'] == $q['nombre']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($q['nombre']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Inicio de Contratación:</label>
+                            <input type="date" name="inicio_contratacion" class="form-control" value="">
+                        </div>
 
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>
-                        <input type="text" name="cuenta" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
+                        <input type="text" name="cuenta" class="form-control">
                     </div>
 
                     <div class="col-md-12">
@@ -241,10 +234,6 @@ if (isset($_GET['id'])){
                         <textarea name="observaciones_alta" class="form-control"><?= htmlspecialchars($personal['observaciones_alta'] ?? '') ?></textarea>
                     </div>
 
-                    <div class="col-md-12">
-                        <label>Observaciones de la Baja:</label>
-                        <textarea name="observaciones_baja" class="form-control"><?= htmlspecialchars($personal['observaciones_baja'] ?? '') ?></textarea>
-                    </div>
 
                     <div class="col-md-12">
                         <label>Observaciones del Usuario:</label>

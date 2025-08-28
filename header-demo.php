@@ -19,8 +19,8 @@ $imagen = $_SESSION["image"];
 	<head>
 		<title>Sistema Eventuales</title>
 		<meta charset="utf-8" />
-		<meta name="description" content="Sistema de gestión de eventuales" />
-		<meta name="keywords" content="eventuales, gestión, sistema" />
+		<meta name="description" content="Sistema de gestión de Eventuales" />
+		<meta name="keywords" content="Eventuales, gestión, sistema" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta property="og:locale" content="en_US" />
 		<meta property="og:type" content="article" />
@@ -131,7 +131,7 @@ $imagen = $_SESSION["image"];
 								<div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
 									<!--begin::Menu wrapper-->
 									<div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-										<img alt="Foto" src="/eventual/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
+										<img alt="Foto" src="/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
 									</div>
 									<!--begin::User account menu-->
 									<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">
@@ -140,7 +140,7 @@ $imagen = $_SESSION["image"];
 											<div class="menu-content d-flex align-items-center px-3">
 												<!--begin::Avatar-->
 												<div class="symbol symbol-50px me-5">
-													<img alt="Foto" src="/eventual/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
+													<img alt="Foto" src="/app/fotos/<?php echo htmlspecialchars($imagen ?: 'blank.png'); ?>" class="rounded-circle" style="object-fit: cover;" />
 												</div>
 												<!--end::Avatar-->
 												<!--begin::Username-->

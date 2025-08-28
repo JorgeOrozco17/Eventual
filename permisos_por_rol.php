@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rol_id'])) {
     $rol_id = intval($_GET['rol']);
     $paginas_seleccionadas = isset($_POST['paginas']) ? $_POST['paginas'] : [];
     $userController->guardarPermisosPorRol($rol_id, $paginas_seleccionadas);
-    header("Location: permisos_por_rol.php?rol=$rol_id&success=1");
+    header("Location: permisos_por_rol.php");
     exit;
 }
 ?>

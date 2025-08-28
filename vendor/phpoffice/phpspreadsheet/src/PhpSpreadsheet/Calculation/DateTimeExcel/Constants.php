@@ -4,7 +4,7 @@ namespace PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel;
 
 class Constants
 {
-    // Constants currently used by WeekNum; will eventually be used by WEEKDAY
+    // Constants currently used by WeekNum; will Eventually be used by WEEKDAY
     const STARTWEEK_SUNDAY = 1;
     const STARTWEEK_MONDAY = 2;
     const STARTWEEK_MONDAY_ALT = 11;

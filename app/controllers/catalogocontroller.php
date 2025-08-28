@@ -26,12 +26,12 @@ class CatalogoController {
         $ok = $this->model->saveJuris($data);
 
         if ($ok) {
-                header("Location: /eventual/juris.php?success=1");
+                header("Location:/juris.php");
             } else {
-                header("Location: /eventual/juris.php?error=1");
+                header("Location:/juris.php");
             }
         } catch (Exception $e) {
-            header("Location: /eventual/juris.php?error=1");
+            header("Location:/juris.php");
         }
 
         exit();
@@ -52,12 +52,12 @@ class CatalogoController {
             $ok = $this->model->updateJuris($data['id'], $data['nombre'], $data['ubicacion']);
     
             if ($ok) {
-                header("Location: /eventual/juris.php?updated=1");
+                header("Location:/juris.php?updated=1");
             } else {
-                header("Location: /eventual/juris.php?error=1");
+                header("Location:/juris.php");
             }
         } catch (Exception $e) {
-            header("Location: /eventual/juris.php?error=1");
+            header("Location:/juris.php");
         }
         exit();
     }
@@ -128,12 +128,12 @@ class CatalogoController {
             $ok = $this->model->insertFijo($data);
 
             if ($ok) {
-                header("Location: /eventual/fijos.php?");
+                header("Location:/fijos.php?");
             } else {
-                header("Location: /eventual/fijos.php?");
+                header("Location:/fijos.php?");
             }
         } catch (Exception $e) {
-            header("Location: /eventual/fijos.php?");
+            header("Location:/fijos.php?");
         }
         exit;
     }
@@ -144,12 +144,12 @@ class CatalogoController {
             $ok = $this->model->updateFijo($data);
 
             if ($ok) {
-                header("Location: /eventual/fijos.php?");
+                header("Location:/fijos.php?");
             } else {
-                header("Location: /eventual/fijos.php?");
+                header("Location:/fijos.php?");
             }
         } catch (Exception $e) {
-            header("Location: /eventual/fijos.php?");
+            header("Location:/fijos.php?");
         }
         exit;
     }

@@ -119,13 +119,13 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
 
 <h2></h2>
 <div class="logos">
-    <img class="logo1" src="http://localhost/EVENTUAL/public/img/logo_coah.png" alt="Logo Coahuila">
-    <img class="logo2" src="http://localhost/EVENTUAL/public/img/logoss.jpg" alt="Logo Secretaría">
+    <img class="logo1" src="public/img/logo_coah.png" alt="Logo Coahuila">
+    <img class="logo2" src="public/img/logoss.jpg" alt="Logo Secretaría">
 </div>
 
 <div class="pdfBody">
     <div class="seccion2">
-        <strong>NÓMINA EVENTUAL</strong>
+        <strong>NÓMINA Eventual</strong>
     </div>
 
     <div class="titulo">DATOS DEL MOVIMIENTO</div>
@@ -225,13 +225,13 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
 
 <h2></h2>
 <div class="logos">
-    <img class="logo1" src="http://localhost/EVENTUAL/public/img/logo_coah.png" alt="Logo Coahuila">
-    <img class="logo2" src="http://localhost/EVENTUAL/public/img/logoss.jpg" alt="Logo Secretaría">
+    <img class="logo1" src="public/img/logo_coah.png" alt="Logo Coahuila">
+    <img class="logo2" src="public/img/logoss.jpg" alt="Logo Secretaría">
 </div>
 
 <div class="pdfBody">
     <div class="seccion2">
-        <strong>NÓMINA EVENTUAL</strong>
+        <strong>NÓMINA Eventual</strong>
     </div>
 
     <div class="titulo">DATOS DEL MOVIMIENTO</div>

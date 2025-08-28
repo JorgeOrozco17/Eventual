@@ -163,6 +163,17 @@ section{
   .form-h1 {
     font-size: 1.8rem;
   }
+    .logoimagen {
+    display: none;
+  }
+  .logo-img {
+    display: none;
+  }
+    .logo-img2 {
+        width: 140px;
+        height: 75px;
+        margin-right: 10px;
+    }   
 }
 
 @media (max-width: 768px) {
@@ -177,6 +188,9 @@ section{
     .form-inputs {
         margin-right: 0;
     }
+      .logoimagen {
+    display: none;
+  }
 }
 
 @media (max-width: 576px) {

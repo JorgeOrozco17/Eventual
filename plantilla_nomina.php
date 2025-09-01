@@ -130,7 +130,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
     </div>
 
     <div class="titulo">DATOS DEL MOVIMIENTO</div>
-<table style="width: 100%; font-size: 11px; margin: 5px 0px;">
+    <table style="width: 100%; font-size: 11px; margin: 5px 0px;">
     <tr>
         <td class="etiqueta">TIPO DE MOVIMIENTO:</td>
         <td class="valor"><?= $tipo_mov ?></td>
@@ -204,7 +204,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
                 <td class="firma-cell">
                     <div><strong>AUTORIZA</strong></div>
                     <div class="linea-firma">
-                        <strong>LIC. JANNET ALEJANDRA GONZALEZ HIDROGO</strong><br>
+                        <strong>LIC. JANNETL ALEJANDRA GONZALEZ HIDROGO</strong><br>
                         SUBDIRECTORA DE RECURSOS HUMANOS
                     </div>
                 </td>
@@ -236,12 +236,12 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
     </div>
 
     <div class="titulo">DATOS DEL MOVIMIENTO</div>
-<table style="width: 100%; font-size: 11px; margin: 5px 0px;">
+    <table style="width: 100%; font-size: 11px; margin: 5px 0px;">
     <tr>
         <td class="etiqueta">TIPO DE MOVIMIENTO:</td>
         <td class="valor"><?= $tipo_mov ?></td>
         <td class="etiqueta">SOLICITA:</td>
-        <td class="valor"><?= $solicita ?>a</td>
+        <td class="valor"><?= $solicita ?></td>
     </tr>
     <tr>
         <td class="etiqueta">OFICIO:</td>
@@ -258,8 +258,14 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
     <tr>
         <td class="etiqueta">PUESTO:</td>
         <td class="valor"><?= $puesto ?></td>
+        <td class="etiqueta">SUELDO BRUTO MENSUAL:</td>
+        <td class="valor"><?= $sueldo_bruto ?></td>
+    </tr>
+    <tr>
         <td class="etiqueta">QUINCENA DE APLICACIÓN:</td>
         <td class="valor"><?= $quincena ?></td>
+        <td></td>
+        <td></td>
     </tr>
 </table>
 
@@ -291,22 +297,30 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
         <table class="firma-table">
             <tr>
                 <td class="firma-cell">
-                    <div><strong>ELABORA</strong></div>
+                    <div><strong>AUTORIZA</strong></div>
                     <div class="linea-firma">
-                        <strong>LIC. JENDY NAYELI GONZALEZ CASTAÑEDA</strong><br>
-                        ENCARGADA DE RECLUTAMIENTO Y SELECCIÓN DE PERSONAL
+                        <strong>C.P. MARIA DE JESUS RAMIREZ HERNANDEZ</strong><br>
+                        DIRECTORA DE ADMINISTRACIÓN
                     </div>
                 </td>
                 <td class="firma-spacer"></td>
                 <td class="firma-cell">
                     <div><strong>AUTORIZA</strong></div>
                     <div class="linea-firma">
-                        <strong>LIC. JANNET ALEJANDRA GONZALEZ HIDROGO</strong><br>
+                        <strong>LIC. JANNETL ALEJANDRA GONZALEZ HIDROGO</strong><br>
                         SUBDIRECTORA DE RECURSOS HUMANOS
                     </div>
                 </td>
             </tr>
         </table>
+
+        <div class="elabora-container">
+            <div><strong>ELABORA</strong></div>
+            <div class="linea-firma">
+                <strong>LIC. JENDY NAYELI GONZALEZ CASTAÑEDA</strong><br>
+                ENCARGADA DE RECLUTAMIENTO Y SELECCIÓN DE PERSONAL
+            </div>
+        </div>
     </div>
 </div>
 

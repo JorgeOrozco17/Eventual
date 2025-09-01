@@ -70,7 +70,6 @@ if (isset($_GET['id'])){
 
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="id" value="< ?= htmlspecialchars($id) ?>">
 
                 <div class="row g-3">
 
@@ -216,26 +215,6 @@ if (isset($_GET['id'])){
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!isset($_GET['id'])): ?>
-                        <!-- Mostrar campos de baja solo si hay id -->
-                        <div class="col-md-6">
-                            <label>Quincena baja:</label>
-                            <select name="quincena_baja" class="form-select" required>
-                                <option value="">Seleccione una quincena</option>
-                                <?php foreach ($quincena as $q): ?>
-                                    <option value="<?= $q['nombre'] ?>" <?= (isset($personal['quincena_baja']) && $personal['quincena_baja'] == $q['nombre']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($q['nombre']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Fecha de Baja:</label>
-                            <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>">
-                        </div>
-                    <?php endif; ?>
-
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>
                         <input type="text" name="cuenta" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
@@ -261,5 +240,12 @@ if (isset($_GET['id'])){
         </div>
     </div>
 </div>
+
+
+<script>
+document.querySelector("form").addEventListener("submit", function(e){
+    console.log("Datos enviados:", Object.fromEntries(new FormData(this)));
+});
+</script>
 
 <?php include 'footer.php'; ?>

@@ -67,6 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $insert_vals[] = $unique_name;
                     $insert_placeholders[] = '?';
                 }
+            } else {
+                // 👇 Si no se subió nada, asignar NULL (o '')
+                if (!$registro_existente) {
+                    $insert_cols[] = $campo;
+                    $insert_vals[] = null; // o '' si prefieres
+                    $insert_placeholders[] = '?';
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/app/helpers/util.php';
 require 'vendor/autoload.php';
 require_once 'app/controllers/capturacontroller.php';
 
@@ -72,8 +73,8 @@ $xCol3 = $xCol2 + 3 + $colWidth;
 foreach (array_chunk($empleados, 3) as $grupo) {
     $pdf->AddPage();
 
-    $logo_path = '/public/img/escudo.png'; // Usa PNG/JPG para compatibilidad
-    $pdf->Image($logo_path, 15, 14, 18, 18); // x=15 para margen izquierdo
+    
+    $pdf->Image(IMG_PATH . '/escudo.png', 15, 14, 18, 18);
 
     // Encabezado una sola vez por página
     $pdf->SetFont('Arial', 'B', 12);

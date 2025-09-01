@@ -1,4 +1,5 @@
 <?php
+require_once 'app/helpers/util.php';
 require_once 'app/models/dbconexion.php';
 session_start();
 
@@ -29,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $_POST['id_personal'] = $id_personal;
 
-        include 'guardar_archivos.php';  // Este script ya hace redirección a archivodetalle.php
+        include '/guardar_archivos.php';  // Este script ya hace redirección a archivodetalle.php
         exit;
     } else {
         // Si no se subió el archivo, redirigir con mensaje de error
@@ -37,6 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 } else {
-    header("Location: autoriza.php");
+    header("Location: /autoriza.php");
     exit;
 }

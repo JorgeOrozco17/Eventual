@@ -110,7 +110,6 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Adscripción:</label>
                         <select name="adscripcion" id="adscripcion" class="form-select" required disabled>
-                            <option value="">Seleccione adscripción</option>
                             <?php foreach ($adscripciones as $a): ?>
                                 <option <?= htmlspecialchars($personal['adscripcion'] ?? '') ?>>
                                     <?= htmlspecialchars($personal['adscripcion'] ?? '') ?>
@@ -175,7 +174,7 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>
-                        <input type="text" name="cuenta" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
+                        <input type="text" name="cuenta" maxlength="18" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
                     </div>
 
                     <div class="col-md-12">

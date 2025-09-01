@@ -94,87 +94,87 @@ if (isset($_GET['id'])){
                     </div>
                     <div class="col-md-6">
                         <label>D01: (ISR)</label>
-                        <input type="text" name="D_01" class="form-control" value="<?= htmlspecialchars($personal['D_01'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="D_01" class="form-control" value="<?= htmlspecialchars($personal['D_01'] ?? '0.0') ?>" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>D04: Anticipo de viaticos</label>
-                        <input type="text" name="D_04" class="form-control" value="<?= htmlspecialchars($personal['D_04'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_04" class="form-control" value="<?= htmlspecialchars($personal['D_04'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D05: Faltas</label>
-                        <input type="text" name="D_05" class="form-control" value="<?= htmlspecialchars($personal['D_05'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_05" class="form-control" value="<?= htmlspecialchars($personal['D_05'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D62: Pension Alimenticia</label>
-                        <input type="text" name="D_62" class="form-control" value="<?= htmlspecialchars($personal['D_62'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_62" class="form-control" value="<?= htmlspecialchars($personal['D_62'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D64: Amortizacion Fovissste</label>
-                        <input type="text" name="D_64" class="form-control" value="<?= htmlspecialchars($personal['D_64'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_64" class="form-control" value="<?= htmlspecialchars($personal['D_64'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D65: Seguro de daños Fovissste</label>
-                        <input type="text" name="D_65" class="form-control" value="<?= htmlspecialchars($personal['D_65'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_65" class="form-control" value="<?= htmlspecialchars($personal['D_65'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>DR1: Retro Seguro de salud</label>
-                        <input type="number" step="0.01" name="D_R1" class="form-control" value="<?= htmlspecialchars($personal['D_R1'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_R1" class="form-control" value="<?= htmlspecialchars($personal['D_R1'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>DR2: invalidez y vida</label>
-                        <input type="number" step="0.01" name="D_R2" class="form-control" value="<?= htmlspecialchars($personal['D_R2'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_R2" class="form-control" value="<?= htmlspecialchars($personal['D_R2'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>DR3: Servicios Sociales y culturales</label>
-                        <input type="text" name="D_R3" class="form-control" value="<?= htmlspecialchars($personal['D_R3'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_R3" class="form-control" value="<?= htmlspecialchars($personal['D_R3'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D_AS: Prestamo</label>
-                        <input type="text" name="D_AS" class="form-control" value="<?= htmlspecialchars($personal['D_AS'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_AS" class="form-control" value="<?= htmlspecialchars($personal['D_AS'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D_AM: </label>
-                        <input type="text" name="D_AM" class="form-control" value="<?= htmlspecialchars($personal['D_AM'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_AM" class="form-control" value="<?= htmlspecialchars($personal['D_AM'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D_S1: Responsabilidades</label>
-                        <input type="text" name="D_S1" class="form-control" value="<?= htmlspecialchars($personal['D_S1'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_S1" class="form-control" value="<?= htmlspecialchars($personal['D_S1'] ?? '0.0') ?>" >
                     </div>
 
                     <div class="col-md-6">
                         <label>D_S2: Responsabilidades</label>
-                        <input type="text" name="D_S2" class="form-control" value="<?= htmlspecialchars($personal['D_S2'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="D_S2" class="form-control" value="<?= htmlspecialchars($personal['D_S2'] ?? '0.0') ?>" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>D_S4: Invalidez y Vida</label>
-                        <input type="text" name="D_S4" class="form-control" value="<?= htmlspecialchars($personal['D_S4'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="D_S4" class="form-control" value="<?= htmlspecialchars($personal['D_S4'] ?? '0.0') ?>" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>D_S5: Servicios sociales y culturales</label>
-                        <input type="text" name="D_S5" class="form-control" value="<?= htmlspecialchars($personal['D_S5'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="D_S5" class="form-control" value="<?= htmlspecialchars($personal['D_S5'] ?? '0.0') ?>" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>D_S6: Cesantia y vejez</label>
-                        <input type="text" name="D_S6" class="form-control" value="<?= htmlspecialchars($personal['D_S6'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="D_S6" class="form-control" value="<?= htmlspecialchars($personal['D_S6'] ?? '0.0') ?>" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>D_O1: Anticipo de Sueldo</label>
-                        <input type="text" name="D_O1" class="form-control" value="<?= htmlspecialchars($personal['D_O1'] ?? '') ?>" >
+                        <input type="number" step="0.01" name="D_O1" class="form-control" value="<?= htmlspecialchars($personal['D_O1'] ?? '0.0') ?>" >
                     </div>
                 </div>
             </div>
@@ -187,22 +187,22 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-6">
                         <label>P_00: Subsidio para el empleado</label>
-                        <input type="text" name="P_00" class="form-control" value="<?= htmlspecialchars($personal['P_00'] ?? '') ?>">
+                        <input type="number" step="0.01" name="P_00" class="form-control" value="<?= htmlspecialchars($personal['P_00'] ?? '0.0') ?>">
                     </div>
 
                     <div class="col-md-6">
                         <label>P_01: Sueldo</label>
-                        <input type="text" name="P_01" class="form-control" value="<?= htmlspecialchars($personal['P_01'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="P_01" class="form-control" value="<?= htmlspecialchars($personal['P_01'] ?? '0.0') ?>" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>P_06: Otras prestaciones</label>
-                        <input type="text" name="P_06" class="form-control" value="<?= htmlspecialchars($personal['P_06'] ?? '') ?>">
+                        <input type="number" step="0.01" name="P_06" class="form-control" value="<?= htmlspecialchars($personal['P_06'] ?? '0.0') ?>">
                     </div>
 
                     <div class="col-md-6">
                         <label>P_26: Gratificacion Extraordinaria</label>
-                        <input type="text" name="P_26" class="form-control" value="<?= htmlspecialchars($personal['P_26'] ?? '') ?>" readonly>
+                        <input type="number" step="0.01" name="P_26" class="form-control" value="<?= htmlspecialchars($personal['P_26'] ?? '0.0') ?>" readonly>
                     </div>
                 </div>
             </div>

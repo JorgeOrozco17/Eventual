@@ -9,6 +9,17 @@ class PersonalModel {
         $this->conn = $db->getConnection();
     }
 
+
+    public function registrarLog($id_usuario, $accion, $id_acciones) {
+    $sql = "INSERT INTO logs (id_usuario, accion, id_acciones) VALUES (:id_usuario, :accion, :id_acciones)";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+    $stmt->bindParam(':accion', $accion, PDO::PARAM_STR);
+    $stmt->bindParam(':id_acciones', $id_acciones, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+
+
     public function getAll() {
         $stmt = $this->conn->prepare("SELECT * FROM personal");
         $stmt->execute();
@@ -40,6 +51,7 @@ class PersonalModel {
     }
 
     public function save($data) {
+    try {
         // Consulta para obtener la clave de recurso
         $stmtCVE = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
         $stmtCVE->execute([$data['programa']]);
@@ -69,34 +81,35 @@ class PersonalModel {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
-            // Si no se encuentran los datos correspondientes, podemos manejar el error
-            return false; // O lanzar una excepción
+            // Registrar log de error
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: Adscripción/Centro/Puesto no encontrados", "0");
+            return false;
         }
 
-        // Asignar valores de la consulta a las variables
+        // Variables
         $adscripcionnombre = $result['adscripcionnombre'];
-        $centronombre = $result['centronombre'];
-        $cluenombre = $result['cluenombre'];
-        $codigo_puesto = $result['codigo_puesto'];
-        $ct_art74 = $result['art74'];
+        $centronombre      = $result['centronombre'];
+        $cluenombre        = $result['cluenombre'];
+        $codigo_puesto     = $result['codigo_puesto'];
+        $ct_art74          = $result['art74'];
 
-        // Determinar estatus basado en el movimiento
+        // Estatus
         $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
 
-        // Preparar la consulta de inserción
+        // Inserción en personal
         $stmtInsert = $this->conn->prepare("
             INSERT INTO personal (
                 numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
-                id_centro, centro, clues, RFC, CURP, sueldo_neto, sueldo_bruto, inicio_contratacion, quincena_alta, 
+                id_centro, centro, clues, RFC, CURP, sueldo_bruto, inicio_contratacion, quincena_alta, 
                 nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
                 id_usuario_registro, estatus, autorizacion
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
         ");
 
         $ok = $stmtInsert->execute([
             $data['numero_oficio'],
             $data['movimiento'],
-            $data['solicita'] ?? '',
+            $data['solicita'] ?? null,
             $data['oficio'],
             $data['puesto'],
             $codigo_puesto,
@@ -110,39 +123,52 @@ class PersonalModel {
             $cluenombre,
             $data['RFC'],
             $data['CURP'],
-            $data['sueldo_neto'] ?? null,
             $data['sueldo_bruto'] ?? null,
             $data['inicio_contratacion'],
             $data['quincena_alta'] ?? null,
-            $data['nombre_alta'] ?? '',
+            $data['nombre_alta'] ?? null,
             $data['fecha_baja'] ?? null,
             $data['quincena_baja'] ?? null,
-            $data['cuenta'] ?? null,
-            $data['observaciones_alta'] ?? '',
-            $data['observaciones_baja'] ?? '',
+            !empty($data['cuenta']) ? $data['cuenta'] : null,
+            $data['observaciones_alta'] ?? null,
+            $data['observaciones_baja'] ?? null,
             $_SESSION['user_id'] ?? 1,
             $estatus
         ]);
 
-        if($ok){
-             $lastInsertId = $this->conn->lastInsertId();
-        // Guardar el comentario si viene en $data
-        if (!empty($data['observaciones_usuario'])) {
-            $stmtComent = $this->conn->prepare("
-                INSERT INTO coments (id_personal, id_usuario, comentario)
-                VALUES (?, ?, ?)
-            ");
-            $stmtComent->execute([
-                $lastInsertId,
-                $_SESSION['user_id'] ?? 1,
-                $data['observaciones_usuario']
-            ]);
+        if ($ok) {
+            $lastInsertId = $this->conn->lastInsertId();
+
+            // Guardar comentario si viene
+            if (!empty($data['observaciones_usuario'])) {
+                $stmtComent = $this->conn->prepare("
+                    INSERT INTO coments (id_personal, id_usuario, comentario)
+                    VALUES (?, ?, ?)
+                ");
+                $stmtComent->execute([
+                    $lastInsertId,
+                    $_SESSION['user_id'] ?? 1,
+                    $data['observaciones_usuario']
+                ]);
+            }
+
+            // Registrar log de éxito
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta empleado realizada", $lastInsertId);
+
+            return $lastInsertId;
+        } else {
+            // Registrar log de fallo
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: fallo en INSERT personal", "0");
+            return false;
         }
-    return $lastInsertId;
-        }else {
-            return false; // O lanzar una excepción
-        }   
+
+    } catch (Exception $e) {
+        // Registrar log con el error exacto
+        $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción: " . $e->getMessage(), "0");
+        return false;
     }
+}
+
 
     public function CalculoPersonal($id_personal) {
         // 1. Traer sueldo_bruto de la tabla personal

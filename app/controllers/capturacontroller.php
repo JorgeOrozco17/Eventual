@@ -35,7 +35,7 @@ class Capturacontroller{
 
             $data = [];
             foreach ($fields as $field) {
-                $data[$field] = !empty($_POST[$field]) ? $_POST[$field] : '';
+                $data[$field] = ($_POST[$field] !== '' ? $_POST[$field] : null);
             }
 
             $ok = $this->model->updateCapturaManual($id, $data);

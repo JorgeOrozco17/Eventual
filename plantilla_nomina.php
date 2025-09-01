@@ -27,6 +27,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <base href="https://nomina.soed.mx/Eventual/">
     <title>Oficio alta o baja</title>
     <style>
         body {
@@ -119,13 +120,13 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
 
 <h2></h2>
 <div class="logos">
-    <img class="logo1" src="public/img/logo_coah.png" alt="Logo Coahuila">
-    <img class="logo2" src="public/img/logoss.jpg" alt="Logo Secretaría">
+    <img class="logo1" src="/public/img/logo_coah.png" alt="Logo Coahuila">
+    <img class="logo2" src="/public/img/logoss.jpg" alt="Logo Secretaría">
 </div>
 
 <div class="pdfBody">
     <div class="seccion2">
-        <strong>NÓMINA Eventual</strong>
+        <strong>NÓMINA EVENTUAL</strong>
     </div>
 
     <div class="titulo">DATOS DEL MOVIMIENTO</div>
@@ -134,7 +135,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
         <td class="etiqueta">TIPO DE MOVIMIENTO:</td>
         <td class="valor"><?= $tipo_mov ?></td>
         <td class="etiqueta">SOLICITA:</td>
-        <td class="valor"><?= $solicita ?>a</td>
+        <td class="valor"><?= $solicita ?></td>
     </tr>
     <tr>
         <td class="etiqueta">OFICIO:</td>

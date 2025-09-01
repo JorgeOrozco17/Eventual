@@ -10,4 +10,17 @@ function pick(array $row, array $keys, $default=null){
     return $default; 
 }
 
+/** Ruta raíz del proyecto (sube un nivel desde /helpers) */
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__));
+}
 
+// Carpeta public
+if (!defined('PUBLIC_PATH')) {
+    define('PUBLIC_PATH', BASE_PATH . '/public');
+}
+
+// Carpeta de imágenes
+if (!defined('IMG_PATH')) {
+    define('IMG_PATH', PUBLIC_PATH . '/img');
+}

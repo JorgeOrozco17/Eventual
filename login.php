@@ -61,8 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="fv-row mb-4">
                             <input type="text" placeholder="Usuario" name="username" id="username" autocomplete="off" class="form-control" required />
                         </div>
-                        <div class="fv-row mb-4">
+                        <div class="fv-row mb-4 position-relative">
                             <input type="password" placeholder="Contraseña" name="password" id="password" autocomplete="off" class="form-control" required />
+                            
+                            <!-- Botón del ojito -->
+                            <span class="btn btn-sm btn-icon position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword()" style="cursor:pointer;">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </span>
                         </div>
                         <div class="content__or-text">
                             <span class="line"></span>
@@ -87,5 +92,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Scripts de Metronic (mantén los tuyos) -->
     <script src="assets/plugins/global/plugins.bundle.js"></script>
     <script src="assets/js/scripts.bundle.js"></script>
+    <script>
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.getElementById("toggleIcon");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
 </body>
 </html>

@@ -105,7 +105,7 @@ include 'header.php';
                 </h1>
             </div>
 
-            <div class="d-grid gap-3 mb-3"> <a href="permisos_por_rol.php" class="btn permissions-btn btn-custom-primary">
+            <div class="d-grid gap-3 mb-3"> <a href="permisos_por_rol.php?rol=1" class="btn permissions-btn btn-custom-primary">
                     <i class="fas fa-users-cog"></i>
                     Permisos por <b>Rol</b>
                 </a>

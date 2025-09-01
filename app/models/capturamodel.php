@@ -157,7 +157,7 @@ class Capturamodel{
                     $P_26,
                     $D_01,
                     $SD,
-                    $emp['cuenta'] ?? '',
+                    $emp['cuenta'] ?? 0,
                     $P_00,
                     $emp['desc_ct_dpto'] ?? '',
                     $emp['desc_cen_art74'] ?? '',
@@ -343,23 +343,28 @@ class Capturamodel{
     }
 
    public function updateCapturaManual($id, $data) {
-        // SQL para hacer el UPDATE de los datos de la captura
-        $stmt = $this->conn->prepare("
-            UPDATE captura SET
-                D_01 = ?, D_04 = ?, D_05 = ?, D_62 = ?, D_64 = ?, D_65 = ?, D_R1 = ?, D_R2 = ?, 
-                D_R3 = ?, D_R4 = ?, D_AS = ?, D_AM = ?, D_S1 = ?, D_S2 = ?, D_S4 = ?, D_S5 = ?, 
-                D_S6 = ?, D_O1 = ?, P_00 = ?, P_01 = ?, P_06 = ?, P_26 = ?
-            WHERE id = ?
-        ");
+        $sql = "UPDATE captura SET
+            D_01 = :D_01, D_04 = :D_04, D_05 = :D_05, D_62 = :D_62, D_64 = :D_64, D_65 = :D_65,
+            D_R1 = :D_R1, D_R2 = :D_R2, D_R3 = :D_R3, D_R4 = :D_R4, D_AS = :D_AS, D_AM = :D_AM,
+            D_S1 = :D_S1, D_S2 = :D_S2, D_S4 = :D_S4, D_S5 = :D_S5, D_S6 = :D_S6, D_O1 = :D_O1,
+            P_00 = :P_00, P_01 = :P_01, P_06 = :P_06, P_26 = :P_26
+            WHERE id = :id";
 
-        return $stmt->execute([
-            $data['D_01'], $data['D_04'], $data['D_05'], $data['D_62'], $data['D_64'], $data['D_65'],
-            $data['D_R1'], $data['D_R2'], $data['D_R3'], $data['D_R4'], $data['D_AS'], $data['D_AM'], 
-            $data['D_S1'], $data['D_S2'], $data['D_S4'], $data['D_S5'], $data['D_S6'], $data['D_O1'], 
-            $data['P_00'], $data['P_01'], $data['P_06'], $data['P_26'],
-            $id
-        ]);
+        $stmt = $this->conn->prepare($sql);
+
+        foreach ($data as $field => $value) {
+            if (is_null($value)) {
+                $stmt->bindValue(":$field", null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue(":$field", $value);
+            }
+        }
+
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
     }
+
 
 
     ////////////////////////////////////////////////////////////////////// generar excel  //////////////////////////////////

@@ -393,32 +393,32 @@ class PersonalModel {
     }
 
     public function altaxbaja($data){
-        $stmt = $this->conn->prepare("
-        UPDATE personal 
-        SET movimiento = ?, quincena_baja = ?, fecha_baja = ?, observaciones_baja = ?, autorizacion = 0, estatus = 'inactivo'
-        WHERE id = ?
-    ");
-
-    $ok = $stmt->execute([
-        $data['movimiento'],
-        $data['quincena_baja'],
-        $data['fecha_baja'],
-        $data['observaciones_baja'] ?? '',
-        $data['id']
-    ]);
-
-    if ($ok && !empty($data['observaciones_usuario'])) {
-        $stmtComent = $this->conn->prepare("
-            INSERT INTO coments (id_personal, id_usuario, comentario)
-            VALUES (?, ?, ?)
+            $stmt = $this->conn->prepare("
+            UPDATE personal 
+            SET movimiento = ?, quincena_baja = ?, fecha_baja = ?, observaciones_baja = ?, autorizacion = 1, estatus = 'inactivo'
+            WHERE id = ?
         ");
-        $stmtComent->execute([
-            $data['id'],
-            $_SESSION['user_id'] ?? 1,
-            $data['observaciones_usuario']
+
+        $ok = $stmt->execute([
+            $data['movimiento'],
+            $data['quincena_baja'],
+            $data['fecha_baja'],
+            $data['observaciones_baja'] ?? '',
+            $data['id']
         ]);
+
+        if ($ok && !empty($data['observaciones_usuario'])) {
+            $stmtComent = $this->conn->prepare("
+                INSERT INTO coments (id_personal, id_usuario, comentario)
+                VALUES (?, ?, ?)
+            ");
+            $stmtComent->execute([
+                $data['id'],
+                $_SESSION['user_id'] ?? 1,
+                $data['observaciones_usuario']
+            ]);
+        }
+        return $ok;
     }
-    return $ok;
-}
 
 }

@@ -132,14 +132,7 @@ if (isset($_GET['id'])){
                                 <?= htmlspecialchars($personal['centro'] ?? 'Seleccione un centro') ?>
                             </option>
                         </select>
-                    </div>
-
-                                        <!-- Sueldo Neto 
-                    <div class="col-md-6">
-                        <label>Sueldo Neto Mensual:</label>
-                        <input type="number" step="0.01" name="sueldo_neto" class="form-control" id="sueldo_neto">
-                    </div>
-                    --->
+                    </div> 
 
                     <!-- Sueldo Bruto -->
                     <div class="col-md-6">

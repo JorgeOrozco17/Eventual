@@ -8,12 +8,9 @@ $catalogo = new CatalogoController();
 $id = $_GET['id'];
 
 $date = date('d/m');
-
+$quincenas = $catalogo->getAllQuincenas();
 $coments = $controller->getComentsById($id);
-
-
 $quincena_actual = $catalogo->getQuincenaByDate($date);
-
 $qna_actual = $quincena_actual['nombre'] ?? 'No disponible';
 
 
@@ -88,7 +85,7 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="col-md-6">
                             <span class="info-label">Solicita:</span>
-                            <input type="text" name="solicita" id="solicita" class="info-value">
+                            <input type="text" name="solicita" id="solicita" class="form-control">
                         </div>
                         <div class="col-md-6">
                             <span class="info-label">Movimiento:</span>
@@ -146,14 +143,18 @@ if (isset($_GET['id'])) {
                         <!-- Quincena baja -->
                         <div class="col-md-6">
                             <span class="info-label">Quincena baja:</span>
-                            <span class="info-value"><?= htmlspecialchars($qna_actual) ?></span>
-                            <input type="hidden" name="quincena_baja" value="<?= htmlspecialchars($qna_actual) ?>">
+                            <select name="quincena_baja" id="quincena_baja" class="form-select">
+                                <?php foreach ($quincenas as $qna): ?>
+                                    <option value="<?= $qna['id'] ?>" <?= (isset($personal['quincena_baja']) && $personal['quincena_baja'] == $qna['id']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($qna['nombre']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <!-- Fecha de Baja -->
                         <div class="col-md-3">
                             <span class="info-label">Fecha de Baja:</span>
-                            <span class="info-value"><?= date('Y-m-d') ?></span>
-                            <input type="hidden" name="fecha_baja" value="<?= date('Y-m-d') ?>">
+                            <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <span class="info-label">Cuenta bancaria:</span>

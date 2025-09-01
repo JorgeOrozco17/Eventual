@@ -193,10 +193,10 @@ public function BajaPersonal() {
 
             $data = $_POST;
 
-            $id_personal = $this->model->altaxbaja($data);
+            $ok = $this->model->altaxbaja($data);
 
-            if ($id_personal) {
-                header("Location:/autorizapersonal.php");
+            if ($ok) {
+                $this->model->save($data);
             } else {
                 header("Location:/personal.php");
             }

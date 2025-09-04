@@ -1,6 +1,6 @@
 //////////////// cerrar sesion despues de 5 minutos de inactividad    ////////////////////
 var timeout;
-var timeoutLimit = 3 * 60 * 1000; 
+var timeoutLimit = 40 * 60 * 1000; 
 
 // Función para reiniciar el temporizador
 function resetTimer() {

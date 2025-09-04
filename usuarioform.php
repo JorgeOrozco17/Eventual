@@ -14,7 +14,7 @@ $usuario = [
     'Nombre' => '',
     'usuario' => '',
     'rol' => '',
-    'archivo' => ''
+    'juris' => ''
 ];
 
 if ($id) {
@@ -106,12 +106,19 @@ if ($id) {
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label">Archivo:</label>
-                            <input type="file" name="archivo" class="form-control">
-                            <?php if (!empty($usuario['archivo'])): ?>
-                                <small class="text-muted">Archivo actual: <?= htmlspecialchars($usuario['archivo']) ?></small>
-                                <input type="hidden" name="archivo_actual" value="<?= htmlspecialchars($usuario['archivo']) ?>">
-                            <?php endif; ?>
+                            <label class="form-label">Jurisdiccion responsable:</label>
+                            <select name="jurisdiccion" id="jurisdiccion" class="form-select" required>
+                                <option value="">Seleccione una jurisdicción</option>
+                                <option value="1" <?= $usuario['juris'] == '1' ? 'selected' : '' ?>>Jurisdicción 1</option>
+                                <option value="2" <?= $usuario['juris'] == '2' ? 'selected' : '' ?>>Jurisdicción 2</option>
+                                <option value="3" <?= $usuario['juris'] == '3' ? 'selected' : '' ?>>Jurisdicción 3</option>
+                                <option value="4" <?= $usuario['juris'] == '4' ? 'selected' : '' ?>>Jurisdicción 4</option>
+                                <option value="5" <?= $usuario['juris'] == '5' ? 'selected' : '' ?>>Jurisdicción 5</option>
+                                <option value="6" <?= $usuario['juris'] == '6' ? 'selected' : '' ?>>Jurisdicción 6</option>
+                                <option value="7" <?= $usuario['juris'] == '7' ? 'selected' : '' ?>>Jurisdicción 7</option>
+                                <option value="8" <?= $usuario['juris'] == '8' ? 'selected' : '' ?>>Jurisdicción 8</option>
+                                <option value="9" <?= $usuario['juris'] == '9' ? 'selected' : '' ?>>Jurisdicción 9</option>
+                            </select>
                         </div>
 
                         <div class="d-flex gap-3">

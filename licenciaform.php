@@ -126,7 +126,7 @@ $tipofalta = isset($_GET['tipo']) ? $_GET['tipo'] : 'licencia';
                 <input type="hidden" name="tipo" value="<?= $tipofalta ?>">
 
                 <div class="form-group mt-4">
-                    <button type="submit" name="guardar" class="btn btn-success">Guardar</button>
+                    <button type="submit" name="guardar" class="btn btn-success" onclick="return confirm('Si la quincena de aplicacion es anterior a la actual se aplicara en la quincena seleccionada del proximo año')">Guardar</button>
                 </div>
             </form>
         </div>

@@ -67,6 +67,7 @@ class UserController {
             'RFC' => trim(htmlspecialchars($input['RFC'] ?? '')),
             'usuario' => trim(htmlspecialchars($input['usuario'] ?? '')),
             'contraseña' => $input['contraseña'] ?? '',
+            'juris' => $input['juris'] ?? '',
             'rol' => $input['rol'] ?? '',
         ];
     }

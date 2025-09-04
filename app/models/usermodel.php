@@ -31,12 +31,12 @@
                 if (!empty($data['id'])) {
                     // Editar usuario
                     if (!empty($data['contraseña'])) {
-                        $stmt = $this->conn->prepare("UPDATE usuarios SET Nombre = ?, usuario = ?, contraseña = ?, rol = ?, archivo = ? WHERE id = ?");
+                        $stmt = $this->conn->prepare("UPDATE usuarios SET Nombre = ?, usuario = ?, contraseña = ?, rol = ?, juris = ? WHERE id = ?");
                         $hashed = password_hash($data['contraseña'], PASSWORD_DEFAULT);
-                        return $stmt->execute([$data['Nombre'], $data['usuario'], $hashed, $data['rol'], $data['archivo'], $data['id']]);
+                        return $stmt->execute([$data['Nombre'], $data['usuario'], $hashed, $data['rol'], $data['juris'], $data['id']]);
                     } else {
-                        $stmt = $this->conn->prepare("UPDATE usuarios SET Nombre = ?, usuario = ?, rol = ?, archivo = ? WHERE id = ?");
-                        return $stmt->execute([$data['Nombre'], $data['usuario'], $data['rol'], $data['archivo'], $data['id']]);
+                        $stmt = $this->conn->prepare("UPDATE usuarios SET Nombre = ?, usuario = ?, rol = ?, juris = ? WHERE id = ?");
+                        return $stmt->execute([$data['Nombre'], $data['usuario'], $data['rol'], $data['juris'], $data['id']]);
                     }
                 } else {
                     // Nuevo usuario
@@ -44,8 +44,8 @@
                         throw new Exception("La contraseña es obligatoria para crear un nuevo usuario.");
                     }
         
-                    $stmt = $this->conn->prepare("INSERT INTO usuarios (Nombre, usuario, contraseña, rol, archivo) VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$data['Nombre'], $data['usuario'], $data['contraseña'], $data['rol'], $data['archivo']]);                
+                    $stmt = $this->conn->prepare("INSERT INTO usuarios (Nombre, usuario, contraseña, rol, juris) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$data['Nombre'], $data['usuario'], $data['contraseña'], $data['rol'], $data['juris']]);
                     return true;
                 }
             } catch (Exception $e) {

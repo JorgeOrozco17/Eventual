@@ -333,7 +333,8 @@ class PersonalModel {
         UPDATE personal 
         SET 
             movimiento = ?,
-            fecha_baja = ?, 
+            fecha_baja = ?,
+            solicita = ?, 
             quincena_baja = ?, 
             observaciones_baja = ?, 
             autorizacion = 0,
@@ -344,6 +345,7 @@ class PersonalModel {
     $ok = $stmt->execute([
         $data['movimiento'],
         $data['fecha_baja'],
+        $data['solicita'],
         $data['quincena_baja'],
         $data['observaciones_baja'] ?? '',
         $data['id']

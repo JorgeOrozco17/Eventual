@@ -148,29 +148,35 @@ if (isset($_GET['id'])){
                     </div>
 
                     <div class="col-md-6">
-                        <label>Nombre Alta:</label>
+                        <label>Nombre Empleado:</label>
                         <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>" readonly>
                     </div>
 
+                    <?php if ($personal && $personal['movimiento'] == 'alta'): ?>
                     <div class="col-md-3">
                         <label>Quincena Alta:</label>
-                        <input type="text" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['quincena_alta'] ?? '') ?>" readonly>
+                        <input type="text" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['quincena_alta'] ?? '') ?>" required>
                     </div>
 
                     <div class="col-md-3">
                         <label>Inicio de Contratación:</label>
-                        <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?>" readonly>
+                        <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?>" required>
                     </div>
 
+                    <?php endif; ?>
+                   
+                    <?php if ($personal && $personal['movimiento'] == 'baja'): ?>
                     <div class="col-md-3">
                         <label>Quincena baja:</label>
-                        <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['quincena_baja'] ?? '') ?>" readonly>
+                        <input type="text" name="quincena_baja" class="form-control" value="<?= htmlspecialchars($personal['quincena_baja'] ?? '') ?>" required>
                     </div>
 
                     <div class="col-md-3">
                         <label>Fecha de Baja:</label>
-                        <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>" readonly>
+                        <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>" required>
                     </div>
+
+                    <?php endif; ?>
 
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>

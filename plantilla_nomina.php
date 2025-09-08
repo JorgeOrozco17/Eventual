@@ -9,8 +9,8 @@ $solicita = $personal['solicita'];
 $puesto = $personal['puesto'];
 $programa = $personal['programa'];
 $descripcion = $personal['adscripcion'];
-$sueldo_neto = "$" . number_format($personal['sueldo_neto'], 2);
-$sueldo_bruto = "$" . number_format($personal['sueldo_bruto'], 2);
+$sueldo_neto = "$" . number_format($personal['sueldo_neto_mensual'], 2);
+$sueldo_bruto = "$" . number_format($personal['sueldo_bruto_mensual'], 2);
 $quincena_alta = $personal['quincena_alta'] ?? 'No aplica';
 $quincena_baja = $personal['quincena_baja'] ?? 'No aplica';
 $oficio = $personal['oficio'];
@@ -158,7 +158,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
     </tr>
     <tr>
         <td class="etiqueta">QUINCENA DE APLICACIÓN:</td>
-        <td class="valor"><?= $quincena ?></td>
+        <td class="valor"><?= $quincena_alta ?></td>
         <td></td>
         <td></td>
     </tr>
@@ -233,7 +233,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
 
 <div class="pdfBody">
     <div class="seccion2">
-        <strong>NÓMINA Eventual</strong>
+        <strong>NÓMINA EVENTUAL</strong>
     </div>
 
     <div class="titulo">DATOS DEL MOVIMIENTO</div>
@@ -264,7 +264,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
     </tr>
     <tr>
         <td class="etiqueta">QUINCENA DE APLICACIÓN:</td>
-        <td class="valor"><?= $quincena ?></td>
+        <td class="valor"><?= $quincena_baja ?></td>
         <td></td>
         <td></td>
     </tr>

@@ -34,6 +34,11 @@ $quincenas = $catalogio->getAllQuincenas();
         <button class="btn btn-secondary" id="btn_periodo">
             Altas y bajas por periodo
         </button>
+        <?php if ($_SESSION['role'] === 1 || $_SESSION['role'] === 2): ?>
+        <button class="btn btn-secondary" id="btn_oficio">
+            Oficio de altas y bajas por quincena
+        </button>
+        <?php endif; ?>
     </div>
 
 <div class="container mt-5">
@@ -109,6 +114,39 @@ $quincenas = $catalogio->getAllQuincenas();
                 </div>
             </div>
         </div>
+
+        <div class="card mb-4 hidden" id="filtros_oficio">
+            <!---------- oficio de altas y bajas por periodo ---------->
+            <div class="card-body">
+                <form action="generar_oficio.php" method="POST" target="_blank" enctype="multipart/form-data">
+                    <p>Oficio Altas y Bajas por quincena</p>
+                    <div class="row g-3"> 
+                        <div class="col-md-3">
+                            <label for="quincena">Quincena</label>
+                            <select name="qna" id="quincena" class="form-select">
+                                <?php foreach($quincenas as $qna): ?>
+                                    <option value="<?= $qna['nombre']; ?>"><?= $qna['nombre']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="anio">AÑO</label>
+                            <input type="number" name="anio" id="anio" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="oficio">Numero de oficio</label>
+                            <input type="text" name="oficio" id="oficio" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <button type="submit" style="margin-top: 1rem;" class="btn btn-success">Generar oficio</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 </div>
 <div class="container mt-5">
     <h2>Resultados</h2>
@@ -130,42 +168,48 @@ $quincenas = $catalogio->getAllQuincenas();
 
 const btnQna = document.getElementById("btn_quincena");
 const btnPer = document.getElementById("btn_periodo");
+const btnOfi = document.getElementById("btn_oficio");
 
 const filtrosQna = document.getElementById("filtros_quincena");
 const filtrosPer = document.getElementById("filtros_periodo");
+const filtrosOfi = document.getElementById("filtros_oficio");
 const resultados = document.getElementById("resultados");
 
 // Al hacer clic en quincena
-btnQna.addEventListener("click", () => {
-    filtrosQna.classList.remove("hidden");
-    filtrosPer.classList.add("hidden");
-    resultados.classList.remove("hidden");
-
-    // limpiar resultados
-    tabla_resultados.innerHTML = "";
-
-    // opcional: resaltar botón activo
-    btnQna.classList.add("btn-primary");
-    btnQna.classList.remove("btn-secondary");
-    btnPer.classList.remove("btn-primary");
-    btnPer.classList.add("btn-secondary");
-});
-
-// Al hacer clic en periodo
-btnPer.addEventListener("click", () => {
-    filtrosPer.classList.remove("hidden");
+function mostrarSeccion(activa) {
+    // Ocultar todas
     filtrosQna.classList.add("hidden");
+    filtrosPer.classList.add("hidden");
+    filtrosOfi.classList.add("hidden");
+
+    // Quitar estilos activos
+    btnQna.classList.remove("btn-primary"); btnQna.classList.add("btn-secondary");
+    btnPer.classList.remove("btn-primary"); btnPer.classList.add("btn-secondary");
+    btnOfi.classList.remove("btn-primary"); btnOfi.classList.add("btn-secondary");
+
+    // Mostrar la activa
+    if (activa === "qna") {
+        filtrosQna.classList.remove("hidden");
+        btnQna.classList.add("btn-primary");
+        btnQna.classList.remove("btn-secondary");
+    } else if (activa === "per") {
+        filtrosPer.classList.remove("hidden");
+        btnPer.classList.add("btn-primary");
+        btnPer.classList.remove("btn-secondary");
+    } else if (activa === "ofi") {
+        filtrosOfi.classList.remove("hidden");
+        btnOfi.classList.add("btn-primary");
+        btnOfi.classList.remove("btn-secondary");
+    }
+
     resultados.classList.remove("hidden");
+    tabla_resultados.innerHTML = ""; // limpiar resultados
+}
 
-    // limpiar resultados
-    tabla_resultados.innerHTML = "";
-
-    // opcional: resaltar botón activo
-    btnPer.classList.add("btn-primary");
-    btnPer.classList.remove("btn-secondary");
-    btnQna.classList.remove("btn-primary");
-    btnQna.classList.add("btn-secondary");
-});
+// Listeners
+btnQna.addEventListener("click", () => mostrarSeccion("qna"));
+btnPer.addEventListener("click", () => mostrarSeccion("per"));
+btnOfi.addEventListener("click", () => mostrarSeccion("ofi"));
 
 document.getElementById("generar_reporte").addEventListener("click", function() {
     const qna  = document.getElementById("quincena").value;

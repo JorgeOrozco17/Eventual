@@ -1,5 +1,8 @@
 <?php
+require_once __DIR__ . '/../helpers/util.php';
+require_once __DIR__ . '/../models/dbconexion.php';
 require_once __DIR__ . '/../models/usermodel.php';
+
 
 class UserController {
     public $model;

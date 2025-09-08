@@ -132,10 +132,6 @@ if (isset($_GET['id'])) {
                             <span class="info-label">Sueldo Bruto Mensual:</span>
                             <span class="info-value"><?= htmlspecialchars($personal['sueldo_bruto'] ?? '-') ?></span>
                         </div>
-                        <div class="col-md-6">
-                            <span class="info-label">Quincena alta:</span>
-                            <span class="info-value"><?= htmlspecialchars($personal['quincena_alta'] ?? '') ?></span>
-                        </div>
                         <div class="col-md-3">
                             <span class="info-label">Inicio de Contratación:</span>
                             <span class="info-value"><?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?></span>

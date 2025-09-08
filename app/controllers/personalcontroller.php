@@ -206,4 +206,13 @@ public function BajaPersonal() {
         }
         
     }
+
+    public function getPersonalNew($qna, $anio) {
+    $data = $this->model->getPersonalNew($qna, $anio);
+
+    // Depuración: imprime en log
+    error_log("getPersonalNew en Controller (qna=$qna, anio=$anio): " . print_r($data, true));
+
+    return $data;
+}
 }

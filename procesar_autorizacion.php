@@ -6,6 +6,7 @@ session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_personal = $_POST['id'] ?? null;
     $cuenta = $_POST['cuenta'] ?? null;
+    $movimiento = $_POST['movimiento'] ?? null;
     $id_usuario = $_SESSION['user_id'] ?? 0;
 
     if (!$id_personal || !$cuenta) {
@@ -23,14 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt2 = $conn->prepare("UPDATE personal SET autorizacion = 1 WHERE id = ?");
     $stmt2->execute([$id_personal]);
 
-    // 3. Reenviar archivo al manejador de archivos (guardar_archivos.php)
+     // 3. Reenviar archivo al manejador de archivos (guardar_archivos.php)
     if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-        $_FILES['autorizacion'] = $_FILES['archivo'];
+        // Cambiar el índice del archivo dependiendo del movimiento
+        if ($movimiento === 'baja') {
+            $_FILES['baja'] = $_FILES['archivo'];
+        } else {
+            $_FILES['autorizacion'] = $_FILES['archivo'];
+        }
         unset($_FILES['archivo']);
 
         $_POST['id_personal'] = $id_personal;
 
-        include '/guardar_archivos.php';  // Este script ya hace redirección a archivodetalle.php
+        include __DIR__ . '/guardar_archivos.php'; // mejor usar ruta absoluta
         exit;
     } else {
         // Si no se subió el archivo, redirigir con mensaje de error

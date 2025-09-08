@@ -90,7 +90,7 @@ th { background: #eee; text-align: center; }
             <b>NÓMINA</b>
         </td>
         <td style="width:80%; text-align:center; border:none; font-weight:bold; font-size:18px;">
-            EventualES
+            Eventual
         </td>
     </tr>
     <tr>
@@ -106,7 +106,7 @@ th { background: #eee; text-align: center; }
             <b>PROGRAMA</b>
         </td>
         <td style="width:80%; border:none; text-align:center; font-style:italic; font-weight:bold; font-size:18px; border-bottom:1px solid #000;">
-            EventualES
+            Eventual
         </td>
     </tr>
     <tr>

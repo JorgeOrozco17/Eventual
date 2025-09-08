@@ -93,7 +93,7 @@ foreach (array_chunk($empleados, 2) as $grupo) {
         $pdf->Rect($x_inicio, $y_inicio, $anchoCaja, $altoCaja);
 
         // === LOGO Y ENCABEZADO DENTRO DE LA CAJA ===
-        $logo_path = '/public/img/escudo.png';
+        $logo_path = __DIR__ . '/public/img/escudo.png';
         $logo_y = $y_inicio + 4;
         $pdf->Image($logo_path, $x_inicio + 3, $logo_y, 18, 18);
 

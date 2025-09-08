@@ -45,7 +45,12 @@ class PersonalModel {
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE id = ?");
+        $stmt = $this->conn->prepare(" SELECT *,
+               (sueldo_neto * 2)   AS sueldo_neto_mensual,
+               (sueldo_bruto * 2) AS sueldo_bruto_mensual
+        FROM personal 
+        WHERE id = ?
+        ");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -421,6 +426,18 @@ class PersonalModel {
             ]);
         }
         return $ok;
+    }
+
+    public function getPersonalNew($qna, $anio){
+    $stmt = $this->conn->prepare("SELECT *,
+               (sueldo_neto * 2)  AS sueldo_neto_mensual,
+               (sueldo_bruto * 2) AS sueldo_bruto_mensual
+        FROM personal
+        WHERE (quincena_alta = ? AND YEAR(inicio_contratacion) = ?)
+           OR (quincena_baja = ? AND YEAR(fecha_baja) = ?)
+    ");
+    $stmt->execute([$qna, $anio, $qna, $anio]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 }

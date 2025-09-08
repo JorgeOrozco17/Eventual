@@ -73,8 +73,8 @@ $xCol3 = $xCol2 + 3 + $colWidth;
 foreach (array_chunk($empleados, 3) as $grupo) {
     $pdf->AddPage();
 
-    
-    $pdf->Image(IMG_PATH . '/escudo.png', 15, 14, 18, 18);
+
+    $pdf->Image(__DIR__ . '/public/img/escudo.png', 15, 14, 18, 18);
 
     // Encabezado una sola vez por página
     $pdf->SetFont('Arial', 'B', 12);

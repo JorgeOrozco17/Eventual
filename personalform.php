@@ -78,11 +78,6 @@ if (isset($_GET['id'])){
                         <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>">
                     </div>
 
-                    <div class="col-md-3">
-                        <label>Número de Oficio:</label>
-                        <input type="text" name="numero_oficio" class="form-control" value="<?= htmlspecialchars($personal['numero_oficio'] ?? '') ?>" required>
-                    </div>
-
                     <div class="col-md-5">
                         <label>Solicita</label>
                         <input type="text" name="solicita" class="form-control" value="<?= htmlspecialchars($personal['solicita'] ?? '') ?>" >

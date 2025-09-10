@@ -55,11 +55,7 @@ if (isset($_GET['id'])){
                 <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
 
                 <div class="row g-3">
-                    <div class="col-md-3">
-                        <label>Número de Oficio:</label>
-                        <input type="text" name="numero_oficio" class="form-control" value="<?= htmlspecialchars($personal['numero_oficio'] ?? '') ?>" required readonly>
-                    </div>
-
+                    
                     <div class="col-md-5">
                         <label>Solicita</label>
                         <input type="text" name="solicita" class="form-control" value="<?= htmlspecialchars($personal['solicita'] ?? '') ?>" readonly>

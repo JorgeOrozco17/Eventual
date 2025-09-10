@@ -1,8 +1,7 @@
 <?php
 
 require_once 'app/controllers/personalController.php'; // Ajusta la ruta si es necesario
-
-include 'header.php'; // Asegúrate de que este archivo existe y contiene el encabezado HTML necesario
+include 'header.php';
 
 $controller = new PersonalController();
 

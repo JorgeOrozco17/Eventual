@@ -17,6 +17,7 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
         ),
         'S' => 
         array (
+            'Symfony\\Component\\Finder\\' => 25,
             'Svg\\' => 4,
             'Sabberworm\\CSS\\' => 15,
         ),
@@ -25,6 +26,7 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
             'Psr\\SimpleCache\\' => 16,
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
+            'PhpZip\\' => 7,
             'PhpOffice\\PhpSpreadsheet\\' => 25,
         ),
         'M' => 
@@ -56,6 +58,10 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
         array (
             0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
         ),
+        'Symfony\\Component\\Finder\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/finder',
+        ),
         'Svg\\' => 
         array (
             0 => __DIR__ . '/..' . '/dompdf/php-svg-lib/src/Svg',
@@ -76,6 +82,10 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
         'Psr\\Http\\Client\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
+        ),
+        'PhpZip\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nelexa/zip/src',
         ),
         'PhpOffice\\PhpSpreadsheet\\' => 
         array (

@@ -2,6 +2,7 @@
 require 'vendor/autoload.php';
 include 'app/controllers/contratocontroller.php';
 include 'app/controllers/catalogocontroller.php';
+use PhpZip\ZipFile;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -259,20 +260,24 @@ foreach ($empleados as $empleado) {
     $archivos[] = $filename;
 }
 
-// 5. Crear el ZIP
+// 5. Crear el ZIP con PhpZip
 $zipname = $tmpDir . '/Contratos_' . date('d_m_Y') . '.zip';
-$zip = new ZipArchive();
-$zip->open($zipname, ZipArchive::CREATE);
-foreach ($archivos as $file) {
-    $zip->addFile($file, basename($file));
+$zipFile = new ZipFile();
+
+try {
+    foreach ($archivos as $file) {
+        $zipFile->addFile($file, basename($file));
+    }
+    $zipFile->saveAsFile($zipname);
+} finally {
+    $zipFile->close();
 }
-$zip->close();
 
 // 6. Descarga el ZIP
 header('Content-Type: application/zip');
 header('Content-Disposition: attachment; filename="Contratos_' . date('Ymd_His') . '.zip"');
 header('Content-Length: ' . filesize($zipname));
 readfile($zipname);
-
 exit;
+
 ?>

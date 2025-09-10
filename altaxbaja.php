@@ -52,15 +52,10 @@ if (isset($_GET['id'])){
         </div>
 
         <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" action="procesar_alta_por_baja.php" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
 
                 <div class="row g-3">
-
-                    <div class="col-md-3">
-                        <label>Número de Oficio:</label>
-                        <input type="text" name="numero_oficio" class="form-control" value="<?= htmlspecialchars($personal['numero_oficio'] ?? '') ?>" required>
-                    </div>
 
                     <div class="col-md-5">
                         <label>Solicita</label>
@@ -69,11 +64,7 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-4">
                         <label>Movimiento:</label>
-                        <input type="text" name="movimiento" class="form-control" value="ALTA POR BAJA" placeholder="ALTA POR BAJA" readonly>
-                    </div>
-
-                    <div>
-                        <input type="hidden" name="estatus" id="estatus" >
+                        <input type="text" name="movimiento_fake" class="form-control" value="ALTA POR BAJA" placeholder="ALTA POR BAJA" readonly>
                     </div>
 
                     <div class="col-md-6">
@@ -118,8 +109,8 @@ if (isset($_GET['id'])){
                         <label>Adscripción:</label>
                         <select name="adscripcion" id="adscripcion" class="form-select" required>
                             <?php foreach ($adscripciones as $a): ?>
-                                <option value="<?= $a['id'] ?>" <?= (isset($personal['adscripcion']) && $personal['adscripcion'] == $a['id']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($a['nombre']) . '-' . htmlspecialchars($a['ubicacion'])?>
+                                <option value="<?= $a['id'] ?>" <?= (isset($personal['id_adscripcion']) && $personal['id_adscripcion'] == $a['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($a['nombre']) . '-' . htmlspecialchars($a['ubicacion']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -173,7 +164,7 @@ if (isset($_GET['id'])){
 
                         <div class="col-md-3">
                             <label>Fecha de Baja:</label>
-                            <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>">
+                            <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>" required>
                         </div>
 
                         <div class="col-md-12">
@@ -219,7 +210,7 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>
-                        <input type="text" name="cuenta" class="form-control">
+                        <input type="number" name="cuenta" class="form-control">
                     </div>
 
                     <div class="col-md-12">

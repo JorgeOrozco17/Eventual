@@ -58,30 +58,30 @@ $personal = $controller->model->getNoAutorizados();
                 <table id="tablaComun" class="table table-hover gy-5 dataTable">
                     <thead class="table-light">
                         <tr>
-                            <th>#</th>
-                            <th>No. Oficio</th>
-                            <th>Nombre</th>
-                            <th>RFC</th>
-                            <th>CURP</th>
                             <th>Movimiento</th>
-                            <th>Oficio</th>
-                            <th>Inicio</th>
-                            <th>Fin</th>
+                            <th>Nombre</th>
+                            <th>Neto Mensual</th>
+                            <th>Bruto Mensual</th>
+                            <th>Perfil</th>
+                            <th>Recurso</th>
+                            <th>Motivo</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($personal as $p): ?>
                         <tr>
-                            <td><?= htmlspecialchars($p['id']) ?></td>
-                            <td><?= htmlspecialchars($p['numero_oficio']) ?></td>
-                            <td><?= htmlspecialchars($p['nombre_alta']) ?></td>
-                            <td><?= htmlspecialchars($p['RFC']) ?></td>
-                            <td><?= htmlspecialchars($p['CURP']) ?></td>
                             <td><?= htmlspecialchars($p['movimiento']) ?></td>
-                            <td><?= htmlspecialchars($p['oficio']) ?></td>
-                            <td><?= htmlspecialchars($p['inicio_contratacion']) ?></td>
-                            <td><?= htmlspecialchars($p['fecha_baja']) ?></td>
+                            <td><?= htmlspecialchars($p['nombre_alta']) ?></td>
+                            <td><?= htmlspecialchars($p['sueldo_neto']) ?></td>
+                            <td><?= htmlspecialchars($p['sueldo_bruto']) ?></td>
+                            <td><?= htmlspecialchars($p['puesto']) ?></td>
+                            <td><?= htmlspecialchars($p['programa']) ?></td>
+                            <?php if ($p['movimiento'] === 'baja'): ?>
+                                <td><?= htmlspecialchars($p['observaciones_baja']) ?></td>
+                            <?php else: ?>
+                                <td><?= htmlspecialchars($p['observaciones_alta']) ?></td>
+                            <?php endif; ?>
                             <td nowrap>
                                 <a href="autorizafrom.php?id=<?= $p['id'] ?>" title="continuar registro" class="btn btn-icon btn-sm btn-info me-2" onclick="return confirm('Para continuar con el registro debe contar con la autorizacion de alta')">
                                     <i class="fas fa-arrow-right-long"></i>

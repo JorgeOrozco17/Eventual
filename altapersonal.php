@@ -56,31 +56,35 @@ $personal = $controller->model->getAutorizados();
         <!-- Card Body -->
         <div class="card-body bg-white rounded-bottom">
             <div class="table-responsive">
-                <table id="tablaComun" class="table align-middle table-row-bordered table-row-solid gy-4 gs-7">
-                    <thead class="border-gray-200 fs-5 fw-semibold bg-light">
+                <table id="tablaComun" class="table table-hover gy-5 dataTable">
+                    <thead class="table-light">
                         <tr>
-                            <th class="min-w-100px">No. Oficio</th>
+                            <th class="min-w-100px">Movimiento</th>
                             <th class="min-w-180px">Nombre</th>
                             <th class="min-w-100px">RFC</th>
-                            <th class="min-w-150px">CURP</th>
-                            <th class="min-w-120px">Movimiento</th>
-                            <th class="min-w-120px">Oficio</th>
-                            <th class="min-w-120px">Inicio</th>
-                            <th class="min-w-120px">Fin</th>
+                            <th class="min-w-150px">Neto Mensual</th>
+                            <th class="min-w-120px">Bruto Mensual</th>
+                            <th class="min-w-120px">Perfil</th>
+                            <th class="min-w-120px">Recurso</th>
+                            <th class="min-w-120px">Motivo</th>
                             <th class="min-w-150px text-center">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="fs-6 fw-semibold text-gray-700">
+                    <tbody>
                         <?php foreach ($personal as $p): ?>
                         <tr>
-                            <td><?= htmlspecialchars($p['numero_oficio']) ?></td>
+                            <td><?= htmlspecialchars($p['movimiento']) ?></td>
                             <td><?= htmlspecialchars($p['nombre_alta']) ?></td>
                             <td><?= htmlspecialchars($p['RFC']) ?></td>
-                            <td><?= htmlspecialchars($p['CURP'])?></td>
-                            <td><?= htmlspecialchars($p['movimiento']) ?></td>
-                            <td><?= htmlspecialchars($p['oficio']) ?></td>
-                            <td><?= htmlspecialchars($p['inicio_contratacion']) ?></td>
-                            <td><?= htmlspecialchars($p['fecha_baja']) ?></td>
+                            <td><?= htmlspecialchars($p['sueldo_neto_mensual'])?></td>
+                            <td><?= htmlspecialchars($p['sueldo_bruto_mensual']) ?></td>
+                            <td><?= htmlspecialchars($p['puesto']) ?></td>
+                            <td><?= htmlspecialchars($p['programa']) ?></td>
+                            <?php if ($p['movimiento'] === 'alta'): ?>
+                            <td><?= htmlspecialchars($p['observaciones_alta']) ?></td>
+                            <?php elseif ($p['movimiento'] === 'baja'): ?>
+                            <td><?= htmlspecialchars($p['observaciones_baja']) ?></td>
+                            <?php endif; ?>
                             <td class="text-center">
                                 <a href="personaldetalles.php?id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-light-info me-1" title="Información">
                                     <i class="fas fa-circle-info"></i>

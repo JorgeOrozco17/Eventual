@@ -59,45 +59,72 @@ class PersonalController {
     }
 
     public function save() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (!($_SERVER['REQUEST_METHOD'] === 'POST')) {
             header("Location:/personalform.php");
             exit();
         }
+        $data = $_POST;
 
         try {
-            $data = $_POST;
-
+            // aquí NO sobrescribas $data con $_POST otra vez!
             if ($this->model->existsRFC($data['RFC'], $data['movimiento'])) {
-                header("Location:/altapersonal.php");
-                exit();
+                return false; // mejor regresas false en vez de redirigir
             }
 
-            if ($this->model->existsCURP($data['CURP'], $data['movimiento'])) { // Corregido CRUP => CURP
-                header("Location:/altapersonal.php");
-                exit();
+            if ($this->model->existsCURP($data['CURP'], $data['movimiento'])) {
+                return false;
             }
 
             $id_personal = $this->model->save($data);
 
             if ($id_personal) {
                 $this->model->CalculoPersonal($id_personal);
-                header("Location:/autorizapersonal.php");
+                header("Location:/autorizapersonal.php?success=1");
+                exit();
             } else {
-                header("Location:/personal.php");
+                return false;
             }
         } catch (Exception $e) {
             error_log("Error al guardar personal: " . $e->getMessage());
-            header("Location:/personal.php");
+            return [ 'success' => false, 'error' => $e->getMessage() ];
         }
-
-        exit();
+        
     }
+
+    public function AltaBajaPersonalSave($data) {
+        try {
+            // aquí NO sobrescribas $data con $_POST otra vez!
+            if ($this->model->existsRFC($data['RFC'], $data['movimiento'])) {
+                return false; // mejor regresas false en vez de redirigir
+            }
+
+            if ($this->model->existsCURP($data['CURP'], $data['movimiento'])) {
+                return false;
+            }
+
+            $id_personal = $this->model->saveAltaBaja($data);
+
+            if ($id_personal) {
+                $this->model->CalculoPersonal($id_personal);
+                return $id_personal;
+            } else {
+                return false;
+            }
+        } catch (Exception $e) {
+            error_log("Error al guardar personal: " . $e->getMessage());
+            return [ 'success' => false, 'error' => $e->getMessage() ];
+        }
+    }
+
 
     public function delete($id) {
         $this->model->delete($id);
-        header("Location:/altapersonal.php");
+
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/altapersonal.php';
+        header("Location: $referer");
         exit();
     }
+
 
     public function get($id) {
         $data = $this->model->obtenerPorId($id);
@@ -157,6 +184,17 @@ public function BajaPersonal() {
 
         exit();
     }
+
+    public function AltaBajaPersonal($data) {
+        try {
+            $ok = $this->model->updateBaja($data);
+            return $ok; // devolvemos true/false en lugar de cortar el flujo
+        } catch (Exception $e) {
+            error_log("Error en AltaBajaPersonal: " . $e->getMessage());
+            return false;
+        }
+    }
+
 
 
     public function completeEmployee($id) {

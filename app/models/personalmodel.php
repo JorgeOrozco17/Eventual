@@ -33,7 +33,12 @@ class PersonalModel {
     }
 
     public function getAutorizados(){
-        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE autorizacion = 1");
+        $sql = "SELECT id, nombre_alta, RFC, sueldo_neto, sueldo_bruto, puesto, programa, movimiento, observaciones_alta, observaciones_baja,
+                (sueldo_neto * 2)   AS sueldo_neto_mensual,
+                (sueldo_bruto * 2) AS sueldo_bruto_mensual
+                FROM personal 
+                WHERE autorizacion = 1";
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -45,9 +50,7 @@ class PersonalModel {
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare(" SELECT *,
-               (sueldo_neto * 2)   AS sueldo_neto_mensual,
-               (sueldo_bruto * 2) AS sueldo_bruto_mensual
+        $stmt = $this->conn->prepare(" SELECT *
         FROM personal 
         WHERE id = ?
         ");
@@ -56,123 +59,297 @@ class PersonalModel {
     }
 
     public function save($data) {
-    try {
-        // Consulta para obtener la clave de recurso
-        $stmtCVE = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
-        $stmtCVE->execute([$data['programa']]);
-        $cve_recurso = $stmtCVE->fetchColumn();
+        try {
+            // Consulta para obtener la clave de recurso
+            $stmtCVE = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
+            $stmtCVE->execute([$data['programa']]);
+            $cve_recurso = $stmtCVE->fetchColumn();
 
-        // Consulta optimizada para obtener los nombres de adscripción, centro y clues, y el código de puesto
-        $stmt = $this->conn->prepare("
-            SELECT 
-                j.nombre AS adscripcionnombre,
-                c.nombre AS centronombre,
-                c.clues AS cluenombre,
-                c.ct_art_74 AS art74,
-                p.codigo AS codigo_puesto
-            FROM 
-                jurisdicciones j
-                JOIN centros c ON c.id = :centro
-                JOIN puestos p ON p.nombre_puesto = :puesto
-            WHERE 
-                j.id = :adscripcion
-        ");
-        $stmt->execute([
-            ':adscripcion' => $data['adscripcion'],
-            ':centro' => $data['centro'],
-            ':puesto' => $data['puesto']
-        ]);
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    j.nombre AS adscripcionnombre,
+                    j.ubicacion AS ubicacion,
+                    c.nombre AS centronombre,
+                    c.clues AS cluenombre,
+                    c.ct_art_74 AS art74,
+                    p.codigo AS codigo_puesto
+                FROM 
+                    jurisdicciones j
+                    JOIN centros c ON c.id = :centro
+                    JOIN puestos p ON p.nombre_puesto = :puesto
+                WHERE 
+                    j.id = :adscripcion
+            ");
+            $stmt->execute([
+                ':adscripcion' => $data['adscripcion'],
+                ':centro' => $data['centro'],
+                ':puesto' => $data['puesto']
+            ]);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$result) {
-            // Registrar log de error
-            $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: Adscripción/Centro/Puesto no encontrados", "0");
-            return false;
-        }
-
-        // Variables
-        $adscripcionnombre = $result['adscripcionnombre'];
-        $centronombre      = $result['centronombre'];
-        $cluenombre        = $result['cluenombre'];
-        $codigo_puesto     = $result['codigo_puesto'];
-        $ct_art74          = $result['art74'];
-
-        // Estatus
-        $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
-
-        // Inserción en personal
-        $stmtInsert = $this->conn->prepare("
-            INSERT INTO personal (
-                numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
-                id_centro, centro, clues, RFC, CURP, sueldo_bruto, inicio_contratacion, quincena_alta, 
-                nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
-                id_usuario_registro, estatus, autorizacion
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-        ");
-
-        $ok = $stmtInsert->execute([
-            $data['numero_oficio'],
-            $data['movimiento'],
-            $data['solicita'] ?? null,
-            $data['oficio'],
-            $data['puesto'],
-            $codigo_puesto,
-            $data['programa'],
-            $cve_recurso,
-            $data['rama'],
-            $data['adscripcion'],
-            $adscripcionnombre,
-            $data['centro'],
-            $centronombre,
-            $cluenombre,
-            $data['RFC'],
-            $data['CURP'],
-            $data['sueldo_bruto'] ?? null,
-            $data['inicio_contratacion'],
-            $data['quincena_alta'] ?? null,
-            $data['nombre_alta'] ?? null,
-            $data['fecha_baja'] ?? null,
-            $data['quincena_baja'] ?? null,
-            !empty($data['cuenta']) ? $data['cuenta'] : null,
-            $data['observaciones_alta'] ?? null,
-            $data['observaciones_baja'] ?? null,
-            $_SESSION['user_id'] ?? 1,
-            $estatus
-        ]);
-
-        if ($ok) {
-            $lastInsertId = $this->conn->lastInsertId();
-
-            // Guardar comentario si viene
-            if (!empty($data['observaciones_usuario'])) {
-                $stmtComent = $this->conn->prepare("
-                    INSERT INTO coments (id_personal, id_usuario, comentario)
-                    VALUES (?, ?, ?)
-                ");
-                $stmtComent->execute([
-                    $lastInsertId,
-                    $_SESSION['user_id'] ?? 1,
-                    $data['observaciones_usuario']
-                ]);
+            if (!$result) {
+                // Registrar log de error
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: Adscripción/Centro/Puesto no encontrados", "0");
+                return false;
             }
 
-            // Registrar log de éxito
-            $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta empleado realizada", $lastInsertId);
+            // Variables
+            $adscripcionnombre = $result['adscripcionnombre'];
+            $centronombre      = $result['centronombre'];
+            $cluenombre        = $result['cluenombre'];
+            $codigo_puesto     = $result['codigo_puesto'];
+            $ct_art74          = $result['art74'];
+            $ubicacion        = $result['ubicacion'];
 
-            return $lastInsertId;
-        } else {
-            // Registrar log de fallo
-            $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: fallo en INSERT personal", "0");
+            // Estatus
+            $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
+
+            // Inserción en personal
+            $stmtInsert = $this->conn->prepare("
+                INSERT INTO personal (
+                    numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
+                    id_centro, centro, clues, RFC, CURP, sueldo_bruto, inicio_contratacion, quincena_alta, 
+                    nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
+                    id_usuario_registro, estatus, autorizacion
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            ");
+
+            $ok = $stmtInsert->execute([
+                $data['numero_oficio'] ?? null,
+                $data['movimiento'],
+                $data['solicita'] ?? null,
+                $data['oficio'],
+                $data['puesto'],
+                $codigo_puesto,
+                $data['programa'],
+                $cve_recurso,
+                $data['rama'],
+                $data['adscripcion'],
+                $adscripcionnombre,
+                $data['centro'],
+                $centronombre,
+                $cluenombre,
+                $data['RFC'],
+                $data['CURP'],
+                $data['sueldo_bruto'] ?? null,
+                $data['inicio_contratacion'],
+                $data['quincena_alta'] ?? null,
+                $data['nombre_alta'] ?? null,
+                $data['fecha_baja'] ?? null,
+                $data['quincena_baja'] ?? null,
+                !empty($data['cuenta']) ? $data['cuenta'] : null,
+                $data['observaciones_alta'] ?? null,
+                $data['observaciones_baja'] ?? null,
+                $_SESSION['user_id'] ?? 1,
+                $estatus
+            ]);
+
+            if ($ok) {
+                $lastInsertId = $this->conn->lastInsertId();
+
+                $stmtart74 = $this->conn->prepare("
+                    INSERT INTO art_74 (id_personal, desc_ct_dpto, desc_cen_art74, ct_art_74, juris)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $ok74 =$stmtart74->execute([
+                    $lastInsertId,
+                    $cluenombre . ' ' . $adscripcionnombre . ' ' . $centronombre,
+                    $adscripcionnombre . ' ' . $centronombre,
+                    $ct_art74,
+                    $adscripcionnombre . '-' . $ubicacion
+                ]);
+
+                if ($ok74) {
+                    // Registrar log de éxito en art_74
+                    $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta en art_74 realizada", $lastInsertId);
+                } else {
+                $errorInfo = $stmtart74->errorInfo(); 
+                    $mensaje = "Error INSERT art_74: " . ($errorInfo[2] ?? 'Desconocido');
+                    $this->registrarLog($_SESSION['user_id'] ?? 0, $mensaje, $lastInsertId);
+                }
+
+                // Guardar comentario si viene
+                if (!empty($data['observaciones_usuario'])) {
+                    $stmtComent = $this->conn->prepare("
+                        INSERT INTO coments (id_personal, id_usuario, comentario)
+                        VALUES (?, ?, ?)
+                    ");
+                    $stmtComent->execute([
+                        $lastInsertId,
+                        $_SESSION['user_id'] ?? 1,
+                        $data['observaciones_usuario']
+                    ]);
+                }
+
+                // Registrar log de éxito
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta empleado realizada", $lastInsertId);
+
+                return $lastInsertId;
+            } else {
+                // Registrar log de fallo
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: fallo en INSERT personal", "0");
+                return false;
+            }
+
+        } catch (Exception $e) {
+            // Registrar log con el error exacto
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción: " . $e->getMessage(), "0");
             return false;
         }
-
-    } catch (Exception $e) {
-        // Registrar log con el error exacto
-        $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción: " . $e->getMessage(), "0");
-        return false;
     }
-}
+
+    public function saveAltaBaja($data) {
+        try {
+            // Consulta para obtener la clave de recurso
+            $stmtCVE = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
+            $stmtCVE->execute([$data['programa']]);
+            $cve_recurso = $stmtCVE->fetchColumn();
+
+            // Consulta optimizada para obtener los nombres de adscripción, centro y clues, y el código de puesto
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    j.nombre AS adscripcionnombre,
+                    j.ubicacion AS ubicacion,
+                    c.id AS centroid,
+                    c.clues AS cluenombre,
+                    c.ct_art_74 AS art74,
+                    p.codigo AS codigo_puesto
+                FROM 
+                    jurisdicciones j
+                    JOIN centros c ON c.nombre = :centro
+                    JOIN puestos p ON p.nombre_puesto = :puesto
+                WHERE 
+                    j.id = :adscripcion
+            ");
+            $stmt->execute([
+                ':adscripcion' => $data['adscripcion'],
+                ':centro' => $data['centro'],
+                ':puesto' => $data['puesto']
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$result) {
+                $mensajeError = sprintf(
+                    "Error: Adscripción/Centro/Puesto no encontrados. Adscripción: %s, Centro: %s, Puesto: %s",
+                    $data['adscripcion'],
+                    $data['centro'],
+                    $data['puesto']
+                );
+
+                // Si quieres también agregar info de PDO
+                $pdoError = $stmt->errorInfo();
+                $mensajeError .= " | SQLSTATE: {$pdoError[0]}, Código: {$pdoError[1]}, Mensaje: {$pdoError[2]}";
+
+                $this->registrarLog($_SESSION['user_id'] ?? 0, $mensajeError, "0");
+                return false;
+            }
+
+            // Variables
+            $adscripcionnombre = $result['adscripcionnombre'];
+            $centroid      = $result['centroid'];
+            $cluenombre        = $result['cluenombre'];
+            $codigo_puesto     = $result['codigo_puesto'];
+            $ct_art74          = $result['art74'] ?? null;
+            $ubicacion        = $result['ubicacion'];
+
+            // Estatus
+            $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
+
+            // Inserción en personal
+            $stmtInsert = $this->conn->prepare("
+                INSERT INTO personal (
+                    numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
+                    id_centro, centro, clues, RFC, CURP, sueldo_bruto, inicio_contratacion, quincena_alta, 
+                    nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
+                    id_usuario_registro, estatus, autorizacion
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            ");
+
+            $ok = $stmtInsert->execute([
+                $data['numero_oficio'] ?? null,
+                $data['movimiento'],
+                $data['solicita'] ?? null,
+                $data['oficio'],
+                $data['puesto'], ////
+                $codigo_puesto, ////
+                $data['programa'],
+                $cve_recurso,
+                $data['rama'],
+                $data['adscripcion'],
+                $adscripcionnombre,/////
+                $centroid,
+                $data['centro'],
+                $cluenombre,
+                $data['RFC'],
+                $data['CURP'],
+                $data['sueldo_bruto'] ?? null,
+                $data['inicio_contratacion'],
+                $data['quincena_alta'] ?? null,
+                $data['nombre_alta'] ?? null,
+                $data['fecha_baja'] ?? null,
+                $data['quincena_baja'] ?? null,
+                !empty($data['cuenta']) ? $data['cuenta'] : null,
+                $data['observaciones_alta'] ?? null,
+                $data['observaciones_baja'] ?? null,
+                $_SESSION['user_id'] ?? 1,
+                $estatus
+            ]);
+
+            if ($ok) {
+                $lastInsertId = $this->conn->lastInsertId();
+
+                $stmtart74 = $this->conn->prepare("
+                    INSERT INTO art_74 (id_personal, desc_ct_dpto, desc_cen_art74, ct_art_74, juris)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $ok74 =$stmtart74->execute([
+                    $lastInsertId,
+                    $cluenombre . ' ' . $adscripcionnombre . ' ' . $data['centro'],
+                    $adscripcionnombre . ' ' . $data['centro'],
+                    $ct_art74,
+                    $adscripcionnombre . '-' . $ubicacion
+                ]);
+
+                if ($ok74) {
+                    // Registrar log de éxito en art_74
+                    $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta en art_74 realizada", $lastInsertId);
+                } else {
+                $errorInfo = $stmtart74->errorInfo(); 
+                    $mensaje = "Error INSERT art_74: " . ($errorInfo[2] ?? 'Desconocido');
+                    $this->registrarLog($_SESSION['user_id'] ?? 0, $mensaje, $lastInsertId);
+                }
+
+                // Guardar comentario si viene
+                if (!empty($data['observaciones_usuario'])) {
+                    $stmtComent = $this->conn->prepare("
+                        INSERT INTO coments (id_personal, id_usuario, comentario)
+                        VALUES (?, ?, ?)
+                    ");
+                    $stmtComent->execute([
+                        $lastInsertId,
+                        $_SESSION['user_id'] ?? 1,
+                        $data['observaciones_usuario']
+                    ]);
+                }
+
+                // Registrar log de éxito
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta empleado realizada", $lastInsertId);
+
+                return $lastInsertId;
+            } else {
+                // Registrar log de fallo
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: fallo en INSERT personal", "0");
+                return false;
+            }
+
+        } catch (Exception $e) {
+            // Registrar log con el error exacto
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción: " . $e->getMessage(), "0");
+            return false;
+        }
+    }
 
 
     public function CalculoPersonal($id_personal) {
@@ -334,41 +511,55 @@ class PersonalModel {
     }
 
     public function updateBaja($data) {
-    $stmt = $this->conn->prepare("
-        UPDATE personal 
-        SET 
-            movimiento = ?,
-            fecha_baja = ?,
-            solicita = ?, 
-            quincena_baja = ?, 
-            observaciones_baja = ?, 
-            autorizacion = 0,
-            estatus = 'inactivo'
-        WHERE id = ?
-    ");
+    try {
+        $this->conn->beginTransaction();
 
-    $ok = $stmt->execute([
-        $data['movimiento'],
-        $data['fecha_baja'],
-        $data['solicita'],
-        $data['quincena_baja'],
-        $data['observaciones_baja'] ?? '',
-        $data['id']
-    ]);
-
-    if ($ok && !empty($data['observaciones_usuario'])) {
-        $stmtComent = $this->conn->prepare("
-            INSERT INTO coments (id_personal, id_usuario, comentario)
-            VALUES (?, ?, ?)
+        $stmt = $this->conn->prepare("
+            UPDATE personal 
+            SET 
+                movimiento = ?,
+                fecha_baja = ?,
+                solicita = ?, 
+                quincena_baja = ?, 
+                observaciones_baja = ?, 
+                autorizacion = 0,
+                estatus = 'inactivo'
+            WHERE id = ?
         ");
-        $stmtComent->execute([
-            $data['id'],
-            $_SESSION['user_id'] ?? 1,
-            $data['observaciones_usuario']
+
+        $ok = $stmt->execute([
+            $data['movimiento'],
+            $data['fecha_baja'],
+            $data['solicita'],
+            $data['quincena_baja'],
+            $data['observaciones_baja'] ?? '',
+            $data['id']
         ]);
+
+        if ($ok && !empty($data['observaciones_usuario'])) {
+            $stmtComent = $this->conn->prepare("
+                INSERT INTO coments (id_personal, id_usuario, comentario)
+                VALUES (?, ?, ?)
+            ");
+            $stmtComent->execute([
+                $data['id'],
+                $_SESSION['user_id'] ?? 1,
+                $data['observaciones_usuario']
+            ]);
+        }
+
+        $this->conn->commit();
+
+        $this->registrarLog($_SESSION['user_id'] ?? 0, "Se actualizó BAJA de personal ID {$data['id']}", $data['id']);
+        return true;
+
+    } catch (Exception $e) {
+        $this->conn->rollBack();
+        $this->registrarLog($_SESSION['user_id'] ?? 0, "Error en updateBaja: " . $e->getMessage(), $data['id'] ?? 0);
+        return false;
     }
-    return $ok;
-    }
+}
+
 
 
     public function completeEmployee($id, $data) {

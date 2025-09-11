@@ -79,8 +79,8 @@ class PersonalController {
 
             if ($id_personal) {
                 $this->model->CalculoPersonal($id_personal);
-                header("Location:/autorizapersonal.php?success=1");
-                exit();
+                header("Location: autoruzipersonal.php?msg=ok");
+            exit();
             } else {
                 return false;
             }

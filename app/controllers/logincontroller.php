@@ -19,7 +19,6 @@ class LoginController {
         $user = $this->model->checkLogin($username, $password);
 
         if ($user) {
-            // Si el login es exitoso, podrías guardar datos en la sesión
             session_start();
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['s_usuario'] = $user['usuario'];
@@ -27,8 +26,18 @@ class LoginController {
             $_SESSION['image'] = $user['archivo'];
             $_SESSION['juris'] = $user['juris'];
 
-            // Redirigir a la página principal
-            header("Location: index.php");
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bienvenido',
+                        text: 'Acceso correcto',
+                        showConfirmButton: false,
+                        timer: 500
+                    }).then(() => {
+                        window.location.href = 'index.php';
+                    });
+                </script>";
             exit();
         } else {
             // Si el login falla, enviar mensaje de error

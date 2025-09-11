@@ -92,6 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Scripts de Metronic (mantén los tuyos) -->
     <script src="assets/plugins/global/plugins.bundle.js"></script>
     <script src="assets/js/scripts.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         function togglePassword() {
             const input = document.getElementById("password");
@@ -107,5 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     </script>
+    <?php if (!empty($errorMessage)): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '<?= $errorMessage ?>',
+                confirmButtonText: 'Intentar de nuevo'
+            });
+        </script>
+    <?php endif; ?>
+
 </body>
 </html>

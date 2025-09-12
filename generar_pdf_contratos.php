@@ -1,4 +1,5 @@
 <?php
+session_start();
 require 'vendor/autoload.php';
 include 'app/controllers/contratocontroller.php';
 include 'app/controllers/catalogocontroller.php';
@@ -21,6 +22,7 @@ $options->set('chroot', __DIR__);
 
 // 1. Recibe la jurisdicción (puede ser "todas")
 $jurisdiccion = $_GET['jurisdiccion'] ?? 'todas';
+
 
 $catalogoCtrl = new CatalogoController();
 
@@ -219,6 +221,7 @@ foreach ($empleados as $empleado) {
 
     $sueldo_mensual = $empleado['sueldo_bruto'] * 2; // Sueldo mensual
 
+    $responsable = $_SESSION['name'];
 
     // --- VARIABLES PARA TEMPLATE ---
     $vars = [
@@ -241,6 +244,7 @@ foreach ($empleados as $empleado) {
         '{{VIGENCIA_DIAS}}'       => '<span class="underline">' . htmlspecialchars($vigencia_dias) . '</span>',
         '{{SALARIO}}'             => '<span class="underline">' . number_format($sueldo_mensual, 2) . '</span>',
         '{{SALARIO_LETRAS}}'      => '<span class="underline">' . convertir_a_letras($sueldo_mensual) . '</span>',
+        '{{RESPONSABLE}}'         => '<span class="underline">' . htmlspecialchars($responsable) . '</span>',
     ];
 
 

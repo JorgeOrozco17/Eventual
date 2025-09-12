@@ -1,4 +1,5 @@
 <?php
+session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -186,6 +187,7 @@ $adscripcion_full = trim($adscripcion_nombre . ' - ' . ($adscripcion_ubicacion ?
 
 $sueldo_mensual = $empleado['sueldo_bruto'] * 2;
 
+$responsable = $_SESSION['name'];
 
 // --- Arma el array de reemplazo ---
 $vars = [
@@ -208,6 +210,7 @@ $vars = [
         '{{VIGENCIA_DIAS}}'       => '<span class="underline">' . htmlspecialchars($vigencia_dias) . '</span>',
         '{{SALARIO}}'             => '<span class="underline">' . number_format($sueldo_mensual, 2) . '</span>',
         '{{SALARIO_LETRAS}}'      => '<span class="underline">' . convertir_a_letras($sueldo_mensual) . '</span>',
+        '{{RESPONSABLE}}'         => '<span class="underline">' . htmlspecialchars($responsable) . '</span>',
     ];
 
 // --- LEE el template, reemplaza y genera PDF ---

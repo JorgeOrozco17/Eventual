@@ -4,7 +4,9 @@ require_once 'app/controllers/PersonalController.php';
 include 'header.php';
 $controller = new PersonalController();
 
-$personal = $controller->model->getAutorizados();
+$responsable = $_SESSION['juris'];
+
+$personal = $controller->getAutorizados($responsable);
 ?>
 <style>
     body {
@@ -76,8 +78,8 @@ $personal = $controller->model->getAutorizados();
                             <td><?= htmlspecialchars($p['movimiento']) ?></td>
                             <td><?= htmlspecialchars($p['nombre_alta']) ?></td>
                             <td><?= htmlspecialchars($p['RFC']) ?></td>
-                            <td><?= htmlspecialchars($p['sueldo_neto_mensual'])?></td>
-                            <td><?= htmlspecialchars($p['sueldo_bruto_mensual']) ?></td>
+                            <td><?= htmlspecialchars($p['sueldo_neto'])?></td>
+                            <td><?= htmlspecialchars($p['sueldo_bruto']) ?></td>
                             <td><?= htmlspecialchars($p['puesto']) ?></td>
                             <td><?= htmlspecialchars($p['programa']) ?></td>
                             <?php if ($p['movimiento'] === 'alta'): ?>

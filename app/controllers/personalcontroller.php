@@ -46,8 +46,8 @@ class PersonalController {
         return $this->model->getEmpleadosByJurisdiccion($jurisdiccion);
     }
 
-    public function getAutorizados(){
-        return $this->model->getAutorizados();
+    public function getAutorizados($responsable){
+        return $this->model->getAutorizados($responsable);
     }
 
     public function getNoAutorizados(){
@@ -79,14 +79,47 @@ class PersonalController {
 
             if ($id_personal) {
                 $this->model->CalculoPersonal($id_personal);
-                header("Location: autoruzipersonal.php?msg=ok");
-            exit();
+                echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registro exitoso',
+                        text: 'El empleado ha sido registrado correctamente.',
+                        showConfirmButton: false,
+                        timer: 900,
+                        background: '#fdfaf6',
+                        color: '#333',
+                        customClass: {
+                            popup: 'rounded-4 shadow-lg'
+                        }
+                    }).then(() => {
+                        window.location.href = 'autorizapersonal.php';
+                    });
+                </script>";
+                exit();
             } else {
                 return false;
             }
         } catch (Exception $e) {
             error_log("Error al guardar personal: " . $e->getMessage());
-            return [ 'success' => false, 'error' => $e->getMessage() ];
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                <script>
+                    Swal.fire({
+                        icon: 'danger',
+                        title: 'Error al registrar',
+                        text: 'Ocurrió un error al registrar al empleado.',
+                        showConfirmButton: false,
+                        timer: 900,
+                        background: '#fdfaf6',
+                        color: '#333',
+                        customClass: {
+                            popup: 'rounded-4 shadow-lg'
+                        }
+                    }).then(() => {
+                        window.location.href = 'personalform.php';
+                    });
+                </script>";
+                exit();
         }
         
     }
@@ -112,18 +145,66 @@ class PersonalController {
             }
         } catch (Exception $e) {
             error_log("Error al guardar personal: " . $e->getMessage());
-            return [ 'success' => false, 'error' => $e->getMessage() ];
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                <script>
+                    Swal.fire({
+                        icon: 'danger',
+                        title: 'Error al registrar',
+                        text: 'Ocurrió un error al registrar al empleado.',
+                        showConfirmButton: false,
+                        timer: 900,
+                        background: '#fdfaf6',
+                        color: '#333',
+                        customClass: {
+                            popup: 'rounded-4 shadow-lg'
+                        }
+                    }).then(() => {
+                        window.location.href = 'personalform.php';
+                    });
+                </script>";
+                exit();
         }
     }
 
 
     public function delete($id) {
-        $this->model->delete($id);
+        $ok = $this->model->delete($id);
 
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/altapersonal.php';
-        header("Location: $referer");
+        if ($ok) {
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Eliminado',
+                    text: 'El empleado fue eliminado correctamente.',
+                    showConfirmButton: false,
+                    timer: 1200,
+                    background: '#fdfaf6',
+                    color: '#333',
+                    customClass: { popup: 'rounded-4 shadow-lg' }
+                }).then(() => {
+                    window.location.href = 'altapersonal.php';
+                });
+            </script>";
+        } else {
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar el empleado.',
+                    showConfirmButton: true,
+                    background: '#fdfaf6',
+                    color: '#333',
+                    customClass: { popup: 'rounded-4 shadow-lg' }
+                }).then(() => {
+                    window.location.href = 'altapersonal.php';
+                });
+            </script>";
+        }
         exit();
     }
+
 
 
     public function get($id) {

@@ -107,7 +107,7 @@ if ($id) {
 
                         <div class="mb-4">
                             <label class="form-label">Jurisdiccion responsable:</label>
-                            <select name="jurisdiccion" id="jurisdiccion" class="form-select" required>
+                            <select name="juris" id="jurisdiccion" class="form-select" required>
                                 <option value="">Seleccione una jurisdicción</option>
                                 <option value="1" <?= $usuario['juris'] == '1' ? 'selected' : '' ?>>Jurisdicción 1</option>
                                 <option value="2" <?= $usuario['juris'] == '2' ? 'selected' : '' ?>>Jurisdicción 2</option>

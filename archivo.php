@@ -1,11 +1,12 @@
 <?php 
 require_once 'app/controllers/PersonalController.php';
 include 'header.php'; 
-
-
 $controller = new PersonalController();
 
-$personal = $controller->model->getAll();
+
+$responsable = $_SESSION['juris'];
+
+$personal = $controller->getAutorizados($responsable);
 ?>
 <style>
     body {
@@ -40,7 +41,7 @@ $personal = $controller->model->getAll();
                             <th>Nombre</th>
                             <th>RFC</th>
                             <th>CURP</th>
-                            <th>Adscripcion</th>
+                            <th>Centro</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -51,7 +52,7 @@ $personal = $controller->model->getAll();
                             <td><?= htmlspecialchars($p['nombre_alta']) ?></td>
                             <td><?= htmlspecialchars($p['RFC']) ?></td>
                             <td><?= htmlspecialchars($p['CURP']) ?></td>
-                            <td><?= htmlspecialchars($p['adscripcion']) ?></td>
+                            <td><?= htmlspecialchars($p['centro']) ?></td>
                             <td nowrap>
                                 <a href="archivodetalle.php?id=<?= $p['id'] ?>" title="Archivo digital" class="btn btn-icon btn-sm btn-info me-2">
                                     <i class="fas fa-folder-open"></i>

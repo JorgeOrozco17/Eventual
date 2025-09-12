@@ -110,10 +110,10 @@ if (!$personal) {
                 <div class="row">
                 <div class="col-md-6">
                     <!--end::Input group-->
-                    <!--begin::Input group      numero de oficio-->
+                    <!--begin::Input group      Estatus-->
                     <div class="row mb-6">
                         <!--begin::Label-->
-                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Numero de oficio</label>
+                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Estatus</label>
                         <!--end::Label-->
                         <!--begin::Col-->
                         <div class="col-lg-8">
@@ -121,7 +121,7 @@ if (!$personal) {
                             <div class="row">
                                 <!--begin::Col-->
                                 <div class="col-lg-12 fv-row">
-                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= htmlspecialchars($personal ['numero_oficio'])?>" readonly />
+                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= htmlspecialchars($personal ['estatus'])?>" readonly />
                                 </div>
                                 <!--end::Col-->
                             </div>
@@ -130,52 +130,10 @@ if (!$personal) {
                         <!--end::Col-->
                     </div>
                     <!--end::Input group-->
-                    <!--begin::Input group      solicita-->
-                    <div class="row mb-6">
-                        <!--begin::Label-->
-                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Solicita</label>
-                        <!--end::Label-->
-                        <!--begin::Col-->
-                        <div class="col-lg-8">
-                            <!--begin::Row-->
-                            <div class="row">
-                                <!--begin::Col-->
-                                <div class="col-lg-12 fv-row">
-                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= htmlspecialchars($personal ['solicita'])?>" readonly />
-                                </div>
-                                <!--end::Col-->
-                            </div>
-                            <!--end::Row-->
-                        </div>
-                        <!--end::Col-->
-                    </div>
-                    <!--end::Input group-->
-                    <!--begin::Input group      Movimiento-->
-                    <div class="row mb-6">
-                        <!--begin::Label-->
-                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Movimiento</label>
-                        <!--end::Label-->
-                        <!--begin::Col-->
-                        <div class="col-lg-8">
-                            <!--begin::Row-->
-                            <div class="row">
-                                <!--begin::Col-->
-                                <div class="col-lg-12 fv-row">
-                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= htmlspecialchars($personal ['movimiento'])?>" readonly />
-                                </div>
-                                <!--end::Col-->
-                            </div>
-                            <!--end::Row-->
-                        </div>
-                        <!--end::Col-->
-                    </div>
-                    <!--end::Input group-->
-                </div>
-                <div class="col-md-6">
                     <!--begin::Input group       Oficio-->
                     <div class="row mb-6">
                         <!--begin::Label-->
-                        <label class="col-lg-2 col-form-label required fw-semibold fs-6">Oficio</label>
+                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Oficio</label>
                         <!--end::Label-->
                         <!--begin::Col-->
                         <div class="col-lg-8">
@@ -192,6 +150,8 @@ if (!$personal) {
                         <!--end::Col-->
                     </div>
                     <!--end::Input group-->
+                </div>
+                <div class="col-md-6">
                     <!--begin::Input group        Puesto-->
                     <div class="row mb-6">
                         <!--begin::Label-->

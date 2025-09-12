@@ -25,6 +25,7 @@ class LoginController {
             $_SESSION['role'] = $user['rol'];
             $_SESSION['image'] = $user['archivo'];
             $_SESSION['juris'] = $user['juris'];
+            $_SESSION['name'] = $user['Nombre'];
 
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
                 <script>

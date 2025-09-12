@@ -32,16 +32,29 @@ class PersonalModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAutorizados(){
-        $sql = "SELECT id, nombre_alta, RFC, sueldo_neto, sueldo_bruto, puesto, programa, movimiento, observaciones_alta, observaciones_baja,
-                (sueldo_neto * 2)   AS sueldo_neto_mensual,
-                (sueldo_bruto * 2) AS sueldo_bruto_mensual
+    public function getAutorizados($responsable){
+        $sql = "SELECT id, nombre_alta, RFC, sueldo_neto, sueldo_bruto, puesto, programa, movimiento, centro, CURP, 
+                    observaciones_alta, observaciones_baja
                 FROM personal 
                 WHERE autorizacion = 1";
+
+        // bandera para saber si se va a filtrar
+        $filtrar = ($responsable != 10);
+
+        if ($filtrar) {
+            $sql .= " AND id_adscripcion = :responsable";
+        }
+
         $stmt = $this->conn->prepare($sql);
+
+        if ($filtrar) {
+            $stmt->bindParam(':responsable', $responsable, PDO::PARAM_INT);
+        }
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function getNoAutorizados(){
         $stmt = $this->conn->prepare("SELECT * FROM personal WHERE autorizacion = 0");
@@ -89,18 +102,21 @@ class PersonalModel {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$result) {
+                $errorInfo = $stmt->errorInfo();
+                $mensajeError = $errorInfo[2];
+
                 // Registrar log de error
-                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: Adscripción/Centro/Puesto no encontrados", "0");
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: $mensajeError", json_encode($data));
                 return false;
             }
 
             // Variables
-            $adscripcionnombre = $result['adscripcionnombre'];
-            $centronombre      = $result['centronombre'];
-            $cluenombre        = $result['cluenombre'];
-            $codigo_puesto     = $result['codigo_puesto'];
-            $ct_art74          = $result['art74'];
-            $ubicacion        = $result['ubicacion'];
+            $adscripcionnombre = $result['adscripcionnombre'] ?? null;
+            $centronombre      = $result['centronombre'] ?? null;
+            $cluenombre        = $result['cluenombre'] ?? null;
+            $codigo_puesto     = $result['codigo_puesto'] ?? null;
+            $ct_art74          = $result['art74'] ?? null;
+            $ubicacion        = $result['ubicacion'] ?? null;
 
             // Estatus
             $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
@@ -117,23 +133,23 @@ class PersonalModel {
 
             $ok = $stmtInsert->execute([
                 $data['numero_oficio'] ?? null,
-                $data['movimiento'],
+                $data['movimiento'] ?? null,
                 $data['solicita'] ?? null,
-                $data['oficio'],
-                $data['puesto'],
-                $codigo_puesto,
-                $data['programa'],
-                $cve_recurso,
-                $data['rama'],
-                $data['adscripcion'],
-                $adscripcionnombre,
-                $data['centro'],
-                $centronombre,
-                $cluenombre,
-                $data['RFC'],
-                $data['CURP'],
+                $data['oficio'] ?? null,
+                $data['puesto'] ?? null,
+                $codigo_puesto ?? null,
+                $data['programa'] ?? null,
+                $cve_recurso ?? null,
+                $data['rama'] ?? null,
+                $data['adscripcion'] ?? null,
+                $adscripcionnombre ?? null,
+                $data['centro'] ?? null,
+                $centronombre ?? null,
+                $cluenombre ?? null,
+                $data['RFC'] ?? null,
+                $data['CURP'] ?? null,
                 $data['sueldo_bruto'] ?? null,
-                $data['inicio_contratacion'],
+                $data['inicio_contratacion'] ?? null,
                 $data['quincena_alta'] ?? null,
                 $data['nombre_alta'] ?? null,
                 $data['fecha_baja'] ?? null,

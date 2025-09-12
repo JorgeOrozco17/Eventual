@@ -175,7 +175,7 @@ input[type="file"].form-control:hover {
                 $nombres_campos = [
                     'autorizacion' => 'Autorizacion',
                     'baja' => 'Baja',
-                    'solicitud' => 'Solicitud',
+                    'Solicitud' => 'Solicitud',
                     'curriculum' => 'Currículum',
                     'acta_nacimiento' => 'Acta de Nacimiento',
                     'curp' => 'CURP',
@@ -229,7 +229,7 @@ input[type="file"].form-control:hover {
                 <?php endforeach; ?>
                 </div>
 
-                <button type="submit" class="btn btn-primary mt-4">Guardar Cambios</button>
+                <button type="submit" class="btn btn-primary mt-4" onclick="return confirm('Una vez cargados los archvivos NO se podran borra o modificar. ¿Desea guardar los cambios?')">Guardar Cambios</button>
             </form>
         </div>
     </div>

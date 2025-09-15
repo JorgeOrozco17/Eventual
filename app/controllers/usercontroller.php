@@ -133,4 +133,13 @@ class UserController {
         return $this->model->rolTienePermiso($rol_id, $id_pagina);
     }
 
+
+    public function getResponsablesByRH($responsable){
+        return $this->model->getResponsablesByRH($responsable);
+    }
+
+    public function getAllResponsables(){
+        return $this->model->getAllResponsables();
+    }   
+
 }

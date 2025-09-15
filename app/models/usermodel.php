@@ -142,4 +142,44 @@
             return $stmt->fetchColumn() ? true : false;
         }
 
+////////////////////////////////////////////////////// Responsables de jurisdiccion /////////////////////////////
+
+        public function getResponsablesBYRH($responsable) {
+            $stmt = $this->conn->prepare("
+            SELECT r.*, 
+                u.Nombre, 
+                CASE 
+                    WHEN r.id_centro = 0 THEN 'Jurisdicción'
+                    ELSE c.nombre
+                END AS nombre_centro,
+                j.nombre AS nombre_juris
+            FROM responsables r
+            JOIN usuarios u 
+                ON r.rh_responsable = u.id
+            LEFT JOIN centros c 
+                ON r.id_centro = c.id
+            JOIN jurisdicciones j 
+                ON r.id_juris = j.id
+            WHERE r.rh_responsable = :responsable");
+            $stmt->execute(['responsable' => $responsable]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        public function getAllResponsables() {
+            $stmt = $this->conn->prepare("
+            SELECT 
+                r.*,  
+                CASE 
+                    WHEN r.id_centro = 0 THEN 'Jurisdicción'
+                    ELSE c.nombre
+                END AS nombre_centro,
+                j.nombre AS nombre_juris
+            FROM responsables r
+            LEFT JOIN centros c 
+                ON r.id_centro = c.id
+            JOIN jurisdicciones j 
+                ON r.id_juris = j.id");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
     }

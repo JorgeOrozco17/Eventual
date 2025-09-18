@@ -68,10 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $insert_placeholders[] = '?';
                 }
             } else {
-                // 👇 Si no se subió nada, asignar NULL (o '')
                 if (!$registro_existente) {
                     $insert_cols[] = $campo;
-                    $insert_vals[] = null; // o '' si prefieres
+                    $insert_vals[] = null;
                     $insert_placeholders[] = '?';
                 }
             }
@@ -89,6 +88,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO archivos (" . implode(', ', $insert_cols) . ") VALUES (" . implode(', ', $insert_placeholders) . ")";
         $stmt = $conn->prepare($sql);
         $stmt->execute($insert_vals);
+    }
+
+    // =========================
+    // 📌 Guardar anexos generales
+    // =========================
+    if (!empty($_FILES['anexos']['name'][0])) {
+        foreach ($_FILES['anexos']['name'] as $key => $filename) {
+            if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
+                $tmp_name = $_FILES['anexos']['tmp_name'][$key];
+                $unique_name = uniqid("anexo_") . "_" . basename($filename);
+                $destino = "uploads/anexos/" . $unique_name;
+
+                if (!is_dir("uploads/anexos")) {
+                    mkdir("uploads/anexos", 0777, true);
+                }
+
+                if (move_uploaded_file($tmp_name, $destino)) {
+                    $stmt = $conn->prepare("INSERT INTO anexos_personal 
+                        (id_personal, nombre_archivo, archivo, usuario_id) 
+                        VALUES (?, ?, ?, ?)");
+                    $stmt->execute([
+                        $id_personal,
+                        $filename,
+                        $unique_name,
+                        $id_usuario
+                    ]);
+                }
+            }
+        }
     }
 
     header("Location: archivodetalle.php?id=" . $id_personal);

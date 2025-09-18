@@ -175,7 +175,7 @@ input[type="file"].form-control:hover {
                 $nombres_campos = [
                     'autorizacion' => 'Autorizacion',
                     'baja' => 'Baja',
-                    'Solicitud' => 'Solicitud',
+                    'solicitud' => 'Solicitud',
                     'curriculum' => 'Currículum',
                     'acta_nacimiento' => 'Acta de Nacimiento',
                     'curp' => 'CURP',
@@ -227,10 +227,55 @@ input[type="file"].form-control:hover {
                         </div>
                     </div>
                 <?php endforeach; ?>
+            </div>
+
+            <hr>
+            <h4>Anexos generales</h4>
+            <div id="anexos-container">
+                <div class="anexo-item mb-2">
+                    <input type="file" name="anexos[]" class="form-control">
                 </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-info mt-2" onclick="addAnexo()">+ Agregar otro anexo</button>
+
+            <script>
+            function addAnexo() {
+                let container = document.getElementById('anexos-container');
+                let div = document.createElement('div');
+                div.classList.add('anexo-item','mb-2');
+                div.innerHTML = `<input type="file" name="anexos[]" class="form-control">`;
+                container.appendChild(div);
+            }
+            </script>
+
 
                 <button type="submit" class="btn btn-primary mt-4" onclick="return confirm('Una vez cargados los archvivos NO se podran borra o modificar. ¿Desea guardar los cambios?')">Guardar Cambios</button>
             </form>
+
+            <hr>
+            <h4>Historial de anexos</h4>
+            <div class="list-group">
+            <?php
+            $anexos = $controller->getAnexosById($id);
+            if ($anexos) {
+                foreach ($anexos as $anexo) {
+                    echo "<div class='list-group-item d-flex justify-content-between align-items-center'>
+                            <span><i class='fas fa-paperclip'></i> "
+                                .htmlspecialchars($anexo['nombre_archivo'])."
+                                <br><small class='text-muted'>Subido: ".$anexo['fecha_subida']."</small>
+                            </span>
+                            <a href='uploads/anexos/".htmlspecialchars($anexo['archivo'])."' 
+                            target='_blank' class='btn btn-sm btn-outline-primary'>Ver</a>
+                        </div>";
+                }
+            } else {
+                echo "<div class='text-muted'>No hay anexos aún.</div>";
+            }
+            ?>
+            </div>
+
+
+
         </div>
     </div>
 </div>

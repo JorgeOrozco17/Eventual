@@ -10,7 +10,7 @@ $usuario = new UserController();
 
 if($rol == 5){
     $responsables = $usuario->getResponsablesByRH($_SESSION['user_id']);
-} elseif($rol == 1 && $rol == 10) {
+} elseif($rol == 1) {
     $responsables = $usuario->getAllResponsables();
 }
 
@@ -51,6 +51,9 @@ if($rol == 5){
     <div class="section-title">
         <i class="bi bi-people"></i> Lista de empleados
     </div>
+    <a href="jurisform.php" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Registro
+            </a>
     <div class="card mb-4">
         <div class="card-body">
             <div class="table-responsive">

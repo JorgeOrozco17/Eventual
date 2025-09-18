@@ -647,4 +647,11 @@ class PersonalModel {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getAnexosById($id){
+        $stmt = $this->conn->prepare("
+        SELECT * FROM anexos_personal WHERE id_personal = ?
+        ");
+        $stmt->execute([$id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

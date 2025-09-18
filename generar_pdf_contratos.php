@@ -3,6 +3,7 @@ session_start();
 require 'vendor/autoload.php';
 include 'app/controllers/contratocontroller.php';
 include 'app/controllers/catalogocontroller.php';
+include 'app/controllers/usercontroller.php';
 use PhpZip\ZipFile;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -219,7 +220,7 @@ foreach ($empleados as $empleado) {
     // Construye la variable combinada
     $adscripcion_full = trim($adscripcion_nombre . ' - ' . ($adscripcion_ubicacion ?  $adscripcion_ubicacion : ''));
 
-    $sueldo_mensual = $empleado['sueldo_bruto'] * 2; // Sueldo mensual
+    $sueldo_mensual = $empleado['sueldo_bruto']; // Sueldo mensual
 
     $responsable = $_SESSION['name'];
 

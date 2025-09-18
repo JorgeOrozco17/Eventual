@@ -142,4 +142,8 @@ class UserController {
         return $this->model->getAllResponsables();
     }   
 
+    public function getRespobsableByJurisdiccion($juris){
+        return $this->model->getRespobsableByJurisdiccion($juris);
+    }
+
 }

@@ -16,7 +16,7 @@ $quincena_baja = $personal['quincena_baja'] ?? 'No aplica';
 $oficio = $personal['oficio'];
 $adscripciones = $personal['adscripcion'];
 $centro = $personal['centro'];
-$ovservaciones = $personal['observaciones_alta'];
+$observaciones = $personal['observaciones_alta'];
 $qna_baja = $personal['quincena_baja'] ?? 'No aplica';
 $fecha_baja = $personal['fecha_baja'] ?? 'No aplica';
 $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
@@ -182,12 +182,12 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
             <td class="etiqueta"> Inicio de contratación</td>
             <td class="valor"> <?= $fecha_contrato ?></td>
         </tr>
-        <tr>
+         <tr>
             <td class="etiqueta"> Observaciones</td>
             <td></td>
         </tr>
         <tr>
-            <td class="observacion" colspan="2"><?= $ovservaciones ?></td>
+            <td class="observacion" colspan="2"><?= $observaciones_baja ?></td>
         </tr>
     </table>
 
@@ -290,7 +290,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
             <td></td>
         </tr>
         <tr>
-            <td class="observacion" colspan="2"><?= $ovservaciones ?></td>
+            <td class="observacion" colspan="2"><?= $observaciones_baja ?></td>
         </tr>
     </table>
 

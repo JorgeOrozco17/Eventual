@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 require 'vendor/autoload.php';
 include 'app/controllers/contratocontroller.php';
 include 'app/controllers/catalogocontroller.php';
+include 'app/controllers/usercontroller.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -28,6 +29,7 @@ if (!$id) exit('Empleado no especificado.');
 
 $contratoCtrl = new ContratoController();
 $catalogoCtrl = new CatalogoController();
+$usuarios = new UserController();
 $empleado = $contratoCtrl->getEmpleadoById($id);
 if (!$empleado) exit('Empleado no encontrado.');
 
@@ -185,9 +187,11 @@ if (!empty($empleado['id_adscripcion'])) {
 // Construye la variable combinada
 $adscripcion_full = trim($adscripcion_nombre . ' - ' . ($adscripcion_ubicacion ?  $adscripcion_ubicacion : ''));
 
-$sueldo_mensual = $empleado['sueldo_bruto'] * 2;
+$sueldo_mensual = $empleado['sueldo_bruto'];
 
 $responsable = $_SESSION['name'];
+$responsableRH = $usuarios->getRespobsableByJurisdiccion($_SESSION['juris']);
+
 
 // --- Arma el array de reemplazo ---
 $vars = [
@@ -211,6 +215,7 @@ $vars = [
         '{{SALARIO}}'             => '<span class="underline">' . number_format($sueldo_mensual, 2) . '</span>',
         '{{SALARIO_LETRAS}}'      => '<span class="underline">' . convertir_a_letras($sueldo_mensual) . '</span>',
         '{{RESPONSABLE}}'         => '<span class="underline">' . htmlspecialchars($responsable) . '</span>',
+        '{{RESPONSABLERH}}'       => '<span class="underline">' . htmlspecialchars($responsableRH) . '</span>',
     ];
 
 // --- LEE el template, reemplaza y genera PDF ---

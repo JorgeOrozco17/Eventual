@@ -171,6 +171,8 @@ class PersonalController {
         $ok = $this->model->delete($id);
 
         if ($ok) {
+        $referer = $_SERVER['HTTP_REFERER'] ?? 'altapersonal.php'; // fallback por si no hay referer
+
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
             <script>
                 Swal.fire({
@@ -183,7 +185,7 @@ class PersonalController {
                     color: '#333',
                     customClass: { popup: 'rounded-4 shadow-lg' }
                 }).then(() => {
-                    window.location.href = 'altapersonal.php';
+                    window.location.href = '{$referer}';
                 });
             </script>";
         } else {
@@ -327,11 +329,15 @@ public function BajaPersonal() {
     }
 
     public function getPersonalNew($qna, $anio) {
-    $data = $this->model->getPersonalNew($qna, $anio);
+        $data = $this->model->getPersonalNew($qna, $anio);
 
-    // Depuración: imprime en log
-    error_log("getPersonalNew en Controller (qna=$qna, anio=$anio): " . print_r($data, true));
+        // Depuración: imprime en log
+        error_log("getPersonalNew en Controller (qna=$qna, anio=$anio): " . print_r($data, true));
 
-    return $data;
-}
+        return $data;
+    }
+
+    public function getAnexosById($id){
+        return $this->model->getAnexosById($id);
+    }
 }

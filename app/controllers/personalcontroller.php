@@ -171,7 +171,7 @@ class PersonalController {
         $ok = $this->model->delete($id);
 
         if ($ok) {
-        $referer = $_SERVER['HTTP_REFERER'] ?? 'altapersonal.php'; // fallback por si no hay referer
+        $referer = $_SERVER['HTTP_REFERER']; // fallback por si no hay referer
 
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
             <script>

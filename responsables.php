@@ -51,7 +51,7 @@ if($rol == 5){
     <div class="section-title">
         <i class="bi bi-people"></i> Lista de empleados
     </div>
-    <a href="jurisform.php" class="btn btn-primary">
+    <a href="responsableform.php" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Nuevo Registro
             </a>
     <div class="card mb-4">

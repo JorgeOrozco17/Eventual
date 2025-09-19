@@ -58,7 +58,8 @@ if (isset($_GET['id'])){
                     
                     <div class="col-md-5">
                         <label>Solicita</label>
-                        <input type="text" name="solicita" class="form-control" value="<?= htmlspecialchars($personal['solicita'] ?? '') ?>" readonly>
+                        <input type="text" name="solicita" class="form-control" 
+                            value="<?= htmlspecialchars($personal['solicita'] ?? '') ?>" readonly>
                     </div>
 
                     <div class="col-md-4">
@@ -76,7 +77,8 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-6">
                         <label>Oficio:</label>
-                        <input type="text" name="oficio" class="form-control" value="<?= htmlspecialchars($personal['oficio'] ?? '') ?>" required readonly>
+                        <input type="text" name="oficio" class="form-control" 
+                            value="<?= htmlspecialchars($personal['oficio'] ?? '') ?>" required readonly>
                     </div>
 
                     <div class="col-md-6">
@@ -84,7 +86,8 @@ if (isset($_GET['id'])){
                         <select name="puesto" class="form-select" required disabled>
                             <option value="">Seleccione un puesto</option>
                             <?php foreach ($puestos as $p): ?>
-                                <option value="<?= $p['nombre_puesto'] ?>" <?= (isset($personal['puesto']) && $personal['puesto'] == $p['nombre_puesto']) ? 'selected' : '' ?>>
+                                <option value="<?= $p['nombre_puesto'] ?>" 
+                                    <?= (isset($personal['puesto']) && $personal['puesto'] == $p['nombre_puesto']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($p['nombre_puesto']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -96,7 +99,8 @@ if (isset($_GET['id'])){
                         <select name="programa" class="form-select" required disabled>
                             <option value="">Seleccione un programa</option>
                             <?php foreach ($recursos as $r): ?>
-                                <option value="<?= $r['nombre'] ?>" <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
+                                <option value="<?= $r['nombre'] ?>" 
+                                    <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($r['nombre']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -125,72 +129,93 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-6">
                         <label>RFC:</label>
-                        <input type="text" name="RFC" class="form-control" value="<?= htmlspecialchars($personal['RFC'] ?? '') ?>" required readonly>
+                        <input type="text" name="RFC" class="form-control" 
+                            value="<?= htmlspecialchars($personal['RFC'] ?? '') ?>" required readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>CURP:</label>
-                        <input type="text" name="CURP" class="form-control" value="<?= htmlspecialchars($personal['CURP'] ?? '') ?>" required readonly>
+                        <input type="text" name="CURP" class="form-control" 
+                            value="<?= htmlspecialchars($personal['CURP'] ?? '') ?>" required readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>Sueldo Neto Mensual:</label>
-                        <input type="number" step="0.01" name="sueldo_neto" class="form-control" value="<?= htmlspecialchars($personal['sueldo_neto'] ?? '') ?>" required readonly>
+                        <input type="number" step="0.01" name="sueldo_neto" class="form-control" 
+                            value="<?= htmlspecialchars($personal['sueldo_neto'] ?? '') ?>" required readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>Sueldo Bruto Mensual:</label>
-                        <input type="number" step="0.01" name="sueldo_bruto" class="form-control" value="<?= htmlspecialchars($personal['sueldo_bruto'] ?? '') ?>" required readonly>
+                        <input type="number" step="0.01" name="sueldo_bruto" class="form-control" 
+                            value="<?= htmlspecialchars($personal['sueldo_bruto'] ?? '') ?>" required readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label>Nombre Empleado:</label>
-                        <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>" readonly>
+                        <input type="text" name="nombre_alta" class="form-control" 
+                            value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>" readonly>
                     </div>
-
-                    <?php if ($personal && $personal['movimiento'] == 'alta'): ?>
-                    <div class="col-md-3">
-                        <label>Quincena Alta:</label>
-                        <input type="text" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['quincena_alta'] ?? '') ?>" required>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label>Inicio de Contratación:</label>
-                        <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?>" required>
-                    </div>
-
-                    <?php endif; ?>
-                   
-                    <?php if ($personal && $personal['movimiento'] == 'baja'): ?>
-                    <div class="col-md-3">
-                        <label>Quincena baja:</label>
-                        <input type="text" name="quincena_baja" class="form-control" value="<?= htmlspecialchars($personal['quincena_baja'] ?? '') ?>" required>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label>Fecha de Baja:</label>
-                        <input type="date" name="fecha_baja" class="form-control" value="<?= htmlspecialchars($personal['fecha_baja'] ?? '') ?>" required>
-                    </div>
-
-                    <?php endif; ?>
 
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>
-                        <input type="text" name="cuenta" maxlength="18" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
+                        <input type="text" name="cuenta" maxlength="18" class="form-control" 
+                            value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>" readonly>
                     </div>
 
-                    <div class="col-md-12">
-                        <label>Oficio de autoizacion:</label>
-                        <input type="file" name="archivo" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" required>
+                    <!-- Archivo: ocultable -->
+                    <div class="col-md-12" id="archivoDiv">
+                        <label>Oficio de autorización:</label>
+                        <input type="file" name="archivo" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg">
                     </div>
+                </div>
+
                 <br>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Una vez guardado el archivo de alta este NO se podra modificar, ¿Desea continuar?')">Guardar</button>
-                    <button onclick="history.back()" class="btn btn-secondary">Cancelar</a>
+                    <!-- Botón Editar -->
+                    <button type="button" id="btnEditar" class="btn btn-warning">Editar datos</button>
+
+                    <!-- Botón Actualizar (oculto por defecto) -->
+                    <button type="submit" name="accion" value="actualizar" id="btnActualizar" class="btn btn-primary" style="display:none;">
+                        Actualizar datos
+                    </button>
+
+                    <!-- Botón Autorizar -->
+                    <button type="submit" name="accion" value="autorizar" id="btnGuardar" class="btn btn-success"
+                        onclick="return confirm('Una vez guardado el archivo de alta este NO se podrá modificar, ¿Desea continuar?')">
+                        Guardar y autorizar
+                    </button>
+
+                    <!-- Botón cancelar -->
+                    <button type="button" onclick="history.back()" class="btn btn-secondary">
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+        document.getElementById("btnEditar").addEventListener("click", function() {
+            // habilitar inputs y selects
+            document.querySelectorAll("input, select").forEach(el => {
+                if (el.name !== "estatus") {
+                    el.removeAttribute("readonly");
+                    el.removeAttribute("disabled");
+                }
+            });
+
+            // ocultar archivo
+            document.getElementById("archivoDiv").style.display = "none";
+
+            // ocultar guardar, mostrar actualizar
+            document.getElementById("btnGuardar").style.display = "none";
+            document.getElementById("btnActualizar").style.display = "inline-block";
+
+            // ocultar el botón editar
+            document.getElementById("btnEditar").style.display = "none";
+        });
+        </script>
 
 <?php include 'footer.php'; ?>

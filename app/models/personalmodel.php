@@ -475,6 +475,127 @@ class PersonalModel {
     return $ok;
     }
 
+    public function UpdateCalculoPersonal($id_personal) {
+        // 1. Traer sueldo_bruto de la tabla personal
+        $stmtPersonal = $this->conn->prepare("SELECT sueldo_bruto FROM personal WHERE id = ?");
+        $stmtPersonal->execute([$id_personal]);
+        $bruto_mensual = $stmtPersonal->fetchColumn();
+
+        if ($bruto_mensual === false) {
+            // No se encontró el registro
+            return false;
+        }
+
+        // 2. Traer valores de fijos (D_S2, D_S4, D_S5, D_S6, P_01)
+        $stmtFijos = $this->conn->query("SELECT concepto, cantidad FROM fijos WHERE concepto IN ('D_S2', 'D_S4', 'D_S5', 'D_S6', 'P_01')");
+        $fijos = [];
+        while ($row = $stmtFijos->fetch(PDO::FETCH_ASSOC)) {
+            $fijos[$row['concepto']] = (float)$row['cantidad'];
+        }
+        // Default a 0 si no está
+        $D_S2 = $fijos['D_S2'] ?? 0;
+        $D_S4 = $fijos['D_S4'] ?? 0;
+        $D_S5 = $fijos['D_S5'] ?? 0;
+        $D_S6 = $fijos['D_S6'] ?? 0;
+        $P_01 = $fijos['P_01'] ?? 0;
+
+        // 3. dsctos_issste = suma de los descuentos
+        $dsctos_issste = $D_S2 + $D_S4 + $D_S5 + $D_S6;
+
+        // 4. bruto_qna
+        $bruto_qna = $bruto_mensual / 2;
+
+        // 5. comp_garantizada
+        $comp_garantizada = $bruto_qna - $P_01;
+
+        // 6. sueldo_diario
+        $sueldo_diario = $bruto_mensual / 15;
+
+        // 7. isr_mens e isr_qna
+        // Buscar el rango en la tabla de isr
+        $stmtISR = $this->conn->prepare("
+            SELECT lim_inferior, cuota_fija, porcentaje
+            FROM anexo8_rmf
+            WHERE ? BETWEEN lim_inferior AND lim_superior
+            LIMIT 1
+        ");
+        $stmtISR->execute([$bruto_mensual]);
+        $rowISR = $stmtISR->fetch(PDO::FETCH_ASSOC);
+
+        if ($rowISR) {
+            $lim_inferior = (float)$rowISR['lim_inferior'];
+            $cuota_fija = (float)$rowISR['cuota_fija'];
+            $porcentaje = (float)$rowISR['porcentaje'];
+            $isr_mens = (($bruto_mensual - $lim_inferior) * ($porcentaje / 100)) + $cuota_fija;
+            $isr_qna = $isr_mens / 2;
+        } else {
+            // Si no hay rango, lo dejas en 0 (puedes ajustar este comportamiento)
+            $isr_mens = 0;
+            $isr_qna = 0;
+        }
+
+        $dsctos_issste_mensual = $dsctos_issste * 2;
+
+        // 8. neto_mensual y neto_qna
+        $neto_mensual = ($bruto_mensual - $isr_mens) - $dsctos_issste_mensual;
+        $neto_qna = $neto_mensual / 2;
+
+        // 9. P_00
+        $P_00 = ($bruto_mensual <= 10171) ? 475 : null;
+
+        // 10. sueldo igual a P_01
+        $sueldo = $P_01;
+
+        // 11. Insertar en calculo_personal
+        $stmtUpdateCalc = $this->conn->prepare("
+            UPDATE calculo_personal SET
+                sueldo = ?, 
+                comp_garantizada = ?, 
+                dsctos_issste = ?, 
+                neto_qna = ?, 
+                neto_mensual = ?, 
+                bruto_qna = ?, 
+                bruto_mensual = ?, 
+                sueldo_diario = ?, 
+                isr_qna = ?, 
+                isr_mens = ?, 
+                D_S2 = ?, 
+                D_S4 = ?, 
+                D_S5 = ?, 
+                D_S6 = ?, 
+                P_01 = ?, 
+                P_00 = ?
+            WHERE id_personal = ?
+        ");
+
+        $ok = $stmtUpdateCalc->execute([
+            $sueldo,
+            $comp_garantizada,
+            $dsctos_issste,
+            $neto_qna,
+            $neto_mensual,
+            $bruto_qna,
+            $bruto_mensual,
+            $sueldo_diario,
+            $isr_qna,
+            $isr_mens,
+            $D_S2,
+            $D_S4,
+            $D_S5,
+            $D_S6,
+            $P_01,
+            $P_00,
+            $id_personal   // 👈 este es para el WHERE
+        ]);
+
+        if ($ok) {
+        $stmtUpdate = $this->conn->prepare("UPDATE personal SET sueldo_neto = ? WHERE id = ?");
+        $stmtUpdate->execute([$neto_mensual, $id_personal]);
+    }
+
+    return $ok;
+    }
+
     public function delete($id) {
         $stmt = $this->conn->prepare("DELETE FROM personal WHERE id = ?");
         return $stmt->execute([$id]);

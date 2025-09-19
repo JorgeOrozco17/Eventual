@@ -73,8 +73,8 @@ $personal = $controller->model->getNoAutorizados();
                         <tr>
                             <td><?= htmlspecialchars($p['movimiento']) ?></td>
                             <td><?= htmlspecialchars($p['nombre_alta']) ?></td>
-                            <td><?= htmlspecialchars($p['sueldo_neto']) ?></td>
-                            <td><?= htmlspecialchars($p['sueldo_bruto']) ?></td>
+                            <td><?= '$' . number_format($p['sueldo_neto'], 2, '.', ',') ?></td>
+                            <td><?= '$' . number_format($p['sueldo_bruto'], 2, '.', ',') ?></td>
                             <td><?= htmlspecialchars($p['puesto']) ?></td>
                             <td><?= htmlspecialchars($p['programa']) ?></td>
                             <?php if ($p['movimiento'] === 'baja'): ?>

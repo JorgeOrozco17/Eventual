@@ -172,7 +172,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
     <table style="width: 100%; font-size: 11px; margin: 10px 0px 20px 0px">
         <tr>
             <td class="etiqueta">RFC: </td>
-            <td class="etiqueta">CRUP: </td>
+            <td class="etiqueta">CURP: </td>
         </tr>
         <tr>
             <td class="valor"> <?= $rfc ?> </td>
@@ -187,7 +187,7 @@ $observaciones_baja = $personal['observaciones_baja'] ?? 'No aplica';
             <td></td>
         </tr>
         <tr>
-            <td class="observacion" colspan="2"><?= $observaciones_baja ?></td>
+            <td class="observacion" colspan="2"><?= $observaciones ?></td>
         </tr>
     </table>
 

@@ -462,6 +462,18 @@ include 'seguridad.php';
 													<!--end:Menu link-->
 												</div>
 												<!--end:Menu item           pension-->
+												<!--begin:Menu item          extras-->
+												<div class="menu-item">
+													<!--begin:Menu link-->
+													<a class="menu-link" href="temporales.php">
+														<span class="menu-bullet">
+															<span class="bullet bullet-dot"></span>
+														</span>
+														<span class="menu-title">Deducciones extras y temporales</span>
+													</a>
+													<!--end:Menu link-->
+												</div>
+												<!--end:Menu item           extras-->
 												<!--begin:Menu item           Recibos-->
 												<div class="menu-item">
 													<!--begin:Menu link-->

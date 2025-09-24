@@ -41,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quincena_baja = $_POST['quincena_baja'] ?? $actual['quincena_baja'];
     $fecha_baja    = $_POST['fecha_baja'] ?? $actual['fecha_baja'];
     $cuenta        = $_POST['cuenta'] ?? $actual['cuenta'];
+    $observaciones_alta = $_POST['observaciones_alta'] ?? $actual['observaciones_alta'];
+    $observaciones_baja = $_POST['observaciones_baja'] ?? $actual['observaciones_baja'];
     
 
     if ($accion === 'autorizar') {
@@ -71,12 +73,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("UPDATE personal 
             SET solicita=?, movimiento=?, oficio=?, puesto=?, programa=?, adscripcion=?, centro=?, RFC=?, CURP=?, 
                 sueldo_bruto=?, nombre_alta=?, quincena_alta=?, inicio_contratacion=?, 
-                quincena_baja=?, fecha_baja=?, cuenta=?
+                quincena_baja=?, fecha_baja=?, cuenta=?, observaciones_alta=?, observaciones_baja=?
             WHERE id=?");
         $stmt->execute([
             $solicita, $movimiento, $oficio, $puesto, $programa, $adscripcion, $centro,
             $RFC, $CURP, $sueldo_bruto, $nombre_alta, $quincena_alta,
-            $inicio_contratacion, $quincena_baja, $fecha_baja, $cuenta, $id_personal
+            $inicio_contratacion, $quincena_baja, $fecha_baja, $cuenta, $observaciones_alta,
+            $observaciones_baja, $id_personal
         ]);
 
         // Si se cambió el sueldo_bruto, recalcular

@@ -4,7 +4,8 @@ include 'header.php';
 
 $controller = new Deduccioncontroller();
 
-$data = $controller->getAllPensiones();
+$data = $controller->getAllTemporales();
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $controller->delete($_POST['delete_id']);
@@ -27,16 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     <div class="regreso">
         <span class="menu-title"><a class="menu-link" href="menu_captura.php">
         <span class="menu-tittle">Captura</span></a> 
-        <span class="menu-tittle">/Pensiones</span></span>
+        <span class="menu-tittle">/ Temporales</span></span>
     </div>
     <br>
     <div class="card">
         <div class="card-header">
             <div class="menu-title">
-                <h2>Administracion de pensiones</h2>
+                <h2>Administracion de Deducciones temporales</h2>
             </div>
             <div class="card-toolbar">
-                <a href="pensionesform.php" class="btn btn-primary">
+                <a href="temporales_form.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nuevo Registro
                 </a>
             </div>
@@ -49,22 +50,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                         <tr>
                             <th>#</th>
                             <th>Empleado</th>
-                            <th>Porcentaje</th>
-                            <th>Beneficiaria/o</th>
-                            <th>Cuenta Beneficiaria</th>
+                            <th>Concepto</th>
+                            <th>Monto</th>
+                            <th>Fecha Inico</th>
+                            <th>Fecha Fin</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <?php
+                            $conceptos = [
+                                "D_04" => "ANTICIPO DE VIATICOS",
+                                "D_64" => "AMORTIZACION FOVISSSTE",
+                                "D_65" => "SEGURO DE DAÑOS FOVISSSTE",
+                                "D_AS" => "PRESTAMO",
+                                "D_O1" => "ANTICIPO DE SUELDO"
+                            ];
+                        ?>
                         <?php foreach ($data as $p): ?>
                         <tr>
                             <td><?= htmlspecialchars($p['id']) ?></td>
-                            <td><?= htmlspecialchars($p['id_personal']) ?></td>
-                            <td><?= htmlspecialchars($p['porcentaje']) ?></td>
-                            <td><?= htmlspecialchars($p['beneficiaria']) ?></td>
-                            <td><?= htmlspecialchars($p['cuenta_beneficiaria']) ?></td>
+                            <td><?= htmlspecialchars($p['empleado']) ?></td>
+                            <td><?= htmlspecialchars($conceptos[$p['concepto']] ?? $p['concepto']) ?></td>
+                            <td><?= htmlspecialchars($p['monto']) ?></td>
+                            <td><?= htmlspecialchars($p['fecha_inicio']) ?></td>
+                            <td><?= htmlspecialchars($p['fecha_fin']) ?></td> 
+                            <td><?= htmlspecialchars($p['estado']) ?></td>
                             <td nowrap>
-                                <a href="pensionesform.php?id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-info me-2">
+                                <a href="temporales_form.php?id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-info me-2">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="?action=delete&id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este registro?')">

@@ -141,7 +141,7 @@ if (isset($_GET['id'])) {
                             <span class="info-label">Quincena baja:</span>
                             <select name="quincena_baja" id="quincena_baja" class="form-select">
                                 <?php foreach ($quincenas as $qna): ?>
-                                    <option value="<?= $qna['id'] ?>" <?= (isset($personal['quincena_baja']) && $personal['quincena_baja'] == $qna['id']) ? 'selected' : '' ?>>
+                                    <option value="<?= $qna['id'] ?>" <?= (isset($personal['quincena_baja']) && $personal['quincena_baja'] == $qna['nombre']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($qna['nombre']) ?>
                                     </option>
                                 <?php endforeach; ?>

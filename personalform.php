@@ -127,7 +127,6 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Rama</label>
                         <select name="rama" id="" class="form-select" required>
-                            <option value="">Seleccione una rama</option>
                             <option value="RAMA ADMINISTRATIVA">RAMA ADMINISTRATIVA</option>
                             <option value="RAMA MEDICA"> RAMA MEDICA</option>
                         </select>
@@ -136,7 +135,6 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Adscripción:</label>
                         <select name="adscripcion" id="adscripcion" class="form-select" required>
-                            <option value="">Seleccione adscripción</option>
                             <?php foreach ($adscripciones as $a): ?>
                                 <option value="<?= $a['id'] ?>" <?= (isset($personal['adscripcion']) && $personal['adscripcion'] == $a['id']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($a['nombre']) . '-' . htmlspecialchars($a['ubicacion'])?>
@@ -195,7 +193,6 @@ if (isset($_GET['id'])){
                         <div class="col-md-6">
                             <label>Quincena alta:</label>
                             <select name="quincena_alta" class="form-select" required>
-                                <option value="">Seleccione una quincena</option>
                                 <?php foreach ($quincena as $q): ?>
                                     <option value="<?= $q['nombre'] ?>" <?= (isset($personal['quincena_alta']) && $personal['quincena_alta'] == $q['nombre']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($q['nombre']) ?>

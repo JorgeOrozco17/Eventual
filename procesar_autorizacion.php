@@ -69,14 +69,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     } elseif ($accion === 'actualizar') {
+        $stmtcentro = $conn->prepare("SELECT nombre, clues FROM centros WHERE id = ?");
+        $stmtcentro->execute([$centro]);
+        $centro_data = $stmtcentro->fetch(PDO::FETCH_ASSOC);
+
         //  Actualizar datos SIN marcar autorización
         $stmt = $conn->prepare("UPDATE personal 
-            SET solicita=?, movimiento=?, oficio=?, puesto=?, programa=?, adscripcion=?, centro=?, RFC=?, CURP=?, 
+            SET solicita=?, movimiento=?, oficio=?, puesto=?, programa=?, adscripcion=?, centro=?, clues=?, RFC=?, CURP=?, 
                 sueldo_bruto=?, nombre_alta=?, quincena_alta=?, inicio_contratacion=?, 
                 quincena_baja=?, fecha_baja=?, cuenta=?, observaciones_alta=?, observaciones_baja=?
             WHERE id=?");
         $stmt->execute([
-            $solicita, $movimiento, $oficio, $puesto, $programa, $adscripcion, $centro,
+            $solicita, $movimiento, $oficio, $puesto, $programa, 'J' .$adscripcion, $centro_data['nombre'], $centro_data['clues'],
             $RFC, $CURP, $sueldo_bruto, $nombre_alta, $quincena_alta,
             $inicio_contratacion, $quincena_baja, $fecha_baja, $cuenta, $observaciones_alta,
             $observaciones_baja, $id_personal

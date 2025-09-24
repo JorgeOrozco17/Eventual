@@ -127,7 +127,7 @@ if (isset($_GET['id'])){
                         <select name="adscripcion" id="adscripcion" class="form-select" required disabled>
                             <?php foreach ($adscripciones as $a): ?>
                                 <option value="<?= $a['id'] ?>"
-                                    <?= (isset($personal['adscripcion']) && $personal['adscripcion'] == $a['id']) ? 'selected' : '' ?>>
+                                    <?= (isset($personal['id_adscripcion']) && $personal['id_adscripcion'] == $a['id']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($a['nombre']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -166,8 +166,8 @@ if (isset($_GET['id'])){
                             <label>Quincena alta:</label>
                             <select name="quincena_alta" class="form-select" required disabled>
                                 <?php foreach ($quincena as $q): ?>
-                                    <option value="<?= $q['id'] ?>"
-                                        <?= (isset($personal['quincena_alta']) && $personal['quincena_alta'] == $q['id']) ? 'selected' : '' ?>>
+                                    <option value="<?= $q['nombre'] ?>"
+                                        <?= (isset($personal['quincena_alta']) && $personal['quincena_alta'] == $q['nombre']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($q['nombre']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -185,8 +185,8 @@ if (isset($_GET['id'])){
                             <select name="quincena_baja" class="form-select" required disabled>
                                 <option value="">Seleccione una quincena</option>
                                 <?php foreach ($quincena as $q): ?>
-                                    <option value="<?= $q['id'] ?>"
-                                        <?= (isset($personal['quincena_baja']) && $personal['quincena_baja'] == $q['id']) ? 'selected' : '' ?>>
+                                    <option value="<?= $a['nombre'] ?>"
+                                        <?= (isset($personal['quincena_baja']) && $personal['quincena_baja'] == $q['nombre']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($q['nombre']) ?>
                                     </option>
                                 <?php endforeach; ?>

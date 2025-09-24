@@ -166,11 +166,6 @@ class Capturamodel{
                 ]);
             }
 
-            // Una vez insertados todos los datos, actualizar las columnas de pensión
-            $this->UpdatePensionACaptura($quincena, $anio);
-            $this->UpdateFaltas($quincena, $anio);
-            $this->UpdateLicencias($quincena, $anio);
-
             // Confirmar la transacción
             $this->conn->commit();
             return true;
@@ -302,6 +297,13 @@ class Capturamodel{
     }
 
     public function insertartotales($qna, $anio) {
+
+        // Una vez insertados todos los datos, actualizar las columnas de pensión
+        $this->UpdatePensionACaptura($qna, $anio);
+        $this->UpdateFaltas($qna, $anio);
+        $this->UpdateLicencias($qna, $anio);
+
+
         // Sumar percepciones, deducciones, total neto y contar registros en captura para periodo dado
         $sql = "
             SELECT 

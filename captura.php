@@ -98,9 +98,9 @@ $quincenas = $catalogo->getAllQuincenas();
                             <td><?= htmlspecialchars($p['JUR']) ?></td>
                             <td><?= htmlspecialchars($p['QNA']) ?></td>
                             <td><?= htmlspecialchars($p['AÑO']) ?></td>
-                            <td><?= htmlspecialchars($p['PERCEPCIONES']) ?></td>
-                            <td><?= htmlspecialchars($p['DEDUCCIONES']) ?></td>
-                            <td><?= htmlspecialchars($p['TOTAL_NETO']) ?></td>
+                            <td><?= "$" . number_format($p['PERCEPCIONES'], 2, '.', ',') ?></td>
+                            <td><?= "$" . number_format($p['DEDUCCIONES'], 2, '.', ',') ?></td>
+                            <td><?= "$" . number_format($p['TOTAL_NETO'], 2, '.', ',') ?></td>
                             <td nowrap>
                                 <a href="modifnomina.php?id=<?= $p['id'] ?>&qna=<?=$p['QNA'] ?>&anio=<?= $p['AÑO'] ?>" class="btn btn-icon btn-sm me-2" title="Editar">
                                     <i class="fas fa-edit"></i>

@@ -241,7 +241,7 @@ if (!$personal) {
                             <div class="row">
                                 <!--begin::Col-->
                                 <div class="col-lg-12 fv-row">
-                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= htmlspecialchars($personal ['sueldo_neto'])?>" readonly />
+                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= "$" . number_format($personal ['sueldo_neto'], 2,'.',',')?>" readonly />
                                 </div>
                                 <!--end::Col-->
                             </div>
@@ -261,7 +261,7 @@ if (!$personal) {
                             <div class="row">
                                 <!--begin::Col-->
                                 <div class="col-lg-12 fv-row">
-                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= htmlspecialchars($personal ['sueldo_bruto'])?>" readonly />
+                                    <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="<?= "$" . number_format($personal ['sueldo_bruto'], 2, '.', ',')?>" readonly />
                                 </div>
                                 <!--end::Col-->
                             </div>

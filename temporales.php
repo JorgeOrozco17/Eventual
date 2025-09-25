@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                             <td><?= htmlspecialchars($p['id']) ?></td>
                             <td><?= htmlspecialchars($p['empleado']) ?></td>
                             <td><?= htmlspecialchars($conceptos[$p['concepto']] ?? $p['concepto']) ?></td>
-                            <td><?= htmlspecialchars($p['monto']) ?></td>
+                            <td><?= "$" . number_format($p['monto'], 2, '.', ',') ?></td>
                             <td><?= htmlspecialchars($p['fecha_inicio']) ?></td>
                             <td><?= htmlspecialchars($p['fecha_fin']) ?></td> 
                             <td><?= htmlspecialchars($p['estado']) ?></td>

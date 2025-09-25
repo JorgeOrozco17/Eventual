@@ -166,6 +166,28 @@ class PersonalController {
         }
     }
 
+    public function updatePersonal(){
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location:/personalform.php");
+            exit();
+        }
+
+        $data= $_POST;
+        
+        try {
+            $ok = $this->model->updatePersonal($data);
+            if ($ok) {
+                $this->model->UpdateCalculoPersonal($data['id_personal']);
+                header("Location:/archivodetalle.php?id= ". $data['id_personal']);
+            } else {
+                header("Location:/altapersonal.php");
+            }
+        }catch (Exception $e) {
+            
+        }
+        
+    }
+
 
     public function delete($id) {
         $ok = $this->model->delete($id);

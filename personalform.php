@@ -23,7 +23,7 @@ $adscripciones = $catalogo->getAllJurisdicciones();
 $quincena = $catalogo->getAllQuincenas();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $controller->save();
+    $controller->updatePersonal();
     exit;
 }
 
@@ -75,37 +75,32 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-10">
                         <label>Nombre Alta:</label>
-                        <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>">
-                    </div>
-
-                    <div class="col-md-5">
-                        <label>Solicita</label>
-                        <input type="text" name="solicita" class="form-control" value="<?= htmlspecialchars($personal['solicita'] ?? '') ?>" >
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Movimiento:</label>
-                        <select name="movimiento" class="form-select" required>
-                            <option value="">Seleccione</option>
-                            <option value="alta" <?= (isset($personal['movimiento']) && $personal['movimiento'] == 'alta') ? 'selected' : '' ?>>ALTA</option>
-                        </select>
+                        <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>" readonly>
                     </div>
 
                     <div>
                         <input type="hidden" name="estatus" id="estatus" >
+                        <input type="hidden" name="id_personal" id="id_personal" value="<?= htmlspecialchars($personal['id'] ?? '') ?>" id="">
                     </div>
 
                     <div class="col-md-6">
-                        <label>Oficio:</label>
-                        <input type="text" name="oficio" class="form-control" value="<?= htmlspecialchars($personal['oficio'] ?? '') ?>" required>
+                        <label>RFC:</label>
+                        <input type="text" name="RFC" class="form-control" value="<?= htmlspecialchars($personal['RFC'] ?? '') ?>" maxlength="13" required>
                     </div>
+
+                    <div class="col-md-6">
+                        <label>CURP:</label>
+                        <input type="text" name="CURP" class="form-control" value="<?= htmlspecialchars($personal['CURP'] ?? '') ?>" maxlength="18" required>
+                    </div>
+
 
                     <div class="col-md-6">
                         <label>Puesto:</label>
                         <select name="puesto" class="form-select" required>
                             <option value="">Seleccione un puesto</option>
                             <?php foreach ($puestos as $p): ?>
-                                <option value="<?= $p['nombre_puesto'] ?>" <?= (isset($personal['puesto']) && $personal['puesto'] == $p['nombre_puesto']) ? 'selected' : '' ?>>
+                                <option value="<?= $p['nombre_puesto'] ?>" 
+                                    <?= (isset($personal['puesto']) && $personal['puesto'] == $p['nombre_puesto']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($p['nombre_puesto']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -115,9 +110,9 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Programa:</label>
                         <select name="programa" class="form-select" required>
-                            <option value="">Seleccione un programa</option>
                             <?php foreach ($recursos as $r): ?>
-                                <option value="<?= $r['nombre'] ?>" <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
+                                <option value="<?= $r['nombre'] ?>" 
+                                    <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($r['nombre']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -136,30 +131,21 @@ if (isset($_GET['id'])){
                         <label>Adscripción:</label>
                         <select name="adscripcion" id="adscripcion" class="form-select" required>
                             <?php foreach ($adscripciones as $a): ?>
-                                <option value="<?= $a['id'] ?>" <?= (isset($personal['adscripcion']) && $personal['adscripcion'] == $a['id']) ? 'selected' : '' ?>>
+                                <option value="<?= $a['id'] ?>"
+                                    <?= (isset($personal['id_adscripcion']) && $personal['id_adscripcion'] == $a['id']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($a['nombre']) . '-' . htmlspecialchars($a['ubicacion'])?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
 
-                    <div class="col-md-6">
+                     <div class="col-md-6">
                         <label>Centro:</label>
                         <select name="centro" id="centro" class="form-select" required>
                             <option value="<?= htmlspecialchars($personal['centro'] ?? '') ?>">
                                 <?= htmlspecialchars($personal['centro'] ?? 'Seleccione un centro') ?>
                             </option>
                         </select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label>RFC:</label>
-                        <input type="text" name="RFC" class="form-control" value="<?= htmlspecialchars($personal['RFC'] ?? '') ?>" maxlength="13" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label>CURP:</label>
-                        <input type="text" name="CURP" class="form-control" value="<?= htmlspecialchars($personal['CURP'] ?? '') ?>" maxlength="18" required>
                     </div>
 
                     <div class="col-md-6">
@@ -178,9 +164,10 @@ if (isset($_GET['id'])){
                     </div>
 
                     <!-- Sueldo Bruto -->
-                    <div class="col-md-6" id="sueldo_bruto_field" style="display:none;">
+                    <div class="col-md-6">
                         <label>Sueldo Bruto Mensual:</label>
-                        <input type="number" step="0.01" name="sueldo_bruto" class="form-control" id="sueldo_bruto">
+                        <input type="number" step="0.01" name="sueldo_bruto" class="form-control" 
+                            value="<?= htmlspecialchars($personal['sueldo_bruto'] ?? '') ?>" required>
                     </div>
 
                     <!-- Mensaje de error si no se elige un sueldo -->
@@ -225,7 +212,7 @@ if (isset($_GET['id'])){
 
                 <br>
                 <div class="mt-3">
-                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="submit" class="btn btn-success" >Guardar</button>
                     <a href="altapersonal.php" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>

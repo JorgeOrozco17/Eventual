@@ -166,6 +166,10 @@ class Capturamodel{
                 ]);
             }
 
+            // Una vez insertados todos los datos, actualizar las columnas de pensión
+            $this->UpdatePensionACaptura($quincena, $anio);
+            $this->UpdateTemporales($quincena, $anio);
+
             // Confirmar la transacción
             $this->conn->commit();
             return true;
@@ -298,8 +302,7 @@ class Capturamodel{
 
     public function insertartotales($qna, $anio) {
 
-        // Una vez insertados todos los datos, actualizar las columnas de pensión
-        $this->UpdatePensionACaptura($qna, $anio);
+
         $this->UpdateFaltas($qna, $anio);
         $this->UpdateLicencias($qna, $anio);
 
@@ -487,6 +490,59 @@ class Capturamodel{
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+//////////////////////////////////////////////// calculares las deducciones temporales //////////////////////////////////////////////////
+
+    public function UpdateTemporales($quincena, $anio) {
+        try {
+            // 1. Obtener inicio y fin de la quincena
+            $stmt = $this->conn->prepare("SELECT inicio, fin FROM quincenas WHERE id = ?");
+            $stmt->execute([$quincena]);
+            $quincenaData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$quincenaData) {
+                throw new Exception("No se encontró la quincena $quincena en la tabla quincenas.");
+            }
+
+            $fechaInicio = $quincenaData['inicio'] . " " . $anio;
+            $fechaFin    = $quincenaData['fin'] . " " . $anio;
+
+            // 2. Buscar deducciones temporales dentro del rango
+            $sql = "SELECT id_personal, concepto, monto
+                    FROM deducciones_temporales
+                    WHERE fecha_inicio <= :fechaFin
+                    AND fecha_fin >= :fechaInicio
+                    AND estado = 'activo'";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':fechaInicio', $fechaInicio);
+            $stmt->bindParam(':fechaFin', $fechaFin);
+            $stmt->execute();
+            $deducciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // 3. Preparar statement dinámico para actualizar captura
+            foreach ($deducciones as $ded) {
+                $concepto = $ded['concepto']; // ejemplo: D_64
+                $idPersonal = $ded['id_personal'];
+                $monto = $ded['monto'];
+
+                // Armar SQL dinámico para insertar el monto en la columna correcta
+                $sqlUpdate = "UPDATE captura
+                            SET $concepto = :monto
+                            WHERE id_personal = :id_personal
+                                AND QNA = :qna
+                                AND AÑO = :anio";
+                $stmtUpdate = $this->conn->prepare($sqlUpdate);
+                $stmtUpdate->bindParam(':monto', $monto);
+                $stmtUpdate->bindParam(':id_personal', $idPersonal, PDO::PARAM_INT);
+                $stmtUpdate->bindParam(':qna', $quincena, PDO::PARAM_INT);
+                $stmtUpdate->bindParam(':anio', $anio, PDO::PARAM_INT);
+                $stmtUpdate->execute();
+            }
+
+            return true;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 
 
 }

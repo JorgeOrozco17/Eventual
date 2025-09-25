@@ -367,6 +367,80 @@ class PersonalModel {
         }
     }
 
+    public function updatePersonal($data){
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM personal WHERE id = ?");
+            $stmt->execute([$data['id_personal']]);
+            $actual = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$actual) {
+                // Registrar log de que no se encontró el registro
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: ID {$data['id_personal']} no encontrado en personal", $data['id_personal']);
+                return false; 
+            }
+
+            // Valores nuevos o actuales
+            $puesto        = $_POST['puesto'] ?? $actual['puesto'];
+            $programa      = $_POST['programa'] ?? $actual['programa'];
+            $adscripcion   = $_POST['adscripcion'] ?? $actual['adscripcion'];
+            $centro        = $_POST['centro'] ?? $actual['centro'];
+            $RFC           = $_POST['RFC'] ?? $actual['RFC'];
+            $CURP          = $_POST['CURP'] ?? $actual['CURP'];
+            $sueldo_bruto  = $_POST['sueldo_bruto'] ?? $actual['sueldo_bruto'];
+            $nombre_alta   = $_POST['nombre_alta'] ?? $actual['nombre_alta'];
+            $quincena_alta = $_POST['quincena_alta'] ?? $actual['quincena_alta'];
+            $inicio_contratacion = $_POST['inicio_contratacion'] ?? $actual['inicio_contratacion'];
+            $quincena_baja = $_POST['quincena_baja'] ?? $actual['quincena_baja'];
+            $fecha_baja    = $_POST['fecha_baja'] ?? $actual['fecha_baja'];
+            $cuenta        = $_POST['cuenta'] ?? $actual['cuenta'];
+            $observaciones_alta = $_POST['observaciones_alta'] ?? $actual['observaciones_alta'];
+            $observaciones_baja = $_POST['observaciones_baja'] ?? $actual['observaciones_baja'];
+
+            // Datos del centro
+            $stmtcentro = $this->conn->prepare("SELECT id, clues FROM centros WHERE nombre = ?");
+            $stmtcentro->execute([$centro]);
+            $centro_data = $stmtcentro->fetch(PDO::FETCH_ASSOC);
+
+            if (!$centro_data) {
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: centro {$centro} no encontrado", $centro);
+                return false;
+            }
+
+            // Actualizar datos
+            $stmt = $this->conn->prepare("UPDATE personal 
+                SET puesto=?, programa=?, id_adscripcion=?, adscripcion=?, id_centro=?, centro=?, clues=?, RFC=?, CURP=?, 
+                    sueldo_bruto=?, nombre_alta=?, quincena_alta=?, inicio_contratacion=?, 
+                    quincena_baja=?, fecha_baja=?, cuenta=?, observaciones_alta=?, observaciones_baja=?
+                WHERE id=?");
+
+            $ok = $stmt->execute([
+                $puesto, $programa, $adscripcion, 'J'.$adscripcion, $centro_data['id'], $centro, $centro_data['clues'],
+                $RFC, $CURP, $sueldo_bruto, $nombre_alta, $quincena_alta,
+                $inicio_contratacion, $quincena_baja, $fecha_baja, $cuenta, $observaciones_alta,
+                $observaciones_baja, $data['id_personal']
+            ]);
+
+            if (!$ok) {
+                $errorInfo = $stmt->errorInfo();
+                $this->registrarLog(
+                    $_SESSION['user_id'] ?? 0,
+                    "Error UPDATE personal: SQLSTATE {$errorInfo[0]}, Código {$errorInfo[1]}, Mensaje {$errorInfo[2]}",
+                    $data['id_personal']
+                );
+                return false;
+            }
+
+            // Si todo fue bien
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Update personal exitoso", $data['id_personal']);
+            return true;
+
+        } catch (Exception $e) {
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción en updatePersonal: ".$e->getMessage(), $data['id_personal'] ?? 0);
+            return false;
+        }
+    }
+
+
 
     public function CalculoPersonal($id_personal) {
         // 1. Traer sueldo_bruto de la tabla personal
@@ -585,7 +659,7 @@ class PersonalModel {
             $D_S6,
             $P_01,
             $P_00,
-            $id_personal   // 👈 este es para el WHERE
+            $id_personal  
         ]);
 
         if ($ok) {

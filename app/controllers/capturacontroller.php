@@ -97,14 +97,17 @@ class Capturacontroller{
         if ($ok) {
             $this->model->generarCaptura($quincena, $anio);
 
-            $this->model->calcularTotales($quincena, $anio);
-                }
+            }
         $this->log_accion($usuario, "Insertó nueva nómina.", $id_acciones);
         return $ok ? 'exito' : 'error';
     }
 
     public function insertartotales($qna, $anio){
-        $ok = $this->model->insertartotales($qna, $anio);
+         $ok = $this->model->calcularTotales($qna, $anio);
+
+        if ($ok){
+            $this->model->insertartotales($qna, $anio);
+        }
         $usuario = $_SESSION['user_id'] ?? 0;
         $id_acciones = "QNA= $qna, Año= $anio";
         $this->log_accion($usuario, "Insertó totales de nómina.", $id_acciones);

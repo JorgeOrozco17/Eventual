@@ -199,8 +199,17 @@ class Capturamodel{
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':qna', $quincena);
         $stmt->bindParam(':anio', $anio);
-        return $stmt->execute();
-    }   
+        $ok = $stmt->execute();
+
+        if ($ok) {
+            $this->log_accion($_SESSION['user_id'] ?? 0, "UpdateLicencias exitoso para QNA $quincena/$anio", $quincena);
+        } else {
+            $error = $stmt->errorInfo();
+            $this->log_accion($_SESSION['user_id'] ?? 0, "Error UpdateLicencias: {$error[2]}", $quincena);
+        }
+
+        return $ok;
+    }
 
     public function UpdatePensionACaptura($quincena, $anio) {
         // Actualizar las columnas PENSION, BENEFICIARIA, CUENTA_BENEFICIARIA y D_62 de la tabla captura
@@ -220,7 +229,16 @@ class Capturamodel{
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':qna', $quincena);
         $stmt->bindParam(':anio', $anio);
-        return $stmt->execute();
+        $ok = $stmt->execute();
+
+        if ($ok) {
+            $this->log_accion($_SESSION['user_id'] ?? 0, "UpdatePensionACaptura exitoso para QNA $quincena/$anio", $quincena);
+        } else {
+            $error = $stmt->errorInfo();
+            $this->log_accion($_SESSION['user_id'] ?? 0, "Error UpdatePensionACaptura: {$error[2]}", $quincena);
+        }
+
+        return $ok;
     }
 
     public function UpdateFaltas($quincena, $anio){
@@ -243,7 +261,16 @@ class Capturamodel{
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':qna', $quincena);
         $stmt->bindParam(':anio', $anio);
-        return $stmt->execute();
+        $ok = $stmt->execute();
+
+        if ($ok) {
+            $this->log_accion($_SESSION['user_id'] ?? 0, "UpdateFaltas exitoso para QNA $quincena/$anio", $quincena);
+        } else {
+            $error = $stmt->errorInfo();
+            $this->log_accion($_SESSION['user_id'] ?? 0, "Error UpdateFaltas: {$error[2]}", $quincena);
+        }
+
+        return $ok;
     }
 
     public function deleteCaptura($qna, $anio){
@@ -252,6 +279,10 @@ class Capturamodel{
     }
 
     public function calcularTotales($qna, $anio) {
+
+        $this->UpdateFaltas($qna, $anio);
+        $this->UpdateLicencias($qna, $anio);
+
         // Listado de columnas deducciones y percepciones según tu tabla
         $deduccionesCampos = [
             'D_01', 'D_04', 'D_05', 'D_62', 'D_64', 'D_65', 'D_R1', 'D_R2',
@@ -301,11 +332,6 @@ class Capturamodel{
     }
 
     public function insertartotales($qna, $anio) {
-
-
-        $this->UpdateFaltas($qna, $anio);
-        $this->UpdateLicencias($qna, $anio);
-
 
         // Sumar percepciones, deducciones, total neto y contar registros en captura para periodo dado
         $sql = "
@@ -503,15 +529,16 @@ class Capturamodel{
                 throw new Exception("No se encontró la quincena $quincena en la tabla quincenas.");
             }
 
-            $fechaInicio = $quincenaData['inicio'] . " " . $anio;
-            $fechaFin    = $quincenaData['fin'] . " " . $anio;
+            $fechaInicio = DateTime::createFromFormat('d/m/Y', $quincenaData['inicio'].'/'.$anio)->format('Y-m-d');
+            $fechaFin    = DateTime::createFromFormat('d/m/Y', $quincenaData['fin'].'/'.$anio)->format('Y-m-d');
+
 
             // 2. Buscar deducciones temporales dentro del rango
             $sql = "SELECT id_personal, concepto, monto
                     FROM deducciones_temporales
                     WHERE fecha_inicio <= :fechaFin
                     AND fecha_fin >= :fechaInicio
-                    AND estado = 'activo'";
+                    AND estado = 'ACTIVA'";
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':fechaInicio', $fechaInicio);
             $stmt->bindParam(':fechaFin', $fechaFin);
@@ -535,14 +562,20 @@ class Capturamodel{
                 $stmtUpdate->bindParam(':id_personal', $idPersonal, PDO::PARAM_INT);
                 $stmtUpdate->bindParam(':qna', $quincena, PDO::PARAM_INT);
                 $stmtUpdate->bindParam(':anio', $anio, PDO::PARAM_INT);
-                $stmtUpdate->execute();
+                $ok = $stmtUpdate->execute();
+
+                if ($ok) {
+                    $this->log_accion($_SESSION['user_id'] ?? 0, "UpdateTemporales exitoso: $concepto aplicado a personal $idPersonal", $idPersonal);
+                } else {
+                    $error = $stmtUpdate->errorInfo();
+                    $this->log_accion($_SESSION['user_id'] ?? 0, "Error UpdateTemporales ($concepto, id_personal=$idPersonal): {$error[2]}", $idPersonal);
+                }
             }
 
             return true;
         } catch (Exception $e) {
-            throw $e;
+            $this->log_accion($_SESSION['user_id'] ?? 0, "Excepción UpdateTemporales: ".$e->getMessage(), $quincena);
+            return false;
         }
     }
-
-
 }

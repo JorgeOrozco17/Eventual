@@ -212,7 +212,7 @@ if (isset($_GET['id'])){
         <br>
         <div class="mt-3">
             <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="altapersonal.php" class="btn btn-secondary">Cancelar</a>
+            <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
         </div>
     </form>
 </div>

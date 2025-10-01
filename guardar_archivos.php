@@ -52,6 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $insert_vals = [$id_personal, $id_usuario];
     $insert_placeholders = ['?', '?'];
 
+    // =========================
+    // 📌 Procesar archivos subidos
+    // =========================
     foreach ($campos as $campo) {
         if (isset($_FILES[$campo]) && $_FILES[$campo]['error'] === UPLOAD_ERR_OK) {
             $filename = basename($_FILES[$campo]['name']);
@@ -77,6 +80,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // =========================
+    // 📌 Procesar campos "No aplica"
+    // =========================
+    if (isset($_POST['no_aplica']) && is_array($_POST['no_aplica'])) {
+        foreach ($_POST['no_aplica'] as $campo => $valor) {
+            if ($valor === "no_aplica" && in_array($campo, $campos)) {
+                if ($registro_existente) {
+                    $updates[] = "$campo = ?";
+                    $valores[] = "no_aplica"; // Guardamos literal
+                } else {
+                    $insert_cols[] = $campo;
+                    $insert_vals[] = "no_aplica";
+                    $insert_placeholders[] = '?';
+                }
+            }
+        }
+    }
+
+    // =========================
+    // 📌 Ejecutar INSERT o UPDATE
+    // =========================
     if ($registro_existente) {
         if (!empty($updates)) {
             $valores[] = $id_personal;

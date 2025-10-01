@@ -132,6 +132,29 @@ input[type="file"].form-control:hover {
     background: linear-gradient(90deg,#1c927c 40%,#2257a8 100%);
     color: #fff;
 }
+.input-group-file {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.clear-btn {
+    margin-left: 8px;
+    border: none;
+    background: #f74741ff;
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.clear-btn:hover {
+    background: #f74741ff;
+}
 @media (max-width: 768px) {
     .archivo-card { padding: 11px 6px 10px 11px; }
     .card { padding: 13px 7px 15px 7px; }
@@ -139,18 +162,77 @@ input[type="file"].form-control:hover {
 </style>
 
 <div class="container mt-4">
-
-   <div class="regreso">
+    <div class="regreso">
         <span class="menu-title">
-            <a class="menu-link" href="personal.php"> <span class="menu-tittle">Personal</span></a> 
+            <a class="menu-link" href="personal.php"><span class="menu-tittle">Personal</span></a> 
             <a class="menu-link" href="altapersonal.php"><span class="menu-tittle">/Gestionar personal</span></a>
             <span class="menu-tittle">/Archivo digital del Empleado</span>
         </span>
     </div>
 
+    <br>
     <div class="regreso">
-        <button class="btn btn-sm btn-info me-2" onclick="history.back()"><i class="fas fa-arrow-left-long"></i>Regresar</button>
+        <button class="btn btn-sm btn-info me-2" onclick="history.back()"><i class="fas fa-arrow-left-long"></i> Regresar</button>
     </div>
+    <br>
+
+    <?php
+    $nombres_campos = [
+        'autorizacion' => 'Autorización',
+        'baja' => 'Documento de Baja',
+        'solicitud' => 'Solicitud',
+        'curriculum' => 'Currículum',
+        'acta_nacimiento' => 'Acta de Nacimiento',
+        'curp' => 'CURP',
+        'cartilla_militar' => 'Cartilla Militar',
+        'certificado_estudios' => 'Certificado de Estudios',
+        'titulo_profesional' => 'Título Profesional',
+        'cedula_profesional' => 'Cédula Profesional',
+        'certificacion_cedula' => 'Certificación de Cédula',
+        'titulo_cedula_especialidad' => 'Título/Cédula Especialidad',
+        'cursos_capacitacion' => 'Cursos de Capacitación',
+        'ine' => 'INE',
+        'domicilio' => 'Comprobante de Domicilio',
+        'cartas_recomendacion' => 'Cartas de Recomendación',
+        'carta_protesta' => 'Carta Protesta',
+        'compatibilidad_horario' => 'Compatibilidad de Horario',
+        'carta_compromiso' => 'Carta Compromiso',
+        'certificado_medico' => 'Certificado Médico',
+        'no_antecedentes' => 'No Antecedentes',
+        'no_inhabilitado' => 'No Inhabilitado',
+        'situacion_fiscal' => 'Situación Fiscal',
+        'acuse_declaracion' => 'Acuse Declaración',
+        'comprobante_banco' => 'Comprobante de Banco',
+    ];
+
+    // Detectar archivos faltantes (ignorar no_aplica)
+    $faltantes = [];
+    foreach ($nombres_campos as $campo => $label) {
+        if (empty($archivos[$campo])) {
+            $faltantes[] = $label;
+        } elseif ($archivos[$campo] === "no_aplica") {
+            continue; // no lo contamos como faltante
+        }
+    }
+    ?>
+
+    <?php if (!empty($faltantes)): ?>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0 text-danger"><i class="fas fa-exclamation-circle"></i> Archivos faltantes</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <?php foreach ($faltantes as $faltante): ?>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        <?= htmlspecialchars($faltante) ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -170,86 +252,64 @@ input[type="file"].form-control:hover {
 
                 <div class="row">
                 <?php
-                
-
-                $nombres_campos = [
-                    'autorizacion' => 'Autorizacion',
-                    'baja' => 'Baja',
-                    'solicitud' => 'Solicitud',
-                    'curriculum' => 'Currículum',
-                    'acta_nacimiento' => 'Acta de Nacimiento',
-                    'curp' => 'CURP',
-                    'cartilla_militar' => 'Cartilla Militar',
-                    'certificado_estudios' => 'Certificado de Estudios',
-                    'titulo_profesional' => 'Título Profesional',
-                    'cedula_profesional' => 'Cédula Profesional',
-                    'certificacion_cedula' => 'Certificación de Cédula',
-                    'titulo_cedula_especialidad' => 'Título/Cédula Especialidad',
-                    'cursos_capacitacion' => 'Cursos de Capacitación',
-                    'ine' => 'INE',
-                    'domicilio' => 'Comprobante de Domicilio',
-                    'cartas_recomendacion' => 'Cartas de Recomendación',
-                    'carta_protesta' => 'Carta Protesta',
-                    'compatibilidad_horario' => 'Compatibilidad de Horario',
-                    'carta_compromiso' => 'Carta Compromiso',
-                    'certificado_medico' => 'Certificado Médico',
-                    'no_antecedentes' => 'No Antecedentes',
-                    'no_inhabilitado' => 'No Inhabilitado',
-                    'situacion_fiscal' => 'Situación Fiscal',
-                    'acuse_declaracion' => 'Acuse Declaración',
-                    'comprobante_banco' => 'Comprobante de Banco',
-                ];
-                
                 $campos_bloqueados = ['autorizacion', 'baja'];
+                $campos_obligatorios = ['situacion_fiscal', 'comprobante_banco'];
 
-                foreach ($nombres_campos as $campo => $label):
-                ?>
+                foreach ($nombres_campos as $campo => $label): ?>
                     <div class="col-md-6">
                         <div class="archivo-card">
                             <h6 class="archivo-label"><?= $label ?>:</h6>
-                            <?php if (!empty($archivos[$campo])): ?>
+
+                            <?php if (!empty($archivos[$campo]) && $archivos[$campo] !== "no_aplica"): ?>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="badge bg-success">Archivo subido</span>
                                     <a class="archivo-label" href="uploads/<?= htmlspecialchars($archivos[$campo]) ?>" target="_blank">
                                         <?= htmlspecialchars($archivos[$campo]) ?>
                                     </a>
                                 </div>
+
+                            <?php elseif (!empty($archivos[$campo]) && $archivos[$campo] === "no_aplica"): ?>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary">No aplica</span>
+                                </div>
+
                             <?php else: ?>
                                 <?php if (in_array($campo, $campos_bloqueados)): ?>
-                                    <input type="file" class="form-control mt-2" disabled>
-                                    <span class="text-muted small ms-2" style="color:#888!important;">
-                                        <i class="fas fa-lock"></i> Solo personal autorizado puede subir este documento.
-                                    </span>
+                                     <input type="file" class="form-control mt-2" disabled>
+                                     <span class="text-muted small ms-2" style="color:#888!important;"> 
+                                     <i class="fas fa-lock"></i> Solo personal autorizado puede subir este documento. </span> 
                                 <?php else: ?>
-                                    <input type="file" name="<?= $campo ?>" class="form-control mt-2">
+                                    <div class="input-group-file mt-2">
+                                        <input type="file" name="<?= $campo ?>" class="form-control">
+                                        <button type="button" class="clear-btn" onclick="clearFileInput(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <!-- Botón No aplica -->
+                                        <?php if (!in_array($campo, $campos_obligatorios)): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="setNoAplica(this, '<?= $campo ?>')">
+                                                No aplica
+                                            </button>
+                                            <input type="hidden" name="no_aplica[<?= $campo ?>]" value="">
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
-            </div>
-
-            <hr>
-            <h4>Anexos generales</h4>
-            <div id="anexos-container">
-                <div class="anexo-item mb-2">
-                    <input type="file" name="anexos[]" class="form-control">
                 </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-info mt-2" onclick="addAnexo()">+ Agregar otro anexo</button>
 
-            <script>
-            function addAnexo() {
-                let container = document.getElementById('anexos-container');
-                let div = document.createElement('div');
-                div.classList.add('anexo-item','mb-2');
-                div.innerHTML = `<input type="file" name="anexos[]" class="form-control">`;
-                container.appendChild(div);
-            }
-            </script>
+                <hr>
+                <h4>Anexos generales</h4>
+                <div id="anexos-container">
+                    <div class="anexo-item mb-2">
+                        <input type="file" name="anexos[]" class="form-control">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-info mt-2" onclick="addAnexo()">+ Agregar otro anexo</button>
 
-
-                <button type="submit" class="btn btn-primary mt-4" onclick="return confirm('Una vez cargados los archvivos NO se podran borra o modificar. ¿Desea guardar los cambios?')">Guardar Cambios</button>
+                <hr>
+                <button type="submit" class="btn btn-primary mt-4" onclick="return confirm('Una vez cargados los archivos NO se podrán borrar o modificar. ¿Desea guardar los cambios?')">Guardar Cambios</button>
             </form>
 
             <hr>
@@ -273,11 +333,74 @@ input[type="file"].form-control:hover {
             }
             ?>
             </div>
-
-
-
         </div>
     </div>
 </div>
+
+<script>
+function clearFileInput(btn) {
+    const input = btn.previousElementSibling;
+    const parent = btn.parentElement;
+
+    // limpiar input file
+    if (input && input.type === "file") {
+        input.value = "";
+        input.disabled = false;
+    }
+
+    // quitar marca de "No aplica" si estaba activada
+    const hiddenInput = parent.querySelector('input[type="hidden"]');
+    const noAplicaBtn = parent.querySelector('button.btn');
+
+    if (hiddenInput && noAplicaBtn) {
+        hiddenInput.value = "";
+        noAplicaBtn.classList.remove("btn-secondary");
+        noAplicaBtn.classList.add("btn-outline-secondary");
+        noAplicaBtn.innerText = "No aplica";
+    }
+}
+
+function addAnexo() {
+    let container = document.getElementById('anexos-container');
+    let div = document.createElement('div');
+    div.classList.add('anexo-item','mb-2');
+    div.innerHTML = `
+        <div class="input-group-file">
+            <input type="file" name="anexos[]" class="form-control">
+            <button type="button" class="clear-btn" onclick="clearFileInput(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function setNoAplica(btn, campo) {
+    let hiddenInput = btn.parentElement.querySelector('input[type="hidden"][name="no_aplica['+campo+']"]');
+    let fileInput = btn.parentElement.querySelector('input[type="file"]');
+
+    if (hiddenInput) {
+        if (hiddenInput.value === "no_aplica") {
+            // desmarcar
+            hiddenInput.value = "";
+            btn.classList.remove("btn-secondary");
+            btn.classList.add("btn-outline-secondary");
+            btn.innerText = "No aplica";
+            if (fileInput) fileInput.disabled = false;
+        } else {
+            // marcar
+            hiddenInput.value = "no_aplica";
+            btn.classList.remove("btn-outline-secondary");
+            btn.classList.add("btn-secondary");
+            btn.innerText = "Marcado";
+            if (fileInput) {
+                fileInput.value = "";
+                fileInput.disabled = true;
+            }
+        }
+    }
+}
+</script>
+
 
 <?php include 'footer.php'; ?>

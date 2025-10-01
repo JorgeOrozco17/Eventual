@@ -382,6 +382,7 @@ class PersonalModel {
             // Valores nuevos o actuales
             $puesto        = $_POST['puesto'] ?? $actual['puesto'];
             $programa      = $_POST['programa'] ?? $actual['programa'];
+            $rama          = $_POST['rama'] ?? $actual['rama'];
             $adscripcion   = $_POST['adscripcion'] ?? $actual['adscripcion'];
             $centro        = $_POST['centro'] ?? $actual['centro'];
             $RFC           = $_POST['RFC'] ?? $actual['RFC'];
@@ -397,9 +398,17 @@ class PersonalModel {
             $observaciones_baja = $_POST['observaciones_baja'] ?? $actual['observaciones_baja'];
 
             // Datos del centro
-            $stmtcentro = $this->conn->prepare("SELECT id, clues FROM centros WHERE nombre = ?");
+            $stmtcentro = $this->conn->prepare("SELECT nombre, clues FROM centros WHERE id = ?");
             $stmtcentro->execute([$centro]);
             $centro_data = $stmtcentro->fetch(PDO::FETCH_ASSOC);
+
+             $stmtrecurso = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
+            $stmtrecurso->execute([$programa]);
+            $programa_data = $stmtrecurso->fetch(PDO::FETCH_ASSOC);
+
+            $stmtpuesto = $this->conn->prepare("SELECT codigo FROM puestos WHERE nombre_puesto = ?");
+            $stmtpuesto->execute([$puesto]);
+            $puesto_data = $stmtpuesto->fetch(PDO::FETCH_ASSOC);
 
             if (!$centro_data) {
                 $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: centro {$centro} no encontrado", $centro);
@@ -408,13 +417,13 @@ class PersonalModel {
 
             // Actualizar datos
             $stmt = $this->conn->prepare("UPDATE personal 
-                SET puesto=?, programa=?, id_adscripcion=?, adscripcion=?, id_centro=?, centro=?, clues=?, RFC=?, CURP=?, 
+                SET puesto=?, codigo=?, programa=?, clave_recurso=?, rama=?, id_adscripcion=?, adscripcion=?, id_centro=?, centro=?, clues=?, RFC=?, CURP=?, 
                     sueldo_bruto=?, nombre_alta=?, quincena_alta=?, inicio_contratacion=?, 
                     quincena_baja=?, fecha_baja=?, cuenta=?, observaciones_alta=?, observaciones_baja=?
                 WHERE id=?");
 
             $ok = $stmt->execute([
-                $puesto, $programa, $adscripcion, 'J'.$adscripcion, $centro_data['id'], $centro, $centro_data['clues'],
+                $puesto, $puesto_data['codigo'], $programa, $programa_data['cve_recurso'], $rama, $adscripcion, 'J'.$adscripcion, $centro, $centro_data['nombre'], $centro_data['clues'],
                 $RFC, $CURP, $sueldo_bruto, $nombre_alta, $quincena_alta,
                 $inicio_contratacion, $quincena_baja, $fecha_baja, $cuenta, $observaciones_alta,
                 $observaciones_baja, $data['id_personal']
@@ -478,6 +487,9 @@ class PersonalModel {
         // 6. sueldo_diario
         $sueldo_diario = $bruto_mensual / 15;
 
+        // 9. P_00 (ya se que este no va a qui, necesito cambiarlo despues, solo reacomodar los numeros de los pasos. JAJAJAJA)
+        $P_00 = 0;
+
         // 7. isr_mens e isr_qna
         // Buscar el rango en la tabla de isr
         $stmtISR = $this->conn->prepare("
@@ -495,8 +507,19 @@ class PersonalModel {
             $porcentaje = (float)$rowISR['porcentaje'];
             $isr_mens = (($bruto_mensual - $lim_inferior) * ($porcentaje / 100)) + $cuota_fija;
             $isr_qna = $isr_mens / 2;
+
+            //  Ajuste especial
+            if ($bruto_mensual <= 10171) {
+                $isr_qna -= 237.50;   // El subsidio es 475 mensual, la mitad es 237.50
+
+                if ($isr_qna < 0) {
+                    // el negativo se manda a P_00
+                    $P_00 = abs($isr_qna);
+                    $isr_qna = 0;
+                }
+            }
+
         } else {
-            // Si no hay rango, lo dejas en 0 (puedes ajustar este comportamiento)
             $isr_mens = 0;
             $isr_qna = 0;
         }
@@ -506,9 +529,6 @@ class PersonalModel {
         // 8. neto_mensual y neto_qna
         $neto_mensual = ($bruto_mensual - $isr_mens) - $dsctos_issste_mensual;
         $neto_qna = $neto_mensual / 2;
-
-        // 9. P_00
-        $P_00 = ($bruto_mensual <= 10171) ? 475 : null;
 
         // 10. sueldo igual a P_01
         $sueldo = $P_01;

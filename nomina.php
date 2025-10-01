@@ -78,7 +78,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
                             <td><?= '$' . number_format($p['total_deducciones'], 2, '.', ',') ?></td>
                             <td><?= '$' . number_format($p['total_neto'], 2, '.', ',') ?></td>
                             <td nowrap>
-                                <?php if (!empty($p['total_percepciones']) && $p['total_percepciones'] != '0.0'): ?>
+                                <?php if ( $p['estatus'] === 1): ?>
                                     <a href="generar_excel.php?qna=<?= $p['qna'] ?>&anio=<?= $p['año'] ?>" class="btn btn-icon btn-sm btn-info me-2">
                                         <i class="fas fa-file-lines"></i>
                                     </a>

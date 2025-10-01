@@ -44,11 +44,12 @@ class Capturamodel{
 
     //////////////////////////////////////////    Funciones para procesar la nomina  //////////////////////////////////////////
 
-    public function insertNomina ($quincena, $anio){
-        $tipo = 'Ordinaria';
-        $stmt = $this->conn->prepare("INSERT INTO nominas (qna, año, tipo, total_registros,total_percepciones, total_deducciones, total_neto)
-        VALUES (?, ?, ?, 0, 0.00, 0.00, 0.00)");
-        return $stmt->execute([$quincena, $anio, $tipo]);
+    public function insertNomina ($tipo, $quincena, $anio){
+        $stmt = $this->conn->prepare("INSERT INTO nominas (qna, año, tipo, total_registros,total_percepciones, total_deducciones, total_neto, estatus)
+        VALUES (?, ?, ?, 0, 0.00, 0.00, 0.00, 0)");
+        $stmt->execute([$quincena, $anio, $tipo]);
+
+        return $this->conn->lastInsertId();
     }
 
     //Funcion para verificar si ya existe una nomina generada
@@ -66,7 +67,7 @@ class Capturamodel{
     }
 
 
-    public function generarCaptura($quincena, $anio) {
+    public function generarCaptura($quincena, $anio, $id_nomina) {
         // Iniciar transacción
         $this->conn->beginTransaction();
 
@@ -111,10 +112,10 @@ class Capturamodel{
             // Preparar la consulta de inserción para la tabla captura
             $stmtInsert = $this->conn->prepare(" 
                 INSERT INTO captura (
-                    id_personal, NOM, RFC, CURP, NOMBRE, CLUES, JUR, DESCRIPCION_CLUES, CODIGO, QNA,
+                    id_nomina, id_personal, NOM, RFC, CURP, NOMBRE, CLUES, JUR, DESCRIPCION_CLUES, CODIGO, QNA,
                     AÑO, STATUS, FECHA_INGRESO, DESC_TNOMINA, RECURSO, CVE_RECURSO, DESC_CATEGORIAS, RAMA,
                     D_S2, D_S4, D_S5, D_S6, P_01, P_26, D_01, SD, CUENTA, P_00, DESC_CT_DEPTO, DESC_CEN_ART74, CT_ART_74, JURIS
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             // Insertar cada empleado en la tabla captura
@@ -131,6 +132,122 @@ class Capturamodel{
 
                 // Insertar en la tabla captura
                 $stmtInsert->execute([
+                    $id_nomina,
+                    $emp['id_personal'],
+                    'EVE',
+                    $emp['RFC'] ?? null,
+                    $emp['CURP'] ?? null,
+                    $emp['nombre_alta'] ?? null,
+                    $emp['clues'] ?? null,
+                    $emp['adscripcion'] ?? null,
+                    $emp['centro'] ?? null,
+                    $emp['codigo'] ?? null,
+                    $quincena  ?? null,
+                    $anio ?? null,
+                    'ACTIVO' ?? null,
+                    $emp['inicio_contratacion'] ?? null,
+                    'Eventual'  ?? null,
+                    $emp['programa'] ?? null,
+                    $emp['clave_recurso'] ?? null,
+                    $emp['puesto'] ?? null,
+                    $emp['rama'] ?? null,
+                    $D_S2,
+                    $D_S4,
+                    $D_S5,
+                    $D_S6,
+                    $P_01,
+                    $P_26,
+                    $D_01,
+                    $SD,
+                    $emp['cuenta'] ?? 0,
+                    $P_00,
+                    $emp['desc_ct_dpto'] ?? null,
+                    $emp['desc_cen_art74'] ?? null,
+                    $emp['ct_art_74'] ?? null,
+                    $emp['juris'] ?? null
+                ]);
+            }
+
+            // Una vez insertados todos los datos, actualizar las columnas de pensión
+            $this->UpdatePensionACaptura($quincena, $anio);
+            $this->UpdateTemporales($quincena, $anio);
+
+            // Confirmar la transacción
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            // Si ocurre algún error, revertir la transacción
+            $this->conn->rollBack();
+            throw $e;
+        }
+    }
+
+    public function generarCapturaExtra($quincena, $anio, $id_nomina) {
+        // Iniciar transacción
+        $this->conn->beginTransaction();
+
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                p.id AS id_personal, 
+                p.RFC, 
+                p.CURP, 
+                p.nombre_alta, 
+                p.clues, 
+                p.adscripcion,
+                p.centro, 
+                p.inicio_contratacion, 
+                p.programa,
+                p.clave_recurso,
+                p.rama,
+                p.puesto,
+                p.cuenta,
+                p.codigo,
+                c.D_S2, 
+                c.D_S4,
+                c.D_S5,
+                c.D_S6,
+                c.P_01,
+                c.P_00, 
+                c.comp_garantizada, 
+                c.isr_qna, 
+                c.sueldo_diario,
+                a.desc_ct_dpto,
+                a.desc_cen_art74,
+                a.ct_art_74,
+                a.juris
+            FROM personal p
+            LEFT JOIN calculo_personal c ON c.id_personal = p.id
+            LEFT JOIN art_74 a ON a.id_personal = p.id
+            WHERE p.estatus = 'activo'
+            ");
+            $stmt->execute();
+            $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Preparar la consulta de inserción para la tabla captura
+            $stmtInsert = $this->conn->prepare(" 
+                INSERT INTO captura (
+                    id_nomina, id_personal, NOM, RFC, CURP, NOMBRE, CLUES, JUR, DESCRIPCION_CLUES, CODIGO, QNA,
+                    AÑO, STATUS, FECHA_INGRESO, DESC_TNOMINA, RECURSO, CVE_RECURSO, DESC_CATEGORIAS, RAMA,
+                    D_S2, D_S4, D_S5, D_S6, P_01, P_26, D_01, SD, CUENTA, P_00, DESC_CT_DEPTO, DESC_CEN_ART74, CT_ART_74, JURIS
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            // Insertar cada empleado en la tabla captura
+            foreach ($empleados as $emp) {
+                $D_S2 = $emp['D_S2'] ?? 0;
+                $D_S4 = $emp['D_S4'] ?? 0;
+                $D_S5 = $emp['D_S5'] ?? 0;
+                $D_S6 = $emp['D_S6'] ?? 0;
+                $P_01 = $emp['P_01'] ?? 0;
+                $P_26 = $emp['comp_garantizada'] ?? 0;
+                $D_01 = $emp['isr_qna'] ?? 0;
+                $SD = $emp['sueldo_diario'] ?? 0;
+                $P_00 = $emp['P_00'] ?? 0;
+
+                // Insertar en la tabla captura
+                $stmtInsert->execute([
+                    $id_nomina,
                     $emp['id_personal'],
                     'EVE',
                     $emp['RFC'] ?? null,
@@ -358,7 +475,8 @@ class Capturamodel{
                 total_registros = ?,
                 total_percepciones = ?,
                 total_deducciones = ?,
-                total_neto = ?
+                total_neto = ?,
+                estatus = ?
             WHERE qna = ? AND año = ?
         ";
 
@@ -368,6 +486,7 @@ class Capturamodel{
             $totales['total_percepciones'],
             $totales['total_deducciones'],
             $totales['total_neto'],
+            1,
             $qna,
             $anio
         ]);

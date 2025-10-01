@@ -54,6 +54,10 @@ $quincena = $catalogo->getAllQuincenas();
         <div class="card-body">
             <form action="procesar_nomina.php" method="POST">
                 <div class="row g-3">
+
+                    <div>
+                        <input type="hidden" name="tipo" id="" value="Ordinaria">
+                    </div>
                     <div class="col-md-6">
                         <label>Quincena</label>
                         <select name="quincena" class="form-select" required>
@@ -92,6 +96,9 @@ $quincena = $catalogo->getAllQuincenas();
         <div class="card-body">
             <form action="procesar_nomina.php" method="POST">
                 <div class="row g-3">
+                    <div>
+                        <input type="hidden" name="tipo" id="" value="EXT">
+                    </div>
                     <div class="col-md-6">
                         <label>Quincena</label>
                         <select name="quincena" class="form-select" required>

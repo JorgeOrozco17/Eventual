@@ -82,7 +82,7 @@ class Capturacontroller{
 
     ////////////////////////////////// Generar nomina ////////////////////////////////
 
-    public function saveNomina($quincena, $anio){
+    public function saveNomina($tipo, $quincena, $anio){
         $usuario = $_SESSION['user_id'];
         $id_acciones = "QNA= $quincena, Año= $anio";
 
@@ -91,20 +91,40 @@ class Capturacontroller{
             return 'existe';
         }
 
-        $ok = $this->model->insertNomina($quincena, $anio);
+        $id_nomina = $this->model->insertNomina($tipo, $quincena, $anio);
         
 
-        if ($ok) {
-            $this->model->generarCaptura($quincena, $anio);
+        if ($id_nomina) {
+            $this->model->generarCaptura($quincena, $anio, $id_nomina);
 
             }
         $this->log_accion($usuario, "Insertó nueva nómina.", $id_acciones);
-        return $ok ? 'exito' : 'error';
+        return true ? 'exito' : 'error';    
+    }
+
+    public function saveNominaExtra($tipo, $quincena, $anio){
+       $usuario = $_SESSION['user_id'];
+        $id_acciones = "QNA= $quincena, Año= $anio";
+
+        if (!$this->model->nominaExistente($quincena, $anio)) {
+            $this->log_accion($usuario, "Intentó crear nómina Extraordinaria pero no existe. una nomina ordinaria", $id_acciones);
+            return 'existe';
+        }
+
+        $id_nomina = $this->model->insertNomina($tipo, $quincena, $anio);
+        
+
+        if ($id_nomina) {
+            $this->model->generarCaptura($quincena, $anio, $id_nomina);
+
+            }
+        $this->log_accion($usuario, "Insertó nueva nómina.", $id_acciones);
+        return true ? 'exito' : 'error'; 
     }
 
     public function insertartotales($qna, $anio){
          $ok = $this->model->calcularTotales($qna, $anio);
-
+         
         if ($ok){
             $this->model->insertartotales($qna, $anio);
         }

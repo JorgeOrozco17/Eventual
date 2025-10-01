@@ -1,9 +1,14 @@
 <?php
 require_once 'app/controllers/capturacontroller.php';
 
+ // Instanciar el controlador
+    $controller = new Capturacontroller();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quincena = $_POST['quincena'];
     $anio = $_POST['año'];
+    $tipo = $_POST['tipo'];
+
 
     // Validación para asegurar que los valores sean numéricos
     if (!is_numeric($quincena) || !is_numeric($anio)) {
@@ -11,11 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Instanciar el controlador
-    $controller = new Capturacontroller();
-
-    // Guardar la nómina y verificar el resultado
-    $resultado = $controller->saveNomina($quincena, $anio);
+    if ($tipo == 'Ordinaria') {
+        // Guardar la nómina y verificar el resultado
+        $resultado = $controller->saveNomina($tipo, $quincena, $anio);
+    } else if ($tipo == 'EXT') {
+        $resultado = $controller->saveNominaExtra($tipo, $quincena, $anio);
+    }
 
     // Si la nómina ya existe, redirigir con un mensaje de error
     if ($resultado === 'existe') {

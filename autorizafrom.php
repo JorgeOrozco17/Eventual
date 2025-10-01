@@ -137,7 +137,7 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Centro:</label>
                         <select name="centro" id="centro" class="form-select" required disabled>
-                            <option value="<?= htmlspecialchars($personal['centro'] ?? '') ?>">
+                            <option value="<?= htmlspecialchars($personal['id_centro'] ?? '') ?>">
                                 <?= htmlspecialchars($personal['centro'] ?? 'Seleccione un centro') ?>
                             </option>
                         </select>
@@ -255,6 +255,10 @@ if (isset($_GET['id'])){
 </div>
 
 <script>
+        document.querySelector("form").addEventListener("submit", function(e){
+            console.log("Datos enviados:", Object.fromEntries(new FormData(this)));
+        });
+        
         document.getElementById("btnEditar").addEventListener("click", function() {
             // habilitar inputs y selects
             document.querySelectorAll("input, select, textarea").forEach(el => {

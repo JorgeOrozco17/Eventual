@@ -22,8 +22,13 @@ $recursos = $catalogo->getAllRecursos();
 $adscripciones = $catalogo->getAllJurisdicciones();
 $quincena = $catalogo->getAllQuincenas();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $controller->updatePersonal();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id_personal'] ?? null;
+    if (!empty($id)) {
+        $controller->updatePersonal();
+    } else {
+        $controller->save();
+    }
     exit;
 }
 
@@ -75,8 +80,28 @@ if (isset($_GET['id'])){
 
                     <div class="col-md-10">
                         <label>Nombre Alta:</label>
-                        <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>" readonly>
+                        <input type="text" name="nombre_alta" class="form-control" value="<?= htmlspecialchars($personal['nombre_alta'] ?? '') ?>">
                     </div>
+
+                    <?php if (!isset($_GET['id'])): ?>
+                    <div class="col-md-6">
+                        <label>Solicita</label>
+                        <input type="text" name="solicita" class="form-control" value="<?= htmlspecialchars($personal['solicita'] ?? '') ?>" >
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Movimiento:</label>
+                        <select name="movimiento" class="form-select" required>
+                            <option value="">Seleccione</option>
+                            <option value="alta" <?= (isset($personal['movimiento']) && $personal['movimiento'] == 'alta') ? 'selected' : '' ?>>ALTA</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>Oficio:</label>
+                        <input type="text" name="oficio" class="form-control" value="<?= htmlspecialchars($personal['oficio'] ?? '') ?>" required>
+                    </div>
+                    <?php endif; ?>
 
                     <div>
                         <input type="hidden" name="estatus" id="estatus" >
@@ -97,7 +122,6 @@ if (isset($_GET['id'])){
                     <div class="col-md-6">
                         <label>Puesto:</label>
                         <select name="puesto" class="form-select" required>
-                            <option value="">Seleccione un puesto</option>
                             <?php foreach ($puestos as $p): ?>
                                 <option value="<?= $p['nombre_puesto'] ?>" 
                                     <?= (isset($personal['puesto']) && $personal['puesto'] == $p['nombre_puesto']) ? 'selected' : '' ?>>
@@ -120,7 +144,7 @@ if (isset($_GET['id'])){
                     </div>
 
                     <div class="col-md-6">
-                        <label>Rama</label>
+                        <label>Rama:</label>
                         <select name="rama" id="" class="form-select" required>
                             <option value="RAMA ADMINISTRATIVA">RAMA ADMINISTRATIVA</option>
                             <option value="RAMA MEDICA"> RAMA MEDICA</option>
@@ -142,7 +166,7 @@ if (isset($_GET['id'])){
                      <div class="col-md-6">
                         <label>Centro:</label>
                         <select name="centro" id="centro" class="form-select" required>
-                            <option value="<?= htmlspecialchars($personal['centro'] ?? '') ?>">
+                            <option value="<?= htmlspecialchars($personal['id_centro'] ?? '') ?>">
                                 <?= htmlspecialchars($personal['centro'] ?? 'Seleccione un centro') ?>
                             </option>
                         </select>
@@ -187,16 +211,18 @@ if (isset($_GET['id'])){
                                 <?php endforeach; ?>
                             </select>
                         </div>
-
-                        <div class="col-md-3">
-                            <label>Inicio de Contratación:</label>
-                            <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?>">
+                         
+                        <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label>Inicio de Contratación:</label>
+                                <input type="date" name="inicio_contratacion" class="form-control" value="<?= htmlspecialchars($personal['inicio_contratacion'] ?? '') ?>">
+                            </div>
                         </div>
                     <?php endif; ?>
 
                     <div class="col-md-6">
                         <label>Cuenta bancaria:</label>
-                        <input type="text" name="cuenta" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
+                        <input type="number" name="cuenta" class="form-control" value="<?= htmlspecialchars($personal['cuenta'] ?? '') ?>">
                     </div>
 
                     <div class="col-md-12">

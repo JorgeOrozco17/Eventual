@@ -24,8 +24,20 @@ class ContratoController {
         return $this->model->getEmpleadosByJurisdiccion($jurisdiccionId);
     }
 
+    public function getEmpleadosByCentro($user_id) {
+        return $this->model->getEmpleadosByCentro($user_id);
+    }
+
     public function getTrimestres(){
         return $this->model->getTrimestres();
+    }
+
+    public function getCargoById($user_id){
+        return $this->model->getCargoById($user_id);
+    }
+
+    public function getResponsableByUser($user_id){
+        return $this->model->getResponsableByUser($user_id);
     }
 }
 

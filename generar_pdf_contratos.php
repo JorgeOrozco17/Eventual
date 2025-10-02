@@ -26,6 +26,7 @@ $jurisdiccion = $_GET['jurisdiccion'] ?? 'todas';
 
 
 $catalogoCtrl = new CatalogoController();
+$usuarios = new UserController();
 
 if ($jurisdiccion == 'todas') {
     $juris_empleado = $catalogoCtrl->getAllJurisdicciones();
@@ -171,6 +172,9 @@ function empleado_valido($empleado) {
     return true;
 }
 
+$responsableRH = $contratoCtrl->getResponsableByUser($_SESSION['user_id']);
+$cargo_responsable = $contratoCtrl->getCargoById($_SESSION['user_id']);
+
 // --- Ciclo principal de generación de PDFs ---
 foreach ($empleados as $empleado) {
     // Edad desde RFC
@@ -224,8 +228,9 @@ foreach ($empleados as $empleado) {
 
     $responsable = $_SESSION['name'];
 
-    // --- VARIABLES PARA TEMPLATE ---
-    $vars = [
+
+// --- Arma el array de reemplazo ---
+$vars = [
         '{{NOMBRE_TRABAJADOR}}'   => '<span class="underline">' . htmlspecialchars($empleado['nombre_alta']) . '</span>',
         '{{EDAD}}'                => '<span class="underline">' . htmlspecialchars($edad_trabajador) . '</span>',
         '{{NACIONALIDAD}}'        => '<span class="underline">' . htmlspecialchars($empleado['nacionalidad']) . '</span>',
@@ -245,7 +250,9 @@ foreach ($empleados as $empleado) {
         '{{VIGENCIA_DIAS}}'       => '<span class="underline">' . htmlspecialchars($vigencia_dias) . '</span>',
         '{{SALARIO}}'             => '<span class="underline">' . number_format($sueldo_mensual, 2) . '</span>',
         '{{SALARIO_LETRAS}}'      => '<span class="underline">' . convertir_a_letras($sueldo_mensual) . '</span>',
-        '{{RESPONSABLE}}'         => '<span class="underline">' . htmlspecialchars($responsable) . '</span>',
+        '{{RESPONSABLE}}'         => '<span >' . htmlspecialchars($responsable) . '</span>',
+        '{{RESPONSABLERH}}'       => '<span >' . htmlspecialchars($responsableRH) . '</span>',
+        '{{CARGO_RESPONSABLE}}'   => '<span >' . htmlspecialchars($cargo_responsable) . '</span>',
     ];
 
 
@@ -266,7 +273,7 @@ foreach ($empleados as $empleado) {
 }
 
 // 5. Crear el ZIP con PhpZip
-$zipname = $tmpDir . '/Contratos_' . date('d_m_Y') . '.zip';
+$zipname = sys_get_temp_dir() . '/Contratos_' . date('Ymd_His') . '.zip';
 $zipFile = new ZipFile();
 
 try {
@@ -278,11 +285,16 @@ try {
     $zipFile->close();
 }
 
+// --- Limpia buffer de salida para que no meta basura en el zip
+if (ob_get_length()) ob_end_clean();
+
 // 6. Descarga el ZIP
 header('Content-Type: application/zip');
-header('Content-Disposition: attachment; filename="Contratos_' . date('Ymd_His') . '.zip"');
+header('Content-Disposition: attachment; filename="' . basename($zipname) . '"');
 header('Content-Length: ' . filesize($zipname));
+flush();
 readfile($zipname);
 exit;
+
 
 ?>

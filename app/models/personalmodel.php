@@ -605,6 +605,9 @@ class PersonalModel {
         // 6. sueldo_diario
         $sueldo_diario = $bruto_mensual / 15;
 
+        // 9. P_00 (ya se que este no va a qui, necesito cambiarlo despues, solo reacomodar los numeros de los pasos. JAJAJAJA)
+        $P_00 = 0;
+
         // 7. isr_mens e isr_qna
         // Buscar el rango en la tabla de isr
         $stmtISR = $this->conn->prepare("
@@ -622,8 +625,19 @@ class PersonalModel {
             $porcentaje = (float)$rowISR['porcentaje'];
             $isr_mens = (($bruto_mensual - $lim_inferior) * ($porcentaje / 100)) + $cuota_fija;
             $isr_qna = $isr_mens / 2;
+
+            //  Ajuste especial
+            if ($bruto_mensual <= 10171) {
+                $isr_qna -= 237.50;   // El subsidio es 475 mensual, la mitad es 237.50
+
+                if ($isr_qna < 0) {
+                    // el negativo se manda a P_00
+                    $P_00 = abs($isr_qna);
+                    $isr_qna = 0;
+                }
+            }
+
         } else {
-            // Si no hay rango, lo dejas en 0 (puedes ajustar este comportamiento)
             $isr_mens = 0;
             $isr_qna = 0;
         }
@@ -633,9 +647,6 @@ class PersonalModel {
         // 8. neto_mensual y neto_qna
         $neto_mensual = ($bruto_mensual - $isr_mens) - $dsctos_issste_mensual;
         $neto_qna = $neto_mensual / 2;
-
-        // 9. P_00
-        $P_00 = ($bruto_mensual <= 10171) ? 475 : null;
 
         // 10. sueldo igual a P_01
         $sueldo = $P_01;

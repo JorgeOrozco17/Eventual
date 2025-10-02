@@ -142,8 +142,8 @@ class UserController {
         return $this->model->getAllResponsables();
     }   
 
-    public function getRespobsableByJurisdiccion($juris){
-        return $this->model->getRespobsableByJurisdiccion($juris);
+    public function getRespobsableByJurisdiccion($juris, $centro){
+        return $this->model->getRespobsableByJurisdiccion($juris, $centro);
     }
 
 }

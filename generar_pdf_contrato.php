@@ -190,7 +190,8 @@ $adscripcion_full = trim($adscripcion_nombre . ' - ' . ($adscripcion_ubicacion ?
 $sueldo_mensual = $empleado['sueldo_bruto'];
 
 $responsable = $_SESSION['name'];
-$responsableRH = $usuarios->getRespobsableByJurisdiccion($_SESSION['juris']);
+$responsableRH = $usuarios->getRespobsableByJurisdiccion($empleado['id_adscripcion'], $empleado['id_centro']);
+$cargo_responsable = $contratoCtrl->getCargoById($_SESSION['user_id']);
 
 
 // --- Arma el array de reemplazo ---
@@ -214,8 +215,9 @@ $vars = [
         '{{VIGENCIA_DIAS}}'       => '<span class="underline">' . htmlspecialchars($vigencia_dias) . '</span>',
         '{{SALARIO}}'             => '<span class="underline">' . number_format($sueldo_mensual, 2) . '</span>',
         '{{SALARIO_LETRAS}}'      => '<span class="underline">' . convertir_a_letras($sueldo_mensual) . '</span>',
-        '{{RESPONSABLE}}'         => '<span class="underline">' . htmlspecialchars($responsable) . '</span>',
-        '{{RESPONSABLERH}}'       => '<span class="underline">' . htmlspecialchars($responsableRH) . '</span>',
+        '{{RESPONSABLE}}'         => '<span>' . htmlspecialchars($responsable) . '</span>',
+        '{{RESPONSABLERH}}'       => '<span>' . htmlspecialchars($responsableRH) . '</span>',
+        '{{CARGO_RESPONSABLE}}'   => '<span>' . htmlspecialchars($cargo_responsable) . '</span>',
     ];
 
 // --- LEE el template, reemplaza y genera PDF ---

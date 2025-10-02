@@ -17,7 +17,7 @@
         p, ol, li {
             text-align: justify;
             list-style: none;
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
         }
         .firma-table { width: 100%; margin-top: 15px; }
         .firma-table td { vertical-align: top; text-align: center; }
@@ -38,7 +38,12 @@
         .linea-firma {
             border-top: 1px solid #000;
             padding-top: 5px;
-            margin-top: 20%;
+            margin-top: 15%;
+        }
+        .linea-firma_sub {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 10%;
         }
         .underline {
             border-bottom: 1px solid #333;
@@ -99,7 +104,7 @@
 <br>
 
 <b>Expuesto lo anterior, las partes sujetan sus compromisos a la forma, en los términos que se establecen en las siguientes:</b>
-<br><br><br>
+<br><br><br><br><br>
 <b class="titulos">C L Á U S U L A S</b>
 <br><br>
 
@@ -156,16 +161,25 @@
                 </td>
             </tr>
             <br>
-            <br>
             <tr>
                 <td class="firma-cell">
                     <div class="linea-firma">
-                        <strong>C. {{RESPONSABLE}}</strong><br>
+                        <strong>TESTIGO</strong><br>
+                        <strong>{{RESPONSABLE}}</strong> {{CARGO_RESPONSABLE}}
                     </div>
                 </td>
-                <td class="firma-spacer"></td>
+                <td class="firma-spacer">
+                </td>
                 <td class="firma-cell">
                     <div class="linea-firma">
+                        <strong>TESTIGO</strong><br>
+                        {{RESPONSABLERH}}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="firma-cell" colspan="3" style="text-align: center;">
+                    <div class="linea-firma_sub" style="display:inline-block; width:50%;">
                         <strong>LIC. JANNET ALEJANDRA GONZALEZ HIDROGO</strong><br>
                         SUBDIRECTORA ESTATAL DE RECURSOS HUMANOS
                     </div>

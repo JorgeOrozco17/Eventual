@@ -183,16 +183,22 @@
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        public function getRespobsableByJurisdiccion($juris){
+        public function getRespobsableByJurisdiccion($juris, $centro){
             $stmt = $this->conn->prepare("
-            SELECT r.*, u.Nombre
+            SELECT u.nombre AS nombre_responsable
             FROM responsables r
             JOIN usuarios u ON r.rh_responsable = u.id
-            WHERE r.id_juris = 8
-              AND r.id_centro = 0
+            WHERE (r.id_centro = :id_centro)
+            OR (r.id_centro = 0 AND r.id_juris = :id_juris)
+            ORDER BY 
+            CASE 
+                WHEN r.id_centro = :id_centro THEN 1
+                WHEN r.id_centro = 0 AND r.id_juris = :id_juris THEN 2
+                ELSE 3
+            END
             LIMIT 1");
-            $stmt->execute([$juris]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute(['id_juris' => $juris, 'id_centro' => $centro]);
+            return $stmt->fetchColumn();
         }
 
         public function getResponsableBycentro($juris){

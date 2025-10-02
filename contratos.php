@@ -9,7 +9,7 @@ $jurisdicciones = $catalogio->getAllJurisdicciones();
 
 $jurisgral = $_GET['jurisdiccion'] ?? 'todas';
 
-// El admin (juris 9) puede filtrar, los demás sólo ven su jurisdicción
+
 if ($user_juris == 10) {
     if (isset($_GET['jurisdiccion']) && $_GET['jurisdiccion'] != 'todas') {
         $juris = $_GET['jurisdiccion'];
@@ -19,8 +19,12 @@ if ($user_juris == 10) {
         $empleados = $contratoCtrl->getAllEmpleados();
     }
     $mostrar_filtro = true;
-} else {
+} elseif ($_SESSION['role'] == 6) {
     $empleados = $contratoCtrl->getEmpleadosByJurisdiccion($user_juris);
+    $juris = $user_juris;
+    $mostrar_filtro = false;
+} elseif($_SESSION['role'] == 7) {
+    $empleados = $contratoCtrl->getEmpleadosByCentro($_SESSION['user_id']);
     $juris = $user_juris;
     $mostrar_filtro = false;
 }
@@ -108,6 +112,7 @@ function empleado_completo($empleado) {
                             <th>Nombre</th>
                             <th>Puesto</th>
                             <th>Jurisdicción</th>
+                            <th>Centro</th>
                             <th>Estado</th>
                             <th>Acción</th>
                         </tr>
@@ -129,6 +134,7 @@ function empleado_completo($empleado) {
                                     }
                                     ?>
                                 </td>
+                                <td><?= htmlspecialchars($empleado['centro']) ?></td>
                                 <td>
                                     <?php if (empleado_completo($empleado)): ?>
                                         <span class="badge bg-success">Completo</span>

@@ -26,6 +26,7 @@ class Capturacontroller{
             $id = $_GET['id'];
             $qna = $_GET['qna'];
             $anio = $_GET['anio'];
+            $id_nomina = $_GET['id_n'];
 
             $fields = [
                 'D_01', 'D_04', 'D_05', 'D_62', 'D_64', 'D_65', 'D_R1', 'D_R2', 'D_R3', 'D_R4',
@@ -45,13 +46,13 @@ class Capturacontroller{
             $this->log_accion($usuario, "Actualizó captura manual.", $id_acciones);
 
             if ($ok) {
-                $this->model->calcularTotales($qna, $anio);
+                $this->model->calcularTotales($id_nomina, $qna, $anio);
 
                 $this->log_accion($usuario, "Calculó totales de captura.", $id_acciones);
 
-                header("Location: captura.php?&qna=" . $qna . "&anio=" . $anio);
+                header("Location: captura.php?&id=" . urlencode($id_nomina));
             } else {
-                header("Location: captura.php?&qna=" . urlencode($qna) . "&anio=" . urlencode($anio));
+                header("Location: captura.php?&id=" . urlencode($id_nomina));
             }
             exit;
         }
@@ -107,37 +108,37 @@ class Capturacontroller{
         $id_acciones = "QNA= $quincena, Año= $anio";
 
         if (!$this->model->nominaExistente($quincena, $anio)) {
-            $this->log_accion($usuario, "Intentó crear nómina Extraordinaria pero no existe. una nomina ordinaria", $id_acciones);
-            return 'existe';
+            $this->log_accion($usuario, "Intentó crear nómina Extraordinaria pero no existe una nómina ordinaria", $id_acciones);
+            return 'no existe';
         }
 
         $id_nomina = $this->model->insertNomina($tipo, $quincena, $anio);
         
 
         if ($id_nomina) {
-            $this->model->generarCaptura($quincena, $anio, $id_nomina);
+            $this->model->generarCapturaExtra($quincena, $anio, $id_nomina);
 
             }
         $this->log_accion($usuario, "Insertó nueva nómina.", $id_acciones);
         return true ? 'exito' : 'error'; 
     }
 
-    public function insertartotales($qna, $anio){
-         $ok = $this->model->calcularTotales($qna, $anio);
+    public function insertartotales($id_nomina, $qna, $anio){
+         $ok = $this->model->calcularTotales($id_nomina, $qna, $anio);
          
         if ($ok){
-            $this->model->insertartotales($qna, $anio);
+            $this->model->insertartotales($id_nomina);
         }
         $usuario = $_SESSION['user_id'] ?? 0;
-        $id_acciones = "QNA= $qna, Año= $anio";
+        $id_acciones = "ID NÓMINA= $id_nomina";
         $this->log_accion($usuario, "Insertó totales de nómina.", $id_acciones);
         return $ok;
     }
 
     //////////////////////////////// Generar excel ///////////////////////////////////////
 
-    public function datosCaptura($qna, $anio){
-        return $this->model->datosCaptura($qna, $anio);
+    public function datosCaptura($id_nomina){
+        return $this->model->datosCaptura($id_nomina);
     }
 
     /////////////////////////// generar recibos ///////////////////////////////

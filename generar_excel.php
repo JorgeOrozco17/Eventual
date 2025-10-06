@@ -11,14 +11,17 @@ require_once 'app/controllers/capturacontroller.php';
 $controller = new Capturacontroller();
 
 // Obtener todos los registros de la tabla captura
-$qna = $_GET['qna'] ?? '';  // Puedes recibir el valor de la quincena desde la URL
-$anio = $_GET['anio'] ?? ''; // También puedes recibir el año desde la URL
-$capturaData = $controller->model->datosCaptura($qna, $anio); // Filtrar por quincena y año si lo necesitas
+
+$id_nomina = $_GET['id'] ?? ''; // También puedes recibir el id_nomina desde la URL
+$capturaData = $controller->model->datosCaptura($id_nomina); // Filtrar por quincena y año si lo necesitas
+$qna = $capturaData[0]['QNA'] ?? '';  // Puedes recibir el valor de la quincena desde la URL
+$anio = $capturaData[0]['AÑO'] ?? ''; // También puedes recibir el año desde la URL
+$tipo = $capturaData[0]['tipo'] ?? '';
 
 // Crear una nueva instancia de PhpSpreadsheet
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
-$sheet->setTitle('QNA ' . $qna . '-' . $anio);
+$sheet->setTitle('QNA ' . $qna . $tipo  . '-' . $anio);
 
 
 // Títulos de las columnas
@@ -155,7 +158,11 @@ $spreadsheet->getActiveSheet()->calculateColumnWidths();  // Calcular los anchos
 
 // Crear y descargar el archivo
 $writer = new Xlsx($spreadsheet);
-$fileName = 'QNA ' . $qna . ' - ' . $anio . '.xlsx';
+if($tipo == 'Ordinaria'){
+    $fileName = 'QNA ' . $qna . ' - ' . $anio . '.xlsx';
+} else{
+    $fileName = 'QNA ' . $qna . ' ' . $tipo  . ' - ' . $anio . '.xlsx';
+}
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment;filename="' . $fileName . '"');
 header('Cache-Control: max-age=0');

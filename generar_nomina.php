@@ -8,30 +8,50 @@ $captura = new Capturacontroller();
 
 
 $quincena = $catalogo->getAllQuincenas();
-?>
-<?php if (isset($_GET['error'])): ?>
-    <script>
-        const errorType = "<?php echo $_GET['error']; ?>";
 
-        if (errorType === "1") {
-            // Error de que ya existe una nómina para esa quincena y año
+if (isset($_GET['error']) && $_GET['error'] == 1) {
+    echo "
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'error',
-                title: '¡Error!',
-                text: 'Ya se ha creado una nómina para esta quincena y año.',
-                confirmButtonText: 'Cerrar'
+                title: 'Error al registrar',
+                text: 'Ya existe una nómina en ese periodo.',
+                confirmButtonText: 'Aceptar',
+                background: '#fdfaf6',
+                color: '#333',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg'
+                }
             });
-        } else if (errorType === "2") {
-            // Error genérico en caso de otros problemas al generar la nómina
-            Swal.fire({
-                icon: 'error',
-                title: '¡Error!',
-                text: 'Hubo un error al generar la nómina. Intenta nuevamente.',
-                confirmButtonText: 'Cerrar'
-            });
-        }
+        });
     </script>
-<?php endif; ?>
+    ";
+}
+
+if (isset($_GET['error']) && $_GET['error'] == 2) {
+    echo "
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al registrar',
+                text: 'No existe nomina ordinaria para este periodo. Genere la nomina ordinaria primero.',
+                confirmButtonText: 'Aceptar',
+                background: '#fdfaf6',
+                color: '#333',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg'
+                }
+            });
+        });
+    </script>
+    ";
+}
+
+?>
 <style>
     body {
         background-color: #D9D9D9 !important;

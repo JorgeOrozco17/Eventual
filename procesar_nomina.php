@@ -25,10 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Si la nómina ya existe, redirigir con un mensaje de error
     if ($resultado === 'existe') {
-        header("Location: generar_nomina.php");
+        header("Location: generar_nomina.php?error=1");
     } elseif ($resultado === 'exito') {
         // Si la nómina se generó correctamente, redirigir a la página de la nómina
-        header("Location: nomina.php");
+        header("Location: nomina.php?success=1");
     } else {
         // En caso de otro error, redirigir con un mensaje de error
         header("Location: generar_nomina.php?error=2");

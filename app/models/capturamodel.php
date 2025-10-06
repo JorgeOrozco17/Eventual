@@ -15,10 +15,10 @@ class Capturamodel{
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getByPeriodo($qna, $anio){
-        $stmt = $this->conn->prepare("SELECT * FROM captura WHERE QNA = :qna AND AÑO = :anio");
-        $stmt->bindParam(':qna', $qna);
-        $stmt->bindParam(':anio', $anio);
+    public function getByPeriodo($id_nomina){
+        $stmt = $this->conn->prepare("SELECT * FROM captura WHERE id_nomina = :id_nomina");
+        $stmt->bindParam(':id_nomina', $id_nomina);
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -189,38 +189,48 @@ class Capturamodel{
         try {
             $stmt = $this->conn->prepare("
                 SELECT 
-                p.id AS id_personal, 
-                p.RFC, 
-                p.CURP, 
-                p.nombre_alta, 
-                p.clues, 
-                p.adscripcion,
-                p.centro, 
-                p.inicio_contratacion, 
-                p.programa,
-                p.clave_recurso,
-                p.rama,
-                p.puesto,
-                p.cuenta,
-                p.codigo,
-                c.D_S2, 
-                c.D_S4,
-                c.D_S5,
-                c.D_S6,
-                c.P_01,
-                c.P_00, 
-                c.comp_garantizada, 
-                c.isr_qna, 
-                c.sueldo_diario,
-                a.desc_ct_dpto,
-                a.desc_cen_art74,
-                a.ct_art_74,
-                a.juris
-            FROM personal p
-            LEFT JOIN calculo_personal c ON c.id_personal = p.id
-            LEFT JOIN art_74 a ON a.id_personal = p.id
-            WHERE p.estatus = 'activo'
+                    p.id AS id_personal, 
+                    p.RFC, 
+                    p.CURP, 
+                    p.nombre_alta, 
+                    p.clues, 
+                    p.adscripcion,
+                    p.centro, 
+                    p.inicio_contratacion, 
+                    p.programa,
+                    p.clave_recurso,
+                    p.rama,
+                    p.puesto,
+                    p.cuenta,
+                    p.codigo,
+                    c.D_S2, 
+                    c.D_S4,
+                    c.D_S5,
+                    c.D_S6,
+                    c.P_01,
+                    c.P_00, 
+                    c.comp_garantizada, 
+                    c.isr_qna, 
+                    c.sueldo_diario,
+                    a.desc_ct_dpto,
+                    a.desc_cen_art74,
+                    a.ct_art_74,
+                    a.juris
+                FROM personal p
+                LEFT JOIN calculo_personal c ON c.id_personal = p.id
+                LEFT JOIN art_74 a ON a.id_personal = p.id
+                WHERE p.estatus = 'activo'
+                AND p.id NOT IN (
+                    SELECT id_personal 
+                    FROM captura ca
+                    INNER JOIN nominas n ON n.id = ca.id_nomina
+                    WHERE n.qna = :qna
+                        AND n.año = :anio
+                        AND n.tipo = 'Ordinaria'
+                )
             ");
+            $stmt->bindParam(':qna', $quincena, PDO::PARAM_INT);
+            $stmt->bindParam(':anio', $anio, PDO::PARAM_INT);
             $stmt->execute();
             $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -395,7 +405,7 @@ class Capturamodel{
         return $stmt->execute([$qna, $anio]);
     }
 
-    public function calcularTotales($qna, $anio) {
+    public function calcularTotales($id_nomina, $qna, $anio) {
 
         $this->UpdateFaltas($qna, $anio);
         $this->UpdateLicencias($qna, $anio);
@@ -409,8 +419,8 @@ class Capturamodel{
         $percepcionesCampos = ['P_00', 'P_01', 'P_06', 'P_26'];
 
         // 1. Obtener todas las filas de captura para el periodo indicado
-        $stmtSelect = $this->conn->prepare("SELECT id, " . implode(", ", array_merge($deduccionesCampos, $percepcionesCampos)) . " FROM captura WHERE QNA = ? AND AÑO = ?");
-        $stmtSelect->execute([$qna, $anio]);
+        $stmtSelect = $this->conn->prepare("SELECT id, " . implode(", ", array_merge($deduccionesCampos, $percepcionesCampos)) . " FROM captura WHERE id_nomina = ?");
+        $stmtSelect->execute([$id_nomina]);
         $filas = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
 
         // 2. Preparar sentencia para actualizar
@@ -448,7 +458,7 @@ class Capturamodel{
         return true;
     }
 
-    public function insertartotales($qna, $anio) {
+    public function insertartotales($id_nomina) {
 
         // Sumar percepciones, deducciones, total neto y contar registros en captura para periodo dado
         $sql = "
@@ -458,11 +468,11 @@ class Capturamodel{
                 SUM(DEDUCCIONES) AS total_deducciones,
                 SUM(TOTAL_NETO) AS total_neto
             FROM captura
-            WHERE QNA = ? AND AÑO = ?
+            WHERE id_nomina = ?
         ";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$qna, $anio]);
+        $stmt->execute([$id_nomina]);
         $totales = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$totales) {
@@ -477,7 +487,7 @@ class Capturamodel{
                 total_deducciones = ?,
                 total_neto = ?,
                 estatus = ?
-            WHERE qna = ? AND año = ?
+            WHERE id = ?
         ";
 
         $stmtUpdate = $this->conn->prepare($sqlUpdate);
@@ -487,8 +497,7 @@ class Capturamodel{
             $totales['total_deducciones'],
             $totales['total_neto'],
             1,
-            $qna,
-            $anio
+            $id_nomina
         ]);
     }
 
@@ -519,9 +528,9 @@ class Capturamodel{
 
     ////////////////////////////////////////////////////////////////////// generar excel  //////////////////////////////////
 
-    public function datosCaptura($qna, $anio){
-        $stmt = $this->conn->prepare("SELECT * FROM captura WHERE QNA = ? AND AÑO = ?");
-        $stmt->execute([$qna, $anio]);
+    public function datosCaptura($id_nomina){
+        $stmt = $this->conn->prepare("SELECT c.*, n.tipo FROM captura c JOIN nominas n ON c.id_nomina = n.id WHERE c.id_nomina = :id_nomina");
+        $stmt->execute([':id_nomina' => $id_nomina]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

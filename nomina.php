@@ -23,6 +23,26 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit;
 }
 
+if (isset($_GET['success']) && $_GET['success'] == 1) {
+    echo "
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Nómina registrada',
+                text: 'La nómina se ha registrado correctamente.',
+                confirmButtonText: 'Aceptar',
+                background: '#fdfaf6',
+                color: '#333',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg'
+                }
+            });
+        });
+    </script>
+    ";
+}
 
 ?>
 <style>
@@ -60,6 +80,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
                     <thead class="table-light">
                         <tr>
                             <th>QNA</th>
+                            <th>Tipo</th>
                             <th>AÑO</th>
                             <th>Total Registros</th>
                             <th>Total Percepciones</th>
@@ -72,6 +93,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
                         <?php foreach ($data as $p): ?>
                         <tr>
                             <td><?= htmlspecialchars($p['qna']) ?></td>
+                            <th><?= htmlspecialchars($p['tipo']) ?></th>
                             <td><?= htmlspecialchars($p['año']) ?></td>
                             <td><?= htmlspecialchars($p['total_registros']) ?></td>
                             <td><?= '$' . number_format($p['total_percepciones'], 2, '.', ',') ?></td>
@@ -79,12 +101,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
                             <td><?= '$' . number_format($p['total_neto'], 2, '.', ',') ?></td>
                             <td nowrap>
                                 <?php if ( $p['estatus'] === 1): ?>
-                                    <a href="generar_excel.php?qna=<?= $p['qna'] ?>&anio=<?= $p['año'] ?>" class="btn btn-icon btn-sm btn-info me-2">
+                                    <a href="generar_excel.php?id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-info me-2">
                                         <i class="fas fa-file-lines"></i>
                                     </a>
                                 
                                 <?php else: ?>
-                                <a href="captura.php?qna=<?= $p['qna'] ?>&anio=<?= $p['año'] ?>" class="btn btn-icon btn-sm btn-info me-2">
+                                <a href="captura.php?id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-info me-2">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <?php endif; ?>

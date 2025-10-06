@@ -20,10 +20,11 @@ $options->set('isHtml5ParserEnabled', true);
 $options->set('isPhpEnabled', false);
 $options->set('tempDir', $tmpDir);
 $options->set('chroot', __DIR__);
+$options->set('defaultFont', 'Helvetica');
+
 
 // 1. Recibe la jurisdicción (puede ser "todas")
 $jurisdiccion = $_GET['jurisdiccion'] ?? 'todas';
-
 
 $catalogoCtrl = new CatalogoController();
 $usuarios = new UserController();
@@ -83,7 +84,6 @@ mkdir($tmpDir);
 
 // 4. Lee el template
 $template = file_get_contents('contrato_template.html');
-$archivos = [];
 
 // Función para convertir sueldo a letras
 function convertir_a_letras($numero) {
@@ -175,7 +175,13 @@ function empleado_valido($empleado) {
 $responsableRH = $contratoCtrl->getResponsableByUser($_SESSION['user_id']);
 $cargo_responsable = $contratoCtrl->getCargoById($_SESSION['user_id']);
 
-// --- Ciclo principal de generación de PDFs ---
+// === GENERACIÓN DE PDFs Y ZIPS POR LOTES ===
+$archivos = [];
+$batchSize = 100;
+$zipFiles  = [];
+$contador  = 0;
+$lote      = 1;
+
 foreach ($empleados as $empleado) {
     // Edad desde RFC
     $edad_trabajador = edad_desde_rfc($empleado['RFC']);
@@ -186,11 +192,10 @@ foreach ($empleados as $empleado) {
     }
 
     // === FECHAS Y VIGENCIA POR TRIMESTRE ===
-    $fecha_contratacion = $empleado['inicio_contratacion']; // Cambia si tu campo tiene otro nombre
+    $fecha_contratacion = $empleado['inicio_contratacion'];
     $fecha_inicio_tri = $trimestre_actual['inicio'];
     $fecha_fin_tri    = $trimestre_actual['fin'];
 
-    // Determinar inicio
     if ($fecha_contratacion && $fecha_contratacion >= $fecha_inicio_tri && $fecha_contratacion <= $fecha_fin_tri) {
         $inicio_contrato = $fecha_contratacion;
     } else {
@@ -198,19 +203,17 @@ foreach ($empleados as $empleado) {
     }
     $fin_contrato = $fecha_fin_tri;
 
-    // Calcular vigencia meses y días
     $dt_inicio = new DateTime($inicio_contrato);
     $dt_fin = new DateTime($fin_contrato);
     $intervalo = $dt_inicio->diff($dt_fin);
     $vigencia_meses = $intervalo->m + ($intervalo->y * 12);
     $vigencia_dias = $intervalo->d;
 
-    // Si es menos de un mes, solo días
     if ($vigencia_meses < 1) {
         $vigencia_dias = $dt_inicio->diff($dt_fin)->days;
     }
 
-    // Obtén la jurisdicción usando el ID preferentemente
+    // Jurisdicción
     $adscripcion_nombre = '';
     $adscripcion_ubicacion = '';
     if (!empty($empleado['id_adscripcion'])) {
@@ -220,17 +223,13 @@ foreach ($empleados as $empleado) {
             $adscripcion_ubicacion = $juris['ubicacion'] ?? '';
         }
     }
-
-    // Construye la variable combinada
     $adscripcion_full = trim($adscripcion_nombre . ' - ' . ($adscripcion_ubicacion ?  $adscripcion_ubicacion : ''));
 
-    $sueldo_mensual = $empleado['sueldo_bruto']; // Sueldo mensual
-
+    $sueldo_mensual = $empleado['sueldo_bruto'];
     $responsable = $_SESSION['name'];
 
-
-// --- Arma el array de reemplazo ---
-$vars = [
+    // Reemplazos
+    $vars = [
         '{{NOMBRE_TRABAJADOR}}'   => '<span class="underline">' . htmlspecialchars($empleado['nombre_alta']) . '</span>',
         '{{EDAD}}'                => '<span class="underline">' . htmlspecialchars($edad_trabajador) . '</span>',
         '{{NACIONALIDAD}}'        => '<span class="underline">' . htmlspecialchars($empleado['nacionalidad']) . '</span>',
@@ -255,46 +254,69 @@ $vars = [
         '{{CARGO_RESPONSABLE}}'   => '<span >' . htmlspecialchars($cargo_responsable) . '</span>',
     ];
 
-
     $html = strtr($template, $vars);
 
-    // Generar PDF
     $dompdf = new Dompdf($options);
     $dompdf->loadHtml($html);
     $dompdf->setPaper('Letter', 'portrait');
     $dompdf->render();
 
-    // Guarda PDF en archivo temporal
     $pdfOutput = $dompdf->output();
     $filename = $tmpDir . '/' . preg_replace('/[^a-zA-Z0-9_]/', '_', $empleado['nombre_alta']) . '.pdf';
     file_put_contents($filename, $pdfOutput);
 
     $archivos[] = $filename;
-}
+    $contador++;
 
-// 5. Crear el ZIP con PhpZip
-$zipname = sys_get_temp_dir() . '/Contratos_' . date('Ymd_His') . '.zip';
-$zipFile = new ZipFile();
+    // --- Cuando se llega a 100 PDFs o al final ---
+    if ($contador % $batchSize == 0 || $contador == count($empleados)) {
+        $zipname = sys_get_temp_dir() . '/Contratos_Lote_' . $lote . '_' . date('Ymd_His') . '.zip';
+        $zipFile = new ZipFile();
 
-try {
-    foreach ($archivos as $file) {
-        $zipFile->addFile($file, basename($file));
+        try {
+            foreach ($archivos as $file) {
+                $zipFile->addFile($file, basename($file));
+            }
+            $zipFile->saveAsFile($zipname);
+            $zipFiles[] = $zipname;
+        } finally {
+            $zipFile->close();
+        }
+
+        $archivos = [];
+        $lote++;
     }
-    $zipFile->saveAsFile($zipname);
-} finally {
-    $zipFile->close();
 }
 
-// --- Limpia buffer de salida para que no meta basura en el zip
-if (ob_get_length()) ob_end_clean();
+// === ZIP maestro que contiene todos los ZIPs ===
+if (count($zipFiles) > 1) {
+    $zipMaster = sys_get_temp_dir() . '/Contratos_Todos_' . date('Ymd_His') . '.zip';
+    $zipAll = new ZipFile();
 
-// 6. Descarga el ZIP
-header('Content-Type: application/zip');
-header('Content-Disposition: attachment; filename="' . basename($zipname) . '"');
-header('Content-Length: ' . filesize($zipname));
-flush();
-readfile($zipname);
-exit;
+    try {
+        foreach ($zipFiles as $z) {
+            $zipAll->addFile($z, basename($z));
+        }
+        $zipAll->saveAsFile($zipMaster);
+    } finally {
+        $zipAll->close();
+    }
 
-
+    if (ob_get_length()) ob_end_clean();
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . basename($zipMaster) . '"');
+    header('Content-Length: ' . filesize($zipMaster));
+    flush();
+    readfile($zipMaster);
+    exit;
+} else {
+    $zipname = $zipFiles[0];
+    if (ob_get_length()) ob_end_clean();
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . basename($zipname) . '"');
+    header('Content-Length: ' . filesize($zipname));
+    flush();
+    readfile($zipname);
+    exit;
+}
 ?>

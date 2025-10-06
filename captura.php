@@ -5,18 +5,18 @@ include 'header.php';
 $catalogo = new CatalogoController();
 $controller = new Capturacontroller();
 
-$qna = $_GET['qna'] ?? '';
-$anio = $_GET['anio'] ?? '';
+$id_nomina = $_GET['id'] ?? '';
 
-if ($qna && $anio) {
-    $data = $controller->model->getByPeriodo($qna, $anio);
+
+if ($id_nomina) {
+    $data = $controller->model->getByPeriodo($id_nomina);
 } else {
     $data = []; // o null si prefieres no mostrar nada
 }
 
 
-if (isset($_GET['action']) && $_GET['action'] == 'savenomina' && isset($_GET['qna']) && isset($_GET['anio'])){
-    $controller->insertartotales($_GET['qna'], $_GET['anio']);
+if (isset($_GET['action']) && $_GET['action'] == 'savenomina' && isset($_GET['id'])){
+    $controller->insertartotales($id_nomina, $data[0]['QNA'], $data[0]['AÑO']);
     header("Location: nomina.php");
     exit;
 }
@@ -47,7 +47,7 @@ $quincenas = $catalogo->getAllQuincenas();
                 <h2>Administracion de Percepciones/Decucciones</h2>
             </div>
             <div class="card-toolbar">
-                <a href="?action=savenomina&qna=<?= htmlspecialchars($qna) ?>&anio=<?= htmlspecialchars($anio) ?>" class="btn btn-primary">
+                <a href="?action=savenomina&id=<?= htmlspecialchars($id_nomina) ?>" class="btn btn-primary">
                     Finalizar o Guardar Cambios
                 </a>
             </div>
@@ -102,7 +102,7 @@ $quincenas = $catalogo->getAllQuincenas();
                             <td><?= "$" . number_format($p['DEDUCCIONES'], 2, '.', ',') ?></td>
                             <td><?= "$" . number_format($p['TOTAL_NETO'], 2, '.', ',') ?></td>
                             <td nowrap>
-                                <a href="modifnomina.php?id=<?= $p['id'] ?>&qna=<?=$p['QNA'] ?>&anio=<?= $p['AÑO'] ?>" class="btn btn-icon btn-sm me-2" title="Editar">
+                                <a href="modifnomina.php?id=<?= $p['id'] ?>&id_n=<?= $id_nomina ?>&qna=<?=$p['QNA'] ?>&anio=<?= $p['AÑO'] ?>" class="btn btn-icon btn-sm me-2" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="?action=delete&id=<?= $p['id'] ?>" class="btn btn-icon btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este registro?')">

@@ -183,26 +183,23 @@
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        public function getRespobsableByJurisdiccion($juris, $centro){
+        public function getRespobsableByJurisdiccion($user_id){
             $stmt = $this->conn->prepare("
-            SELECT u.nombre AS nombre_responsable
-            FROM responsables r
-            JOIN usuarios u ON r.rh_responsable = u.id
-            WHERE (r.id_centro = :id_centro)
-            OR (r.id_centro = 0 AND r.id_juris = :id_juris)
-            ORDER BY 
-            CASE 
-                WHEN r.id_centro = :id_centro THEN 1
-                WHEN r.id_centro = 0 AND r.id_juris = :id_juris THEN 2
-                ELSE 3
-            END
-            LIMIT 1");
-            $stmt->execute(['id_juris' => $juris, 'id_centro' => $centro]);
+            SELECT u.Nombre 
+            FROM usuarios u 
+            JOIN responsables r ON u.id = r.rh_responsable
+            WHERE r.id_usuario = :user_id");
+            $stmt->execute(['user_id' => $user_id]);
             return $stmt->fetchColumn();
         }
 
-        public function getResponsableBycentro($juris){
-            
+
+        ///////////////////////////////Actualizar usuario////////////////////////////////////////
+
+        public function updateCuenta($id, $usuario, $password, $foto) {
+            $sql = "UPDATE usuarios SET usuario = ?, contraseña = ?, archivo = ? WHERE id = ?";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([$usuario, $password, $foto, $id]);
         }
         
     }

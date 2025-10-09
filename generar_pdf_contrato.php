@@ -164,14 +164,34 @@ if ($fecha_contratacion && $fecha_contratacion >= $fecha_inicio_tri && $fecha_co
 $fin_contrato = $fecha_fin_tri;
 
 // Calcular vigencia meses y días
+// --- CALCULAR VIGENCIA EN MESES Y DÍAS (corrigiendo cálculo) ---
 $dt_inicio = new DateTime($inicio_contrato);
 $dt_fin = new DateTime($fin_contrato);
 $intervalo = $dt_inicio->diff($dt_fin);
+
 $vigencia_meses = $intervalo->m + ($intervalo->y * 12);
 $vigencia_dias = $intervalo->d;
-if ($vigencia_meses < 1) {
+
+// Si abarca el trimestre completo (3 meses exactos)
+$inicio_tri_dt = new DateTime($trimestre_actual['inicio']);
+$fin_tri_dt = new DateTime($trimestre_actual['fin']);
+
+// Si el empleado inició en el mismo día que el trimestre y termina el mismo día que el trimestre
+if ($dt_inicio->format('Y-m-d') == $inicio_tri_dt->format('Y-m-d') &&
+    $dt_fin->format('Y-m-d') == $fin_tri_dt->format('Y-m-d')) {
+    $vigencia_meses = 3;
+    $vigencia_dias = 0;
+}
+// Si la diferencia total de días es >= 85 (promedio de 3 meses)
+elseif ($dt_inicio->diff($dt_fin)->days >= 85) {
+    $vigencia_meses = 3;
+    $vigencia_dias = 0;
+}
+// Si no llega al mes completo
+elseif ($vigencia_meses < 1) {
     $vigencia_dias = $dt_inicio->diff($dt_fin)->days;
 }
+
 
 // Obtén la jurisdicción usando el ID preferentemente
 $adscripcion_nombre = '';
@@ -190,7 +210,7 @@ $adscripcion_full = trim($adscripcion_nombre . ' - ' . ($adscripcion_ubicacion ?
 $sueldo_mensual = $empleado['sueldo_bruto'];
 
 $responsable = $_SESSION['name'];
-$responsableRH = $usuarios->getRespobsableByJurisdiccion($empleado['id_adscripcion'], $empleado['id_centro']);
+$responsableRH = $usuarios->getRespobsableByJurisdiccion($_SESSION['user_id']);
 $cargo_responsable = $contratoCtrl->getCargoById($_SESSION['user_id']);
 
 
@@ -211,6 +231,7 @@ $vars = [
         '{{FECHA_INICIO}}'        => '<span class="underline">' . date('d/m/Y', strtotime($inicio_contrato)) . '</span>',
         '{{FECHA_FIN}}'           => '<span class="underline">' . date('d/m/Y', strtotime($fin_contrato)) . '</span>',
         '{{ADSCRIPCION}}'         => '<span class="underline">' . htmlspecialchars($adscripcion_full) . '</span>',
+        '{{CENTRO}}'              => '<span class="underline">' . htmlspecialchars($empleado['centro']) . '</span>',
         '{{VIGENCIA_MESES}}'      => '<span class="underline">' . htmlspecialchars($vigencia_meses) . '</span>',
         '{{VIGENCIA_DIAS}}'       => '<span class="underline">' . htmlspecialchars($vigencia_dias) . '</span>',
         '{{SALARIO}}'             => '<span class="underline">' . number_format($sueldo_mensual, 2) . '</span>',

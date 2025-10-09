@@ -124,11 +124,11 @@ class PersonalModel {
             // Inserción en personal
             $stmtInsert = $this->conn->prepare("
                 INSERT INTO personal (
-                    numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
+                    numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, desc_tnomina, rama, id_adscripcion, adscripcion, 
                     id_centro, centro, clues, RFC, CURP, sueldo_bruto, inicio_contratacion, quincena_alta, 
                     nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
                     id_usuario_registro, estatus, autorizacion
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
             ");
 
             $ok = $stmtInsert->execute([
@@ -140,6 +140,7 @@ class PersonalModel {
                 $codigo_puesto ?? null,
                 $data['programa'] ?? null,
                 $cve_recurso ?? null,
+                $data['desc_tnomina'] ?? null,
                 $data['rama'] ?? null,
                 $data['adscripcion'] ?? null,
                 $adscripcionnombre ?? null,
@@ -276,11 +277,11 @@ class PersonalModel {
             // Inserción en personal
             $stmtInsert = $this->conn->prepare("
                 INSERT INTO personal (
-                    numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, rama, id_adscripcion, adscripcion, 
+                    numero_oficio, movimiento, solicita, oficio, puesto, codigo, programa, clave_recurso, desc_tnomina, rama, id_adscripcion, adscripcion, 
                     id_centro, centro, clues, RFC, CURP, sueldo_bruto, inicio_contratacion, quincena_alta, 
                     nombre_alta, fecha_baja, quincena_baja, cuenta, observaciones_alta, observaciones_baja, 
                     id_usuario_registro, estatus, autorizacion
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
             ");
 
             $ok = $stmtInsert->execute([
@@ -292,6 +293,7 @@ class PersonalModel {
                 $codigo_puesto, ////
                 $data['programa'],
                 $cve_recurso,
+                $data['desc_tnomina'] ?? null,
                 $data['rama'],
                 $data['adscripcion'],
                 $adscripcionnombre,/////

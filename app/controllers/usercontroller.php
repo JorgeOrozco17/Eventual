@@ -142,8 +142,90 @@ class UserController {
         return $this->model->getAllResponsables();
     }   
 
-    public function getRespobsableByJurisdiccion($juris, $centro){
-        return $this->model->getRespobsableByJurisdiccion($juris, $centro);
+    public function getRespobsableByJurisdiccion($user_id){
+        return $this->model->getRespobsableByJurisdiccion($user_id);
     }
+
+
+    //////////////////////////////////// actualizar usuario //////////////////////
+
+
+    public function actualizarCuenta($id, $data, $files) {
+        $usuario = trim($data['usuario'] ?? '');
+        $password_actual = $data['password_actual'] ?? '';
+        $password_nueva = $data['password_nueva'] ?? '';
+        $password_confirmar = $data['password_confirmar'] ?? '';
+
+        // Validar nombre de usuario
+        if (empty($usuario)) {
+            return ['success' => false, 'message' => 'El nombre de usuario no puede estar vacío.'];
+        }
+
+        // Obtener datos actuales
+        $actual = $this->model->getById($id);
+        if (!$actual) {
+            return ['success' => false, 'message' => 'Usuario no encontrado.'];
+        }
+
+        $passwordActual = $actual['contraseña'];
+        $nuevaPassword = $passwordActual; // Por defecto se conserva la actual
+
+        // === Cambio de contraseña ===
+        if (!empty($password_actual) || !empty($password_nueva) || !empty($password_confirmar)) {
+
+            if (empty($password_actual) || empty($password_nueva) || empty($password_confirmar)) {
+                return ['success' => false, 'message' => 'Debes llenar todos los campos de contraseña.'];
+            }
+            if ($password_actual !== $passwordActual) {
+                return ['success' => false, 'message' => 'La contraseña actual no coincide.'];
+            }
+            if ($password_nueva !== $password_confirmar) {
+                return ['success' => false, 'message' => 'Las contraseñas nuevas no coinciden.'];
+            }
+            $nuevaPassword = $password_nueva;
+        }
+
+        // === Manejo de foto de perfil ===
+        $fotoActual = $actual['archivo'];
+        $fotoFinal = $fotoActual;
+
+        if (!empty($files['foto']['name'])) {
+            $ext = strtolower(pathinfo($files['foto']['name'], PATHINFO_EXTENSION));
+            $permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            if (!in_array($ext, $permitidas)) {
+                return ['success' => false, 'message' => 'Formato de imagen no permitido. Usa JPG, PNG o WEBP.'];
+            }
+
+            $nuevoNombre = 'perfil_' . $id . '_' . time() . '.' . $ext;
+            $rutaDestino = 'uploads/perfiles/' . $nuevoNombre;
+
+            if (!is_dir('uploads/perfiles/')) {
+                mkdir('uploads/perfiles/', 0777, true);
+            }
+
+            if (move_uploaded_file($files['foto']['tmp_name'], $rutaDestino)) {
+                // Eliminar foto anterior
+                if (!empty($fotoActual) && file_exists('uploads/perfiles/' . $fotoActual)) {
+                    unlink('uploads/perfiles/' . $fotoActual);
+                }
+                $fotoFinal = $nuevoNombre;
+            } else {
+                return ['success' => false, 'message' => 'No se pudo subir la foto.'];
+            }
+        }
+
+        // === Actualizar datos en la base de datos ===
+        $ok = $this->model->updateCuenta($id, $usuario, $nuevaPassword, $fotoFinal);
+
+        if ($ok) {
+            $_SESSION['usuario'] = $usuario;
+            $_SESSION['foto'] = $fotoFinal;
+            return ['success' => true, 'message' => 'Datos actualizados correctamente.'];
+        } else {
+            return ['success' => false, 'message' => 'No se pudo actualizar la cuenta.'];
+        }
+    }
+
 
 }

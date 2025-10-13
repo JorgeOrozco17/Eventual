@@ -112,13 +112,16 @@ class Capturacontroller{
             return 'no existe';
         }
 
-        $id_nomina = $this->model->insertNomina($tipo, $quincena, $anio);
-        
+        $extNumber = $this->model->getNextExtNumber($quincena, $anio);
+        $tipoFinal = "EXT $extNumber";
+
+        $id_nomina = $this->model->insertNomina($tipoFinal, $quincena, $anio);
 
         if ($id_nomina) {
             $this->model->generarCapturaExtra($quincena, $anio, $id_nomina);
-
-            }
+            $this->log_accion($usuario, "Insertó nueva nómina $tipoFinal", $id_acciones);
+            return 'exito';
+        }
         $this->log_accion($usuario, "Insertó nueva nómina.", $id_acciones);
         return true ? 'exito' : 'error'; 
     }
@@ -217,8 +220,16 @@ class Capturacontroller{
     
 ////////////////////////////////////////////////////////////////// tabla totales
 
-    public function getTablaTotales($qna, $anio, $programa, $rama){
-        return $this->model->getTablaTotales($qna, $anio, $programa, $rama);
+    public function getTablaTotales($qna, $programa){
+        return $this->model->getTablaTotales($qna, $programa);
+    }
+
+    public function getAllNominas(){
+        return $this->model->getAllNominas();
+    }
+
+    public function getDataNominaById($id){
+        return $this->model->getDataNominaById($id);
     }
 
 }

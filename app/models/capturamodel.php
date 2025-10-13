@@ -52,6 +52,13 @@ class Capturamodel{
         return $this->conn->lastInsertId();
     }
 
+    public function getNextExtNumber($quincena, $anio) {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM nominas WHERE qna = ? AND año = ? AND tipo LIKE 'EXT%'");
+        $stmt->execute([$quincena, $anio]);
+        $count = $stmt->fetchColumn();
+        return $count + 1;
+    }
+
     //Funcion para verificar si ya existe una nomina generada
     public function nominaExistente($quincena, $anio) {
         $stmt = $this->conn->prepare("SELECT COUNT(*) FROM nominas WHERE qna = ? AND año = ?");
@@ -72,6 +79,15 @@ class Capturamodel{
         $this->conn->beginTransaction();
 
         try {
+
+            $stmtFecha = $this->conn->prepare("SELECT fin FROM quincenas WHERE id = ?");
+            $stmtFecha->execute([$quincena]);
+            $data = $stmtFecha->fetch(PDO::FETCH_ASSOC);
+            if (!$data) {
+                throw new Exception("No se encontró la quincena $quincena en la tabla quincenas.");
+            }
+            $fechaFinQuincena = DateTime::createFromFormat('d/m/Y', $data['fin'].'/'.$anio)->format('Y-m-d');
+
             $stmt = $this->conn->prepare("
                 SELECT 
                 p.id AS id_personal, 
@@ -81,7 +97,8 @@ class Capturamodel{
                 p.clues, 
                 p.adscripcion,
                 p.centro, 
-                p.inicio_contratacion, 
+                p.inicio_contratacion,
+                p.desc_tnomina, 
                 p.programa,
                 p.clave_recurso,
                 p.rama,
@@ -93,7 +110,8 @@ class Capturamodel{
                 c.D_S5,
                 c.D_S6,
                 c.P_01,
-                c.P_00, 
+                c.P_00,
+                c.P_06,  
                 c.comp_garantizada, 
                 c.isr_qna, 
                 c.sueldo_diario,
@@ -104,8 +122,10 @@ class Capturamodel{
             FROM personal p
             LEFT JOIN calculo_personal c ON c.id_personal = p.id
             LEFT JOIN art_74 a ON a.id_personal = p.id
-            WHERE p.estatus = 'activo'
+            WHERE p.estatus = 'activo' AND p.autorizacion = 1
+            AND STR_TO_DATE(p.inicio_contratacion, '%Y-%m-%d') <= :fechaFin
             ");
+            $stmt->bindParam(':fechaFin', $fechaFinQuincena);
             $stmt->execute();
             $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -114,8 +134,8 @@ class Capturamodel{
                 INSERT INTO captura (
                     id_nomina, id_personal, NOM, RFC, CURP, NOMBRE, CLUES, JUR, DESCRIPCION_CLUES, CODIGO, QNA,
                     AÑO, STATUS, FECHA_INGRESO, DESC_TNOMINA, RECURSO, CVE_RECURSO, DESC_CATEGORIAS, RAMA,
-                    D_S2, D_S4, D_S5, D_S6, P_01, P_26, D_01, SD, CUENTA, P_00, DESC_CT_DEPTO, DESC_CEN_ART74, CT_ART_74, JURIS
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    D_S2, D_S4, D_S5, D_S6, P_01, P_26, D_01, SD, CUENTA, P_00, P_06, DESC_CT_DEPTO, DESC_CEN_ART74, CT_ART_74, JURIS
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             // Insertar cada empleado en la tabla captura
@@ -129,6 +149,7 @@ class Capturamodel{
                 $D_01 = $emp['isr_qna'] ?? 0;
                 $SD = $emp['sueldo_diario'] ?? 0;
                 $P_00 = $emp['P_00'] ?? 0;
+                $P_06 = $emp['P_06'] ?? 0;
 
                 // Insertar en la tabla captura
                 $stmtInsert->execute([
@@ -161,6 +182,7 @@ class Capturamodel{
                     $SD,
                     $emp['cuenta'] ?? 0,
                     $P_00,
+                    $P_06,
                     $emp['desc_ct_dpto'] ?? null,
                     $emp['desc_cen_art74'] ?? null,
                     $emp['ct_art_74'] ?? null,
@@ -187,8 +209,17 @@ class Capturamodel{
         $this->conn->beginTransaction();
 
         try {
+
+            $stmtFecha = $this->conn->prepare("SELECT fin FROM quincenas WHERE id = ?");
+            $stmtFecha->execute([$quincena]);
+            $data = $stmtFecha->fetch(PDO::FETCH_ASSOC);
+            if (!$data) {
+                throw new Exception("No se encontró la quincena $quincena en la tabla quincenas.");
+            }
+            $fechaFinQuincena = DateTime::createFromFormat('d/m/Y', $data['fin'].'/'.$anio)->format('Y-m-d');
+
             $stmt = $this->conn->prepare("
-                SELECT 
+                    SELECT 
                     p.id AS id_personal, 
                     p.RFC, 
                     p.CURP, 
@@ -208,7 +239,8 @@ class Capturamodel{
                     c.D_S5,
                     c.D_S6,
                     c.P_01,
-                    c.P_00, 
+                    c.P_00,
+                    c.P_06, 
                     c.comp_garantizada, 
                     c.isr_qna, 
                     c.sueldo_diario,
@@ -219,16 +251,18 @@ class Capturamodel{
                 FROM personal p
                 LEFT JOIN calculo_personal c ON c.id_personal = p.id
                 LEFT JOIN art_74 a ON a.id_personal = p.id
-                WHERE p.estatus = 'activo'
+                WHERE p.estatus = 'activo' AND p.autorizacion = 1
+                AND STR_TO_DATE(p.inicio_contratacion, '%Y-%m-%d') <= :fechaFin
                 AND p.id NOT IN (
-                    SELECT id_personal 
+                    SELECT DISTINCT ca.id_personal
                     FROM captura ca
                     INNER JOIN nominas n ON n.id = ca.id_nomina
                     WHERE n.qna = :qna
-                        AND n.año = :anio
-                        AND n.tipo = 'Ordinaria'
+                    AND n.año = :anio
+                    AND (n.tipo = 'Ordinaria' OR n.tipo LIKE 'EXT%')
                 )
             ");
+            $stmt->bindParam(':fechaFin', $fechaFinQuincena);
             $stmt->bindParam(':qna', $quincena, PDO::PARAM_INT);
             $stmt->bindParam(':anio', $anio, PDO::PARAM_INT);
             $stmt->execute();
@@ -239,8 +273,8 @@ class Capturamodel{
                 INSERT INTO captura (
                     id_nomina, id_personal, NOM, RFC, CURP, NOMBRE, CLUES, JUR, DESCRIPCION_CLUES, CODIGO, QNA,
                     AÑO, STATUS, FECHA_INGRESO, DESC_TNOMINA, RECURSO, CVE_RECURSO, DESC_CATEGORIAS, RAMA,
-                    D_S2, D_S4, D_S5, D_S6, P_01, P_26, D_01, SD, CUENTA, P_00, DESC_CT_DEPTO, DESC_CEN_ART74, CT_ART_74, JURIS
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    D_S2, D_S4, D_S5, D_S6, P_01, P_26, D_01, SD, CUENTA, P_00, P_06, DESC_CT_DEPTO, DESC_CEN_ART74, CT_ART_74, JURIS
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             // Insertar cada empleado en la tabla captura
@@ -254,6 +288,7 @@ class Capturamodel{
                 $D_01 = $emp['isr_qna'] ?? 0;
                 $SD = $emp['sueldo_diario'] ?? 0;
                 $P_00 = $emp['P_00'] ?? 0;
+                $P_06 = $emp['P_06'] ?? 0;
 
                 // Insertar en la tabla captura
                 $stmtInsert->execute([
@@ -286,6 +321,7 @@ class Capturamodel{
                     $SD,
                     $emp['cuenta'] ?? 0,
                     $P_00,
+                    $P_06,
                     $emp['desc_ct_dpto'] ?? null,
                     $emp['desc_cen_art74'] ?? null,
                     $emp['ct_art_74'] ?? null,
@@ -597,52 +633,82 @@ class Capturamodel{
 
 /////////////////////////////////////////////////// tabla totales ///////////////////////////////////////
 
-    public function getTablaTotales($qna, $anio, $programa, $rama){
-    $sql = "
-        SELECT 
-            SUM(P_00) AS p_00,
-            SUM(P_01) AS p_01,
-            SUM(P_06) AS p_06,
-            SUM(P_26) AS p_26,
+    public function getTablaTotales($qna, $programa){
+        $stmtprograma = $this->conn->prepare("SELECT nombre, rama, desc_tnomina FROM recurso WHERE id = :id_programa");
+        $stmtprograma->bindParam(':id_programa', $programa, PDO::PARAM_INT);
+        $stmtprograma->execute();
+        $programa = $stmtprograma->fetch(PDO::FETCH_ASSOC);
 
-            SUM(D_01) AS d_01,
-            SUM(D_04) AS d_04,
-            SUM(D_05) AS d_05,
-            SUM(D_62) AS d_62,
-            SUM(D_64) AS d_64,
-            SUM(D_65) AS d_65,
-            SUM(D_R1) AS d_r1,
-            SUM(D_R2) AS d_r2,
-            SUM(D_R3) AS d_r3,
-            SUM(D_R4) AS d_r4,
-            SUM(D_AS) AS d_as,
-            SUM(D_AM) AS d_am,
-            SUM(D_S1) AS d_s1,
-            SUM(D_S2) AS d_s2,
-            SUM(D_S4) AS d_s4,
-            SUM(D_S5) AS d_s5,
-            SUM(D_S6) AS d_s6,
-            SUM(D_O1) AS d_o1,
 
-            SUM(PERCEPCIONES) AS total_percepciones,
-            SUM(DEDUCCIONES) AS total_deducciones,
-            SUM(TOTAL_NETO) AS total_neto
-        FROM captura
-        WHERE QNA = :qna
-          AND AÑO = :anio
-          AND RECURSO = :programa
-          AND RAMA = :rama
-    ";
+        $sql = "
+            SELECT 
+                SUM(P_00) AS p_00,
+                SUM(P_01) AS p_01,
+                SUM(P_06) AS p_06,
+                SUM(P_26) AS p_26,
 
-    $stmt = $this->conn->prepare($sql);
-    $stmt->bindParam(':qna', $qna, PDO::PARAM_INT);
-    $stmt->bindParam(':anio', $anio, PDO::PARAM_INT);
-    $stmt->bindParam(':programa', $programa, PDO::PARAM_STR);
-    $stmt->bindParam(':rama', $rama, PDO::PARAM_STR);
-    $stmt->execute();
+                SUM(D_01) AS d_01,
+                SUM(D_04) AS d_04,
+                SUM(D_05) AS d_05,
+                SUM(D_62) AS d_62,
+                SUM(D_64) AS d_64,
+                SUM(D_65) AS d_65,
+                SUM(D_R1) AS d_r1,
+                SUM(D_R2) AS d_r2,
+                SUM(D_R3) AS d_r3,
+                SUM(D_R4) AS d_r4,
+                SUM(D_AS) AS d_as,
+                SUM(D_AM) AS d_am,
+                SUM(D_S1) AS d_s1,
+                SUM(D_S2) AS d_s2,
+                SUM(D_S4) AS d_s4,
+                SUM(D_S5) AS d_s5,
+                SUM(D_S6) AS d_s6,
+                SUM(D_O1) AS d_o1
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+            FROM captura
+            WHERE id_nomina = :qna
+            AND RECURSO = :programa
+            AND RAMA = :rama
+            AND DESC_TNOMINA = :tipo
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':qna', $qna, PDO::PARAM_INT);
+        $stmt->bindParam(':programa', $programa['nombre'], PDO::PARAM_STR);
+        $stmt->bindParam(':rama', $programa['rama'], PDO::PARAM_STR);
+        $stmt->bindParam(':tipo', $programa['desc_tnomina'], PDO::PARAM_STR);
+        $stmt->execute();
+        $totales = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $percepcion = $totales['p_00'] + $totales['p_01'] + $totales['p_06'] + $totales['p_26'];
+        $deduccion = $totales['d_01'] + $totales['d_04'] + $totales['d_05'] + $totales['d_62'] + $totales['d_64'] + $totales['d_65'] +
+                     $totales['d_r1'] + $totales['d_r2'] + $totales['d_r3'] + $totales['d_r4'] + $totales['d_as'] + $totales['d_am'] +
+                     $totales['d_s1'] + $totales['d_s2'] + $totales['d_s4'] + $totales['d_s5'] + $totales['d_s6'] + $totales['d_o1'];
+
+        $neto = $percepcion - $deduccion;
+
+
+        return [
+            'totales' => $totales,
+            'programa' => $programa,
+            'percepcion' => $percepcion,
+            'deduccion' => $deduccion,
+            'neto' => $neto
+        ];
+    }
+
+    public function getAllNominas() {
+        $stmt = $this->conn->prepare("SELECT * FROM nominas");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getDataNominaById($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM nominas WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO:: FETCH_ASSOC);
+    }   
 
 //////////////////////////////////////////////// calculares las deducciones temporales //////////////////////////////////////////////////
 

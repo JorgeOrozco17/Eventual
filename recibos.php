@@ -6,7 +6,7 @@ include 'header.php';
 $catalogo = new CatalogoController();
 $captura = new Capturacontroller();
 
-
+$quincenas = $captura->getAllNominas();
 $quincena = $catalogo->getAllQuincenas();
 $recursos = $catalogo->getAllRecursos();
 ?>
@@ -127,18 +127,20 @@ $recursos = $catalogo->getAllRecursos();
             <form action="generar_tabla_totales.php" method="POST" target="_blank">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label>Quincena</label>
-                        <select name="quincena" class="form-select" required>
-                            <?php  foreach ($quincena as $q): ?>
-                                <option value="<?= htmlspecialchars($q['id']) ?>">
-                                    <?= htmlspecialchars($q['nombre']) ?>
-                                </option>
-                            <?php  endforeach ?>
-                        </select>
+                        <label>Año</label>
+                        <input type="number" id="anioInput" name="anio" placeholder="Ingrese un año de 4 dígitos"
+                            class="form-control" min="2020" max="2099" maxlength="4" required>
                     </div>
                     <div class="col-md-6">
-                        <label>Año</label>
-                        <input type="number" name="anio" placeholder="Ingrese un año de 4 digitos" class="form-control" min="2020" max="2099" maxlength="4" required>
+                        <label>Quincena</label>
+                        <select id="quincenaSelect" name="quincena" class="form-select" required>
+                            <?php foreach ($quincenas as $q): ?>
+                                <option value="<?= htmlspecialchars($q['id']) ?>"
+                                        data-anio="<?= htmlspecialchars($q['año']) ?>">
+                                    <?= htmlspecialchars('QNA ' . $q['qna'] . ' - ' . $q['tipo'] . ' ' . $q['año']) ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
                     </div>
                 </div>
 
@@ -147,18 +149,10 @@ $recursos = $catalogo->getAllRecursos();
                         <label>Recurso</label>
                         <select name="programa" class="form-select" required>
                             <?php  foreach ($recursos as $r): ?>
-                                <option value="<?= htmlspecialchars($r['nombre']) ?>">
-                                    <?= htmlspecialchars($r['nombre']) ?>
+                                <option value="<?= htmlspecialchars($r['id']) ?>">
+                                    <?= htmlspecialchars($r['nombre'] . ' - ' . $r['rama'] . ' - ' . $r['desc_tnomina']) ?>
                                 </option>
                             <?php  endforeach ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Rama</label>
-                        <select name="rama" class="form-select" required>
-                            <option value="todos">Seleccionar rama</option>
-                            <option value="RAMA ADMINISTRATIVA">RAMA ADMINISTRATIVA</option>
-                            <option value="RAMA MEDICA">RAMA MEDICA</option>
                         </select>
                     </div>
                 </div>
@@ -170,6 +164,41 @@ $recursos = $catalogo->getAllRecursos();
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const inputAnio = document.getElementById("anioInput");
+            const currentYear = new Date().getFullYear();
+            inputAnio.value = currentYear;
+
+
+            const selectQuincena = document.getElementById("quincenaSelect");
+            const todasLasOpciones = Array.from(selectQuincena.options);
+
+            inputAnio.addEventListener("input", () => {
+                const anioSeleccionado = inputAnio.value.trim();
+                selectQuincena.innerHTML = ""; // limpia
+
+                // Filtrar opciones por data-anio
+                const opcionesFiltradas = todasLasOpciones.filter(opt => 
+                    opt.dataset.anio === anioSeleccionado || anioSeleccionado === ""
+                );
+
+                // Si no hay opciones para ese año
+                if (opcionesFiltradas.length === 0) {
+                    const opcion = document.createElement("option");
+                    opcion.textContent = "No hay quincenas para este año";
+                    opcion.disabled = true;
+                    selectQuincena.appendChild(opcion);
+                } else {
+                    opcionesFiltradas.forEach(opt => selectQuincena.appendChild(opt));
+                }
+            });
+
+            const event = new Event('input');
+            inputAnio.dispatchEvent(event);
+        });
+    </script>
    
 
 <?php include 'footer.php'; ?>

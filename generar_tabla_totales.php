@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 require_once 'app/models/dbconexion.php';
-require_once 'app/models/capturamodel.php';
+require_once 'app/controllers/capturacontroller.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -17,11 +17,17 @@ $dompdf = new Dompdf($options);
 $qna     = $_POST['quincena'] ?? '';
 $anio    = $_POST['anio'] ?? '';
 $programa= $_POST['programa'] ?? '';
-$rama    = $_POST['rama'] ?? '';
 
 // --- OBTENER DATOS ---
-$model = new CapturaModel();
-$data  = $model->getTablaTotales($qna, $anio, $programa, $rama);
+$controller = new CapturaController();
+$data  = $controller->getTablaTotales($qna, $programa);
+$dataqna = $controller->getDataNominaById($qna);
+
+$totales  = $data['totales'] ?? [];
+$programa = $data['programa'] ?? [];
+$percepcion = $data['percepcion'] ?? 0;
+$deduccion = $data['deduccion'] ?? 0;   
+$neto = $data['neto'] ?? 0;
 
 // --- MAPEO DE CONCEPTOS ---
 $percepciones = [
@@ -98,7 +104,7 @@ th { background: #eee; text-align: center; }
             <b>QUINCENA</b>
         </td>
         <td style="width:80%; border:none; text-align:center; font-weight:bold; font-size:18px;">
-            '.$qna.' &nbsp;&nbsp;&nbsp;&nbsp; <b>Ordinaria</b> &nbsp;&nbsp;&nbsp;&nbsp; 1 &nbsp;&nbsp;&nbsp;&nbsp; <b>AÑO '.$anio.'</b>
+            '.$dataqna['qna'].' &nbsp;&nbsp;&nbsp;&nbsp; <b>'.$dataqna['tipo'].'</b> &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp; <b>AÑO '.$anio.'</b>
         </td>
     </tr>
     <tr>
@@ -106,7 +112,7 @@ th { background: #eee; text-align: center; }
             <b>PROGRAMA</b>
         </td>
         <td style="width:80%; border:none; text-align:center; font-style:italic; font-weight:bold; font-size:18px; border-bottom:1px solid #000;">
-            Eventual
+            '.$programa['desc_tnomina'].'
         </td>
     </tr>
     <tr>
@@ -114,7 +120,7 @@ th { background: #eee; text-align: center; }
             <b>RECURSO</b>
         </td>
         <td style="width:80%; border:none; text-align:center; font-style:italic; font-weight:bold; font-size:18px; border-bottom:1px solid #000;">
-            '.$programa.'
+            '.$programa['nombre'].'
         </td>
     </tr>
     <tr>
@@ -122,7 +128,7 @@ th { background: #eee; text-align: center; }
             <b>RAMA</b>
         </td>
         <td style="width:80%; border:none; text-align:center; font-style:italic; font-weight:bold; font-size:18px; border-bottom:1px solid #000;">
-            '.$rama.'
+            '.$programa['rama'].'
         </td>
     </tr>
 </table>';
@@ -136,11 +142,11 @@ $html .= "<table>
 </tr>";
 
 foreach ($percepciones as $campo => $label) {
-    if (!empty($data[$campo]) && $data[$campo] > 0) {
+    if (!empty($totales[$campo]) && $totales[$campo] > 0) {
         $html .= "<tr>
                     <td style='text-align:center;'>".strtoupper($campo)."</td>
                     <td style='text-align:left;'>$label</td>
-                    <td style='text-align:right;'>".number_format($data[$campo],2)."</td>
+                    <td style='text-align:right;'>".number_format($totales[$campo],2)."</td>
                   </tr>";
     }
 }
@@ -150,7 +156,7 @@ $html .= "</table>";
 $html .= "<table>
 <tr>
     <td colspan='4' style='text-align:right; font-weight:bold; background:#eee;'>
-        TOTAL DE PERCEPCIONES: ".number_format($data['total_percepciones'],2)."
+        TOTAL DE PERCEPCIONES: ".number_format($percepcion ?? 0,2)."
     </td>
 </tr>
 </table>";
@@ -164,11 +170,11 @@ $html .= "<br><table>
 </tr>";
 
 foreach ($deducciones as $campo => $label) {
-    if (!empty($data[$campo]) && $data[$campo] > 0) {
+    if (!empty($totales[$campo]) && $totales[$campo] > 0) {
         $html .= "<tr>
                     <td style='text-align:center;'>".strtoupper($campo)."</td>
                     <td style='text-align:left;'>$label</td>
-                    <td style='text-align:right;'>".number_format($data[$campo],2)."</td>
+                    <td style='text-align:right;'>".number_format($totales[$campo],2)."</td>
                   </tr>";
     }
 }
@@ -178,12 +184,12 @@ $html .= "</table>";
 $html .= "<table>
 <tr>
     <td colspan='4' style='text-align:right; font-weight:bold; background:#eee;'>
-        TOTAL DE DEDUCCIONES: ".number_format($data['total_deducciones'],2)."
+        TOTAL DE DEDUCCIONES: ".number_format($deduccion ?? 0,2)."
     </td>
 </tr>
 <tr>
     <td colspan='4' style='text-align:right; font-weight:bold; background:#eee;'>
-        TOTAL NETO: ".number_format($data['total_neto'],2)."
+        TOTAL NETO: ".number_format($neto ?? 0,2)."
     </td>
 </tr>
 </table>";

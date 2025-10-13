@@ -74,9 +74,9 @@ class PersonalModel {
     public function save($data) {
         try {
             // Consulta para obtener la clave de recurso
-            $stmtCVE = $this->conn->prepare("SELECT cve_recurso FROM recurso WHERE nombre = ?");
+            $stmtCVE = $this->conn->prepare("SELECT nombre, cve_recurso, rama, desc_tnomina FROM recurso WHERE id = ?");
             $stmtCVE->execute([$data['programa']]);
-            $cve_recurso = $stmtCVE->fetchColumn();
+            $rec_result = $stmtCVE->fetch(PDO::FETCH_ASSOC);
 
             $stmt = $this->conn->prepare("
                 SELECT 
@@ -117,6 +117,10 @@ class PersonalModel {
             $codigo_puesto     = $result['codigo_puesto'] ?? null;
             $ct_art74          = $result['art74'] ?? null;
             $ubicacion        = $result['ubicacion'] ?? null;
+            $rama             = $rec_result['rama'] ?? null;
+            $desc_tnomina     = $rec_result['desc_tnomina'] ?? null;
+            $cve_recurso      = $rec_result['cve_recurso'] ?? null;
+            $programa_nombre  = $rec_result['nombre'] ?? null;
 
             // Estatus
             $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
@@ -138,10 +142,10 @@ class PersonalModel {
                 $data['oficio'] ?? null,
                 $data['puesto'] ?? null,
                 $codigo_puesto ?? null,
-                $data['programa'] ?? null,
+                $programa_nombre ?? null,
                 $cve_recurso ?? null,
-                $data['desc_tnomina'] ?? null,
-                $data['rama'] ?? null,
+                $desc_tnomina ?? null,
+                $rama ?? null,
                 $data['adscripcion'] ?? null,
                 $adscripcionnombre ?? null,
                 $data['centro'] ?? null,

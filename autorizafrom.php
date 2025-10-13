@@ -114,9 +114,9 @@ if (isset($_GET['id'])){
                         <label>Programa:</label>
                         <select name="programa" class="form-select" required disabled>
                             <?php foreach ($recursos as $r): ?>
-                                <option value="<?= $r['nombre'] ?>" 
-                                    <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($r['nombre']) ?>
+                                <option value="<?= $r['id'] ?>" 
+                                    <?= (isset($personal['id']) && $personal['programa'] == $r['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($r['nombre']) . ' - ' .  htmlspecialchars($r['rama']) . ' - ' . htmlspecialchars($r['desc_tnomina'])?>
                                 </option>
                             <?php endforeach; ?>
                         </select>

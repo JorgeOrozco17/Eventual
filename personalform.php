@@ -179,37 +179,16 @@ if (isset($_GET['id'])){
                         </select>
                     </div>
 
-                    <!-- Nuevo campo: Descripción de tipo de nómina -->
-                    <div class="col-md-6">
-                        <label>Descripción del tipo de nómina:</label>
-                        <select name="desc_tnomina" class="form-select" required>
-                            <option value="">Seleccione</option>
-                            <option value="EVENTUALES" <?= (isset($personal['desc_tnomina']) && $personal['desc_tnomina'] == 'EVENTUALES') ? 'selected' : '' ?>>EVENTUALES</option>
-                            <option value="PROMOTORES INSABI" <?= (isset($personal['desc_tnomina']) && $personal['desc_tnomina'] == 'PROMOTORES INSABI') ? 'selected' : '' ?>>PROMOTORES INSABI</option>
-                            <option value="INSABI ANEXO IV" <?= (isset($personal['desc_tnomina']) && $personal['desc_tnomina'] == 'INSABI ANEXO IV') ? 'selected' : '' ?>>INSABI ANEXO IV</option>
-                            <option value="PROGRAMA DE CANCER DE LA MUJER INSABI" <?= (isset($personal['desc_tnomina']) && $personal['desc_tnomina'] == 'PROGRAMA DE CANCER DE LA MUJER INSABI') ? 'selected' : '' ?>>PROGRAMA DE CÁNCER DE LA MUJER INSABI</option>
-                            <option value="VACUNACION FEDERAL" <?= (isset($personal['desc_tnomina']) && $personal['desc_tnomina'] == 'VACUNACION FEDERAL') ? 'selected' : '' ?>>VACUNACIÓN FEDERAL</option>
-                        </select>
-                    </div>
-
                     <div class="col-md-6">
                         <label>Programa:</label>
-                        <select name="programa" class="form-select" required>
+                        <select name="programa" id="programa" class="form-select" required>
                             <?php foreach ($recursos as $r): ?>
-                                <option value="<?= $r['nombre'] ?>" <?= (isset($personal['programa']) && $personal['programa'] == $r['nombre']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($r['nombre']) ?>
+                                <option value="<?= $r['id'] ?>" <?= (isset($personal['programa']) && $personal['programa'] == $r['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($r['nombre']) . ' - ' .  htmlspecialchars($r['rama']) . ' - ' . htmlspecialchars($r['desc_tnomina'])?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-
-                  <div class="col-md-6">
-                    <label>Rama:</label>
-                    <select name="rama" class="form-select" required>
-                        <option value="RAMA ADMINISTRATIVA" <?= (isset($personal['rama']) && $personal['rama'] == 'RAMA ADMINISTRATIVA') ? 'selected' : '' ?>>RAMA ADMINISTRATIVA</option>
-                        <option value="RAMA MEDICA" <?= (isset($personal['rama']) && $personal['rama'] == 'RAMA MEDICA') ? 'selected' : '' ?>>RAMA MÉDICA</option>
-                    </select>
-                </div>
 
                 <div class="section-divider">Adscripción y Sueldo</div>
                 <div class="row g-3">

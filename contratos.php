@@ -122,6 +122,13 @@ body { background-color: #D9D9D9 !important; }
                     </select>
                 </div>
                 <?php endif; ?>
+
+                <a href="#" 
+               class="btn btn-primary d-flex align-items-center gap-1"
+               onclick="confirmarImpresion()">
+                <i class="bi bi-printer"></i> Imprimir contratos
+            </a>
+
             </div>
 
             
@@ -141,13 +148,7 @@ body { background-color: #D9D9D9 !important; }
         </div>
     <?php endif; ?>
 
-    <!--- <a href="#" 
-               class="btn btn-primary d-flex align-items-center gap-1"
-               onclick="confirmarImpresion()">
-                <i class="bi bi-printer"></i> Imprimir contratos
-            </a>
-
-     === Tabla === -->
+    <!-- === Tabla === -->
     <div class="section-title">
         <i class="bi bi-people"></i> Lista de empleados
     </div>

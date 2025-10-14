@@ -11,7 +11,7 @@ class Contratomodel {
     }
 
     public function getAllEmpleados() {
-        $stmt = $this->conn->prepare("SELECT * FROM personal");
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE autorizacion = '1'");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -23,7 +23,7 @@ class Contratomodel {
     }   
 
     public function getEmpleadosByJurisdiccion($jurisdiccion) {
-        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE id_adscripcion = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM personal WHERE id_adscripcion = ? AND autorizacion = '1'");
         $stmt->execute([$jurisdiccion]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -32,7 +32,7 @@ class Contratomodel {
         $stmt = $this->conn->prepare("SELECT p.*
             FROM personal p
             JOIN responsables r ON p.id_centro = r.id_centro
-            WHERE id_usuario = :id_usuario
+            WHERE id_usuario = :id_usuario AND p.autorizacion = '1'
             ORDER BY p.nombre_alta");
         $stmt->execute(['id_usuario' => $user_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

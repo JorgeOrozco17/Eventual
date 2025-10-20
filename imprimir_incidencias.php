@@ -51,9 +51,9 @@ function render_quincena($q_id, $q_nombre, $anio, $controller, $add_break = fals
         <td><b>RECIBIO</b></td>
     </tr>
     <tr>
-        <td>C. CLAUDIA CUELLAR LOPEZ</td>
+        <td>LIC. NORMA ALEJANDRINA RAMIREZ DE LA CRUZ</td>
         <td>
-            LIC. YOLANDA SILVA SILLER<br>
+            LIC. JENDY NAYELI GONZALEZ CASTAÑEDA<br>
             JEFE DEL DEPARTAMENTO DE RECLUTAMIENTO<br>
             Y SELECCIÓN DE PERSONAL.
         </td>

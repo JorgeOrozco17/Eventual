@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                 <table id="tablaComun" class="table table-hover gy-5 dataTable">
                     <thead class="table-light">
                         <tr>
-                            <th>#</th>
                             <th>Empleado</th>
                             <th>Porcentaje</th>
                             <th>Beneficiaria/o</th>
@@ -58,9 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                     <tbody>
                         <?php foreach ($data as $p): ?>
                         <tr>
-                            <td><?= htmlspecialchars($p['id']) ?></td>
-                            <td><?= htmlspecialchars($p['id_personal']) ?></td>
-                            <td><?= htmlspecialchars($p['porcentaje']) ?></td>
+                            <td><?= htmlspecialchars($p['empleado']) ?></td>
+                            <td><?= htmlspecialchars($p['porcentaje'] * 100) ?>%</td>
                             <td><?= htmlspecialchars($p['beneficiaria']) ?></td>
                             <td><?= htmlspecialchars($p['cuenta_beneficiaria']) ?></td>
                             <td nowrap>

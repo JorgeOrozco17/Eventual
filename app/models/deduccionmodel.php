@@ -15,7 +15,7 @@ class deduccionmodel{
     }
 
     public function getAllPensiones(){
-        $stmt = $this->conn->prepare("SELECT * FROM pension");
+        $stmt = $this->conn->prepare("SELECT p.*, per.nombre_alta AS empleado FROM pension p JOIN personal per ON p.id_personal = per.id");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

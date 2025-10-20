@@ -543,8 +543,8 @@ class PersonalModel {
         $stmtInsert = $this->conn->prepare("
             INSERT INTO calculo_personal (
                 id_personal, sueldo, comp_garantizada, dsctos_issste, neto_qna, neto_mensual, bruto_qna, bruto_mensual,
-                sueldo_diario, isr_qna, isr_mens, D_S2, D_S4, D_S5, D_S6, P_01, P_00
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                sueldo_diario, isr_qna, isr_mens, D_S2, D_S4, D_S5, D_S6, P_01, P_00, P_06, dias_integros, dias_medios
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 15, 15)
         ");
 
         $ok = $stmtInsert->execute([

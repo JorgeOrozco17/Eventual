@@ -309,7 +309,7 @@ $fecha_larga = date('j') . ' de ' . $meses[(int)date('n')-1] . ' de ' . date('Y'
         <td class="firma-cell" style="text-align:center; width:70%;">
             <div style="font-weight:bold; margin-bottom:40px;">SOLICITA</div>
             <div style="margin-top:6px; font-weight:bold;">
-            LIC. JANNET ALEJANDRA GONZÁLEZ HIDROGO
+            LIC. JANNETL ALEJANDRA GONZÁLEZ HIDROGO
             </div>
             <div style="margin-top:1px;">
             SUBDIRECTORA DE RECURSOS HUMANOS SERVICIOS DE SALUD DE COAHUILA

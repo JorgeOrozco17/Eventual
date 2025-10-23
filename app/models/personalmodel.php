@@ -71,7 +71,7 @@ class PersonalModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function save($data) {
+        public function save($data) {
         try {
             // Consulta para obtener la clave de recurso
             $stmtCVE = $this->conn->prepare("SELECT nombre, cve_recurso, rama, desc_tnomina FROM recurso WHERE id = ?");
@@ -104,8 +104,6 @@ class PersonalModel {
             if (!$result) {
                 $errorInfo = $stmt->errorInfo();
                 $mensajeError = $errorInfo[2];
-
-                // Registrar log de error
                 $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: $mensajeError", json_encode($data));
                 return false;
             }
@@ -116,11 +114,11 @@ class PersonalModel {
             $cluenombre        = $result['cluenombre'] ?? null;
             $codigo_puesto     = $result['codigo_puesto'] ?? null;
             $ct_art74          = $result['art74'] ?? null;
-            $ubicacion        = $result['ubicacion'] ?? null;
-            $rama             = $rec_result['rama'] ?? null;
-            $desc_tnomina     = $rec_result['desc_tnomina'] ?? null;
-            $cve_recurso      = $rec_result['cve_recurso'] ?? null;
-            $programa_nombre  = $rec_result['nombre'] ?? null;
+            $ubicacion         = $result['ubicacion'] ?? null;
+            $rama              = $rec_result['rama'] ?? null;
+            $desc_tnomina      = $rec_result['desc_tnomina'] ?? null;
+            $cve_recurso       = $rec_result['cve_recurso'] ?? null;
+            $programa_nombre   = $rec_result['nombre'] ?? null;
 
             // Estatus
             $estatus = ($data['movimiento'] === 'alta') ? 'activo' : 'autorizacion';
@@ -169,11 +167,15 @@ class PersonalModel {
             if ($ok) {
                 $lastInsertId = $this->conn->lastInsertId();
 
+                // Registro de log adicional al crear empleado
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Empleado registrado correctamente en personal", $lastInsertId);
+
+                // Inserción en art_74
                 $stmtart74 = $this->conn->prepare("
                     INSERT INTO art_74 (id_personal, desc_ct_dpto, desc_cen_art74, ct_art_74, juris)
                     VALUES (?, ?, ?, ?, ?)
                 ");
-                $ok74 =$stmtart74->execute([
+                $ok74 = $stmtart74->execute([
                     $lastInsertId,
                     $cluenombre . ' ' . $adscripcionnombre . ' ' . $centronombre,
                     $adscripcionnombre . ' ' . $centronombre,
@@ -182,15 +184,13 @@ class PersonalModel {
                 ]);
 
                 if ($ok74) {
-                    // Registrar log de éxito en art_74
                     $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta en art_74 realizada", $lastInsertId);
                 } else {
-                $errorInfo = $stmtart74->errorInfo(); 
+                    $errorInfo = $stmtart74->errorInfo(); 
                     $mensaje = "Error INSERT art_74: " . ($errorInfo[2] ?? 'Desconocido');
                     $this->registrarLog($_SESSION['user_id'] ?? 0, $mensaje, $lastInsertId);
                 }
 
-                // Guardar comentario si viene
                 if (!empty($data['observaciones_usuario'])) {
                     $stmtComent = $this->conn->prepare("
                         INSERT INTO coments (id_personal, id_usuario, comentario)
@@ -203,22 +203,19 @@ class PersonalModel {
                     ]);
                 }
 
-                // Registrar log de éxito
-                $this->registrarLog($_SESSION['user_id'] ?? 0, "Alta empleado realizada", $lastInsertId);
-
                 return $lastInsertId;
             } else {
-                // Registrar log de fallo
-                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: fallo en INSERT personal", "0");
+                $errorInfo = $stmtInsert->errorInfo();
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error INSERT personal: {$errorInfo[2]}", json_encode($data));
                 return false;
             }
 
         } catch (Exception $e) {
-            // Registrar log con el error exacto
-            $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción: " . $e->getMessage(), "0");
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción en save: " . $e->getMessage(), "0");
             return false;
         }
     }
+
 
     public function saveAltaBaja($data) {
         try {
@@ -457,123 +454,118 @@ class PersonalModel {
 
 
 
-    public function CalculoPersonal($id_personal) {
-        // 1. Traer sueldo_bruto de la tabla personal
-        $stmtPersonal = $this->conn->prepare("SELECT sueldo_bruto FROM personal WHERE id = ?");
-        $stmtPersonal->execute([$id_personal]);
-        $bruto_mensual = $stmtPersonal->fetchColumn();
+       public function CalculoPersonal($id_personal) {
+        try {
+            // 1. Traer sueldo_bruto de la tabla personal
+            $stmtPersonal = $this->conn->prepare("SELECT sueldo_bruto FROM personal WHERE id = ?");
+            $stmtPersonal->execute([$id_personal]);
+            $bruto_mensual = $stmtPersonal->fetchColumn();
 
-        if ($bruto_mensual === false) {
-            // No se encontró el registro
-            return false;
-        }
-
-        // 2. Traer valores de fijos (D_S2, D_S4, D_S5, D_S6, P_01)
-        $stmtFijos = $this->conn->query("SELECT concepto, cantidad FROM fijos WHERE concepto IN ('D_S2', 'D_S4', 'D_S5', 'D_S6', 'P_01')");
-        $fijos = [];
-        while ($row = $stmtFijos->fetch(PDO::FETCH_ASSOC)) {
-            $fijos[$row['concepto']] = (float)$row['cantidad'];
-        }
-        // Default a 0 si no está
-        $D_S2 = $fijos['D_S2'] ?? 0;
-        $D_S4 = $fijos['D_S4'] ?? 0;
-        $D_S5 = $fijos['D_S5'] ?? 0;
-        $D_S6 = $fijos['D_S6'] ?? 0;
-        $P_01 = $fijos['P_01'] ?? 0;
-
-        // 3. dsctos_issste = suma de los descuentos
-        $dsctos_issste = $D_S2 + $D_S4 + $D_S5 + $D_S6;
-
-        // 4. bruto_qna
-        $bruto_qna = $bruto_mensual / 2;
-
-        // 5. comp_garantizada
-        $comp_garantizada = $bruto_qna - $P_01;
-
-        // 6. sueldo_diario
-        $sueldo_diario = $bruto_mensual / 15;
-
-        // 9. P_00 (ya se que este no va a qui, necesito cambiarlo despues, solo reacomodar los numeros de los pasos. JAJAJAJA)
-        $P_00 = 0;
-
-        // 7. isr_mens e isr_qna
-        // Buscar el rango en la tabla de isr
-        $stmtISR = $this->conn->prepare("
-            SELECT lim_inferior, cuota_fija, porcentaje
-            FROM anexo8_rmf
-            WHERE ? BETWEEN lim_inferior AND lim_superior
-            LIMIT 1
-        ");
-        $stmtISR->execute([$bruto_mensual]);
-        $rowISR = $stmtISR->fetch(PDO::FETCH_ASSOC);
-
-        if ($rowISR) {
-            $lim_inferior = (float)$rowISR['lim_inferior'];
-            $cuota_fija = (float)$rowISR['cuota_fija'];
-            $porcentaje = (float)$rowISR['porcentaje'];
-            $isr_mens = (($bruto_mensual - $lim_inferior) * ($porcentaje / 100)) + $cuota_fija;
-            $isr_qna = $isr_mens / 2;
-
-            //  Ajuste especial
-            if ($bruto_mensual <= 10171) {
-                $isr_qna -= 237.50;   // El subsidio es 475 mensual, la mitad es 237.50
-
-                if ($isr_qna < 0) {
-                    // el negativo se manda a P_00
-                    $P_00 = abs($isr_qna);
-                    $isr_qna = 0;
-                }
+            if ($bruto_mensual === false) {
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error: id_personal {$id_personal} no encontrado para cálculo", $id_personal);
+                return false;
             }
 
-        } else {
-            $isr_mens = 0;
-            $isr_qna = 0;
+            // 2. Traer valores de fijos
+            $stmtFijos = $this->conn->query("SELECT concepto, cantidad FROM fijos WHERE concepto IN ('D_S2', 'D_S4', 'D_S5', 'D_S6', 'P_01')");
+            $fijos = [];
+            while ($row = $stmtFijos->fetch(PDO::FETCH_ASSOC)) {
+                $fijos[$row['concepto']] = (float)$row['cantidad'];
+            }
+
+            $D_S2 = $fijos['D_S2'] ?? 0;
+            $D_S4 = $fijos['D_S4'] ?? 0;
+            $D_S5 = $fijos['D_S5'] ?? 0;
+            $D_S6 = $fijos['D_S6'] ?? 0;
+            $P_01 = $fijos['P_01'] ?? 0;
+
+            $dsctos_issste = $D_S2 + $D_S4 + $D_S5 + $D_S6;
+            $bruto_qna = $bruto_mensual / 2;
+            $comp_garantizada = $bruto_qna - $P_01;
+            $sueldo_diario = $bruto_mensual / 15;
+            $P_00 = 0;
+
+            // ISR
+            $stmtISR = $this->conn->prepare("
+                SELECT lim_inferior, cuota_fija, porcentaje
+                FROM anexo8_rmf
+                WHERE ? BETWEEN lim_inferior AND lim_superior
+                LIMIT 1
+            ");
+            $stmtISR->execute([$bruto_mensual]);
+            $rowISR = $stmtISR->fetch(PDO::FETCH_ASSOC);
+
+            if ($rowISR) {
+                $lim_inferior = (float)$rowISR['lim_inferior'];
+                $cuota_fija = (float)$rowISR['cuota_fija'];
+                $porcentaje = (float)$rowISR['porcentaje'];
+                $isr_mens = (($bruto_mensual - $lim_inferior) * ($porcentaje / 100)) + $cuota_fija;
+                $isr_qna = $isr_mens / 2;
+
+                if ($bruto_mensual <= 10171) {
+                    $isr_qna -= 237.50;
+                    if ($isr_qna < 0) {
+                        $P_00 = abs($isr_qna);
+                        $isr_qna = 0;
+                    }
+                    $isr_mens = $isr_qna * 2;
+                }
+            } else {
+                $isr_mens = 0;
+                $isr_qna = 0;
+            }
+
+            $dsctos_issste_mensual = $dsctos_issste * 2;
+            $neto_mensual = ($bruto_mensual - $isr_mens) - $dsctos_issste_mensual;
+            $neto_qna = $neto_mensual / 2;
+            $sueldo = $P_01;
+
+            $stmtInsert = $this->conn->prepare("
+                INSERT INTO calculo_personal (
+                    id_personal, sueldo, comp_garantizada, dsctos_issste, neto_qna, neto_mensual, bruto_qna, bruto_mensual,
+                    sueldo_diario, isr_qna, isr_mens, D_S2, D_S4, D_S5, D_S6, P_01, P_00, P_06, dias_integros, dias_medios
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 15, 15)
+            ");
+
+            $ok = $stmtInsert->execute([
+                $id_personal,
+                $sueldo,
+                $comp_garantizada,
+                $dsctos_issste,
+                $neto_qna,
+                $neto_mensual,
+                $bruto_qna,
+                $bruto_mensual,
+                $sueldo_diario,
+                $isr_qna,
+                $isr_mens,
+                $D_S2,
+                $D_S4,
+                $D_S5,
+                $D_S6,
+                $P_01,
+                $P_00
+            ]);
+
+            if ($ok) {
+                $stmtUpdate = $this->conn->prepare("UPDATE personal SET sueldo_neto = ? WHERE id = ?");
+                $stmtUpdate->execute([$neto_mensual, $id_personal]);
+
+                // ✅ Log de éxito
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Cálculo de percepciones y deducciones completado", $id_personal);
+            } else {
+                $errorInfo = $stmtInsert->errorInfo();
+                $this->registrarLog($_SESSION['user_id'] ?? 0, "Error INSERT calculo_personal: {$errorInfo[2]}", $id_personal);
+            }
+
+            return $ok;
+
+        } catch (Exception $e) {
+            $this->registrarLog($_SESSION['user_id'] ?? 0, "Excepción en CalculoPersonal: " . $e->getMessage(), $id_personal);
+            return false;
         }
-
-        $dsctos_issste_mensual = $dsctos_issste * 2;
-
-        // 8. neto_mensual y neto_qna
-        $neto_mensual = ($bruto_mensual - $isr_mens) - $dsctos_issste_mensual;
-        $neto_qna = $neto_mensual / 2;
-
-        // 10. sueldo igual a P_01
-        $sueldo = $P_01;
-
-        // 11. Insertar en calculo_personal
-        $stmtInsert = $this->conn->prepare("
-            INSERT INTO calculo_personal (
-                id_personal, sueldo, comp_garantizada, dsctos_issste, neto_qna, neto_mensual, bruto_qna, bruto_mensual,
-                sueldo_diario, isr_qna, isr_mens, D_S2, D_S4, D_S5, D_S6, P_01, P_00, P_06, dias_integros, dias_medios
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 15, 15)
-        ");
-
-        $ok = $stmtInsert->execute([
-            $id_personal,
-            $sueldo,
-            $comp_garantizada,
-            $dsctos_issste,
-            $neto_qna,
-            $neto_mensual,
-            $bruto_qna,
-            $bruto_mensual,
-            $sueldo_diario,
-            $isr_qna,
-            $isr_mens,
-            $D_S2,
-            $D_S4,
-            $D_S5,
-            $D_S6,
-            $P_01,
-            $P_00
-        ]);
-
-        if ($ok) {
-        $stmtUpdate = $this->conn->prepare("UPDATE personal SET sueldo_neto = ? WHERE id = ?");
-        $stmtUpdate->execute([$neto_mensual, $id_personal]);
     }
 
-    return $ok;
-    }
 
     public function UpdateCalculoPersonal($id_personal) {
         // 1. Traer sueldo_bruto de la tabla personal
@@ -708,8 +700,14 @@ class PersonalModel {
     }
 
     public function delete($id) {
-        $stmt = $this->conn->prepare("DELETE FROM personal WHERE id = ?");
+        $ok = $stmt = $this->conn->prepare("DELETE FROM personal WHERE id = ?");
         return $stmt->execute([$id]);
+
+        if($ok){
+            $stmtcalculo = $this->conn->prepare("DELETE FROM calculo_personal WHERE id_personal = ?");
+            return $stmtcalculo->execute([$id]);
+        }
+
     }
 
     public function existsRFC($rfc, $movimiento) {

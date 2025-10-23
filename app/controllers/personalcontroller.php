@@ -86,7 +86,7 @@ class PersonalController {
                         title: 'Registro exitoso',
                         text: 'El empleado ha sido registrado correctamente.',
                         showConfirmButton: false,
-                        timer: 900,
+                        timer: 1000,
                         background: '#fdfaf6',
                         color: '#333',
                         customClass: {

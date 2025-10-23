@@ -31,6 +31,28 @@ class ReportesModel{
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getAltasBajasByQuincenaEstatus($qna, $anio, $estatus, $tipo){
+        if ($tipo === 'all') {
+            $stmt = $this->conn->prepare("
+                SELECT * 
+                FROM personal 
+                WHERE quincena_alta = ? 
+                AND YEAR(inicio_contratacion) = ?
+                AND autorizacion = ?");
+            $stmt->execute([$qna, $anio, $estatus]);
+        } else {
+            $stmt = $this->conn->prepare("
+                SELECT * 
+                FROM personal 
+                WHERE quincena_alta = ? 
+                AND YEAR(inicio_contratacion) = ? 
+                AND movimiento = ?
+                AND autorizacion = ?");
+            $stmt->execute([$qna, $anio, $tipo, $estatus]);
+        }
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
     public function getAltasBajasByPeriodo($qnaInicio, $qnaFin, $tipo) {
         if ($tipo === 'all') {
@@ -47,6 +69,26 @@ class ReportesModel{
                 WHERE inicio_contratacion BETWEEN ? AND ? 
                 AND movimiento = ?");
             $stmt->execute([$qnaInicio, $qnaFin, $tipo]);
+        }
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAltasBajasByPeriodoEstatus($qnaInicio, $qnaFin, $estatus, $tipo) {
+        if ($tipo === 'all') {
+            $stmt = $this->conn->prepare("
+                SELECT * 
+                FROM personal 
+                WHERE inicio_contratacion BETWEEN ? AND ? 
+                AND autorizacion = ?");
+            $stmt->execute([$qnaInicio, $qnaFin, $estatus]);
+        } else {
+            $stmt = $this->conn->prepare("
+                SELECT * 
+                FROM personal 
+                WHERE inicio_contratacion BETWEEN ? AND ? 
+                AND movimiento = ?
+                AND autorizacion = ?");
+            $stmt->execute([$qnaInicio, $qnaFin, $tipo, $estatus]);
         }
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

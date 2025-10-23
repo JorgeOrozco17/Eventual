@@ -872,8 +872,8 @@ class PersonalModel {
                sueldo_neto  AS sueldo_neto_mensual,
                sueldo_bruto AS sueldo_bruto_mensual
         FROM personal
-        WHERE (quincena_alta = ? AND YEAR(inicio_contratacion) = ?)
-           OR (quincena_baja = ? AND YEAR(fecha_baja) = ?)
+        WHERE (quincena_alta = ? AND YEAR(inicio_contratacion) = ? AND autorizacion = 1)
+           OR (quincena_baja = ? AND YEAR(fecha_baja) = ? AND autorizacion = 1)
     ");
     $stmt->execute([$qna, $anio, $qna, $anio]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

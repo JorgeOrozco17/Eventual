@@ -65,7 +65,16 @@ $quincenas = $catalogio->getAllQuincenas();
                     </div>
 
                     <div class="col-md-3">
-                        <label for="tipo_reporte">Tipo de reporte</label>
+                        <label for="estatus">Estatus</label>
+                        <select name="estatus" id="estatus" class="form-select">
+                            <option value="all">Todos</option>
+                            <option value="1">Autorizados</option>
+                            <option value="0">Sin Autorizar</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="tipo_reporte">Tipo de Movimiento</label>
                         <select id="tipo_reporte" class="form-select">
                             <option value="all">Todas</option>
                             <option value="alta">Altas</option>
@@ -98,7 +107,16 @@ $quincenas = $catalogio->getAllQuincenas();
                     </div>
 
                     <div class="col-md-3">
-                        <label for="tipo_reporte">Tipo de reporte</label>
+                        <label for="estatus">Estatus</label>
+                        <select name="estatus_periodo" id="estatus_periodo" class="form-select">
+                            <option value="all">Todos</option>
+                            <option value="1">Autorizados</option>
+                            <option value="0">Sin Autorizar</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="tipo_reporte">Tipo de movimiento</label>
                         <select id="tipo_reporte" class="form-select">
                             <option value="all">Todas</option>
                             <option value="alta">Altas</option>
@@ -214,12 +232,14 @@ btnOfi.addEventListener("click", () => mostrarSeccion("ofi"));
 document.getElementById("generar_reporte").addEventListener("click", function() {
     const qna  = document.getElementById("quincena").value;
     const anio = document.getElementById("anio").value;
+    const estatus = document.getElementById("estatus").value;
     const tipo = document.getElementById("tipo_reporte").value;
 
     const formData = new FormData();
     formData.append("action", "quincena");
     formData.append("quincena", qna);
     formData.append("anio", anio);
+    formData.append("estatus", estatus);
     formData.append("tipo_reporte", tipo);
 
     fetch("reportes_ajax.php", {
@@ -250,12 +270,14 @@ document.getElementById("generar_reporte").addEventListener("click", function() 
 document.getElementById("generar_reporte_periodo").addEventListener("click", function() {
     const qnaInicio = document.getElementById("quincena_inicio").value;
     const qnaFin    = document.getElementById("quincena_fin").value;
+    const estatus   = document.getElementById("estatus_periodo").value;
     const tipo      = document.getElementById("tipo_reporte").value;
 
     const formData = new FormData();
     formData.append("action", "periodo");
     formData.append("quincena_inicio", qnaInicio);
     formData.append("quincena_fin", qnaFin);
+    formData.append("estatus", estatus);
     formData.append("tipo_reporte", tipo);
 
     fetch("reportes_ajax.php", {

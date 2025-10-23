@@ -89,17 +89,35 @@ class NumeroALetras {
         '', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos',
         'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'
     ];
+
     public function convertir($num) {
         if ($num == 0) return 'cero';
         if ($num < 0) return 'menos ' . $this->convertir(-$num);
+
         $out = '';
+
         if ($num >= 1000000) {
-            $out .= ($num >= 2000000 ? $this->convertir(intval($num / 1000000)) . ' ' : '') .
-                'millón' . ($num >= 2000000 ? 'es' : '') .
-                ($num % 1000000 == 0 ? '' : ' ' . $this->convertir($num % 1000000));
+            $millones = intval($num / 1000000);
+            $resto = $num % 1000000;
+            if ($millones == 1) {
+                $out .= 'un millón';
+            } else {
+                $out .= $this->convertir($millones) . ' millones';
+            }
+            if ($resto > 0) {
+                $out .= ' ' . $this->convertir($resto);
+            }
         } elseif ($num >= 1000) {
-            $out .= ($num >= 2000 ? $this->convertir(intval($num / 1000)) . ' ' : ($num >= 1000 ? 'mil ' : '')) .
-                ($num % 1000 == 0 ? '' : $this->convertir($num % 1000));
+            $miles = intval($num / 1000);
+            $resto = $num % 1000;
+            if ($miles == 1) {
+                $out .= 'mil';
+            } else {
+                $out .= $this->convertir($miles) . ' mil';
+            }
+            if ($resto > 0) {
+                $out .= ' ' . $this->convertir($resto);
+            }
         } elseif ($num >= 100) {
             if ($num == 100) {
                 $out .= 'cien';
@@ -114,9 +132,11 @@ class NumeroALetras {
         } else {
             $out .= $this->UNIDADES[$num];
         }
+
         return trim($out);
     }
 }
+
 
 // Edad desde RFC (igual que en el masivo)
 function edad_desde_rfc($rfc) {

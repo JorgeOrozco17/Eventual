@@ -13,8 +13,16 @@ class ReportesController{
         return $this->model->getAltasBajasByQuincena($qna, $anio, $tipo);
     }
 
+    public function getAltasBajasByQuincenaEstatus($qna, $anio, $estatus, $tipo){
+        return $this->model->getAltasBajasByQuincenaEstatus($qna, $anio, $estatus, $tipo);
+    }
+
     public function getAltasBajasByPeriodo($qnaInicio, $qnaFin, $tipo) {
         return $this->model->getAltasBajasByPeriodo($qnaInicio, $qnaFin, $tipo);
+    }
+
+    public function getAltasBajasByPeriodoEstatus($qnaInicio, $qnaFin, $estatus, $tipo) {
+        return $this->model->getAltasBajasByPeriodoEstatus($qnaInicio, $qnaFin, $estatus, $tipo);
     }
 
 }

@@ -33,27 +33,25 @@ class PersonalModel {
     }
 
     public function getAutorizados($responsable){
-        $sql = "SELECT id, nombre_alta, RFC, sueldo_neto, sueldo_bruto, puesto, programa, movimiento, centro, CURP, 
+        $sql = "SELECT id, nombre_alta, RFC, sueldo_neto, sueldo_bruto, puesto, programa, movimiento, centro, 
                     observaciones_alta, observaciones_baja
                 FROM personal 
                 WHERE autorizacion = 1";
 
-        // bandera para saber si se va a filtrar
-        $filtrar = ($responsable != 10);
-
-        if ($filtrar) {
-            $sql .= " AND id_adscripcion = :responsable";
+        if ($responsable !== 10) {
+            $sql .= " AND adscripcion = :responsable";
         }
 
         $stmt = $this->conn->prepare($sql);
 
-        if ($filtrar) {
-            $stmt->bindParam(':responsable', $responsable, PDO::PARAM_INT);
+        if ($responsable !== 10) {
+            $stmt->bindParam(':responsable', $responsable, PDO::PARAM_STR);
         }
 
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
 
     public function getNoAutorizados(){

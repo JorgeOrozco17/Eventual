@@ -1,12 +1,30 @@
 <?php
 require_once 'app/controllers/PersonalController.php';
+include 'app/controllers/catalogocontroller.php';
 
 include 'header.php';
-$controller = new PersonalController();
+$catalogo = new CatalogoController();
+$controller = new PersonalController();     
 
 $responsable = $_SESSION['juris'];
+$user_rol = $_SESSION['role'];
+$jurisdicciones = $catalogo->getAllJurisdicciones();
 
-$personal = $controller->getAutorizados($responsable);
+$jurisdiccion_inicial = 'J9';
+$filtro = $_GET['jurisdiccion'] ?? $jurisdiccion_inicial;
+
+// 👇 Carga condicional según filtro
+if ($filtro === 'todas') {
+    $personal = $controller->getAutorizados(10); // usa 10 si es el código general o modifica según tu lógica
+} else {
+    $personal = $controller->getAutorizados($filtro);
+}
+
+if ($user_rol == 1 || $user_rol == 2) {
+    $mostrar_filtro = true;
+} else {
+    $mostrar_filtro = false;
+}
 ?>
 <style>
     body {
@@ -14,6 +32,23 @@ $personal = $controller->getAutorizados($responsable);
     }
     h2 {
         color: #333333
+    }
+    .filtro-contratos { min-width: 200px; border-radius: 10px; }
+    .card-filtros {
+        border-left: 4px solid #0d6efd;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .card-filtros:hover {
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+    .filtro-label i {
+        font-size: 1rem;
+        color: #0d6efd;
+        margin-right: 4px;
     }
 </style>
 
@@ -24,7 +59,7 @@ $personal = $controller->getAutorizados($responsable);
         <span class="menu-tittle">Personal</span></a> <span class="menu-tittle">/Gestionar personal</span></span>
     </div>
     <br>
-    <div style="margin: 10px;">
+    <div style="margin-bottom: 10px;">
         <button class="btn btn-sm btn-info me-2" onclick="history.back()"><i class="fas fa-arrow-left-long"></i>Regresar</button>
     </div>
 
@@ -33,7 +68,22 @@ $personal = $controller->getAutorizados($responsable);
         <div class="card-header d-flex justify-content-between align-items-center" style="border-top-left-radius:.5rem;border-top-right-radius:.5rem;">
             <h2 class="mb-0"><i class="fas fa-users me-2"></i>Administración de Personal</h2>
             <div>
-                <!-- Puedes agregar aquí algún botón, menú, o badge si quieres -->
+                <?php if ($mostrar_filtro): ?>
+                <div class="filtro-group">
+                    <label for="filtro-jurisdiccion" class="form-label filtro-label mb-1 fw-semibold text-secondary">
+                        <i class="bi bi-geo-alt-fill"></i> Jurisdicción
+                    </label>
+                    <select id="filtro-jurisdiccion" class="form-select filtro-contratos">
+                        <option value="todas" <?= ($filtro === 'todas') ? 'selected' : '' ?>>Todas</option>
+                        <?php foreach($jurisdicciones as $jurisdiccion): ?>
+                            <option value="<?= htmlspecialchars($jurisdiccion['nombre']) ?>"
+                                <?= ($filtro === $jurisdiccion['nombre']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($jurisdiccion['nombre']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -105,5 +155,14 @@ $personal = $controller->getAutorizados($responsable);
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('filtro-jurisdiccion').addEventListener('change', function() {
+    const jurisdiccion = this.value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('jurisdiccion', jurisdiccion);
+    window.location.href = url; // recarga la página con el nuevo filtro
+});
+</script>
 
 <?php include 'footer.php'; ?>

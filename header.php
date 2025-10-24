@@ -33,13 +33,11 @@ include 'seguridad.php';
 		}
 
 		.menu-title {
-			margin-top: 5px;
 			font-size: 1rem;
 			font-weight: bold;
 		}
 
 		.menu-tittle{
-			margin-top: 50px;
 			font-size: 2.5rem;
 			font-weight: bold;
 		}
